@@ -1,0 +1,659 @@
+import React, { useState } from 'react';
+import { 
+  Target, 
+  Plus, 
+  CheckCircle2, 
+  Sparkles, 
+  TrendingUp, 
+  Calendar, 
+  ArrowRight, 
+  FolderCheck, 
+  Trash2, 
+  Edit3, 
+  Coins, 
+  Check, 
+  X,
+  Archive,
+  RefreshCcw,
+  AlertCircle
+} from 'lucide-react';
+import { SavingsProject } from '../types';
+import { formatCurrency, formatDateFr } from '../utils/date';
+import { DatePicker } from './DatePicker';
+import { FintechSelect } from './FintechSelect';
+
+interface SavingsProjectsSectionProps {
+  projects: SavingsProject[];
+  currency: string;
+  selectedMonth: string;
+  onAddProject: (project: Omit<SavingsProject, 'id' | 'createdAt' | 'isClosed'>) => void;
+  onUpdateProject: (project: SavingsProject) => void;
+  onDeleteProject: (projectId: string) => void;
+  onCloseProject: (projectId: string, close: boolean) => void;
+  onContributeToProject: (projectId: string, amount: number, alsoRecordSavings: boolean) => void;
+}
+
+const CATEGORIES = [
+  'Matériel & Équipement',
+  'Voyage & Loisirs',
+  'Sécurité & Urgence',
+  'Immobilier & Habitat',
+  'Véhicule & Mobilité',
+  'Projet Professionnel',
+  'Autre',
+];
+
+export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
+  projects,
+  currency,
+  selectedMonth,
+  onAddProject,
+  onUpdateProject,
+  onDeleteProject,
+  onCloseProject,
+  onContributeToProject,
+}) => {
+  // États Modales
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<SavingsProject | null>(null);
+  const [contributeProject, setContributeProject] = useState<SavingsProject | null>(null);
+  const [contributeAmount, setContributeAmount] = useState('');
+
+  // Formulaire Projet
+  const [projectTitle, setProjectTitle] = useState('');
+  const [targetAmount, setTargetAmount] = useState('');
+  const [initialAmount, setInitialAmount] = useState('');
+  const [targetDate, setTargetDate] = useState('');
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [note, setNote] = useState('');
+
+  // Filtre d'affichage
+  const [viewFilter, setViewFilter] = useState<'active' | 'closed'>('active');
+  const [celebrationToast, setCelebrationToast] = useState<string | null>(null);
+
+  const activeProjects = projects.filter((p) => !p.isClosed);
+  const closedProjects = projects.filter((p) => p.isClosed);
+
+  const displayedProjects = viewFilter === 'active' ? activeProjects : closedProjects;
+
+  // Calculs totaux
+  const totalTarget = activeProjects.reduce((sum, p) => sum + p.targetAmount, 0);
+  const totalSaved = activeProjects.reduce((sum, p) => sum + p.currentAmount, 0);
+  const globalProgress = totalTarget > 0 ? Math.min(100, Math.round((totalSaved / totalTarget) * 100)) : 0;
+
+  // Ouvrir modal ajout
+  const handleOpenAdd = () => {
+    setEditingProject(null);
+    setProjectTitle('');
+    setTargetAmount('');
+    setInitialAmount('');
+    setTargetDate('');
+    setCategory(CATEGORIES[0]);
+    setNote('');
+    setIsAddModalOpen(true);
+  };
+
+  // Ouvrir modal édition
+  const handleOpenEdit = (project: SavingsProject) => {
+    setEditingProject(project);
+    setProjectTitle(project.title);
+    setTargetAmount(project.targetAmount.toString());
+    setInitialAmount(project.currentAmount.toString());
+    setTargetDate(project.targetDate || '');
+    setCategory(project.category || CATEGORIES[0]);
+    setNote(project.note || '');
+    setIsAddModalOpen(true);
+  };
+
+  // Soumission formulaire projet
+  const handleSaveProjectForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedTarget = parseFloat(targetAmount);
+    if (isNaN(parsedTarget) || parsedTarget <= 0 || !projectTitle.trim()) return;
+
+    const parsedCurrent = parseFloat(initialAmount) || 0;
+
+    if (editingProject) {
+      onUpdateProject({
+        ...editingProject,
+        title: projectTitle.trim(),
+        targetAmount: parsedTarget,
+        currentAmount: parsedCurrent,
+        targetDate: targetDate || undefined,
+        category,
+        note: note.trim() || undefined,
+      });
+    } else {
+      onAddProject({
+        title: projectTitle.trim(),
+        targetAmount: parsedTarget,
+        currentAmount: parsedCurrent,
+        targetDate: targetDate || undefined,
+        category,
+        note: note.trim() || undefined,
+      });
+    }
+
+    setIsAddModalOpen(false);
+  };
+
+  // Soumission versement sur projet
+  const handleContributeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contributeProject) return;
+
+    const amount = parseFloat(contributeAmount);
+    if (isNaN(amount) || amount <= 0) return;
+
+    onContributeToProject(contributeProject.id, amount, true);
+
+    // Vérifier si l'objectif est atteint
+    const newTotal = contributeProject.currentAmount + amount;
+    if (newTotal >= contributeProject.targetAmount) {
+      setCelebrationToast(`Bravo ! L'objectif pour "${contributeProject.title}" est maintenant atteint (100%) ! Vous pouvez le clôturer.`);
+      setTimeout(() => setCelebrationToast(null), 6000);
+    }
+
+    setContributeProject(null);
+    setContributeAmount('');
+  };
+
+  // Clôturer un projet avec toast
+  const handleClose = (projectId: string) => {
+    onCloseProject(projectId, true);
+    setCelebrationToast('Projet clôturé et archivé avec succès ! Félicitations pour la réalisation de cet objectif.');
+    setTimeout(() => setCelebrationToast(null), 5000);
+  };
+
+  return (
+    <div className="space-y-4 pt-2">
+      {/* Toast Célébration */}
+      {celebrationToast && (
+        <div className="p-4 rounded-2xl bg-[#142318] border-2 border-[#ccff00] text-white flex items-center justify-between gap-3 shadow-xl animate-fadeIn">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-5 h-5 text-[#ccff00] shrink-0" />
+            <p className="text-xs sm:text-sm font-bold leading-snug">{celebrationToast}</p>
+          </div>
+          <button
+            onClick={() => setCelebrationToast(null)}
+            className="text-slate-400 hover:text-white p-1"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* En-tête de section Projets */}
+      <div className="bg-[#121613] rounded-3xl p-5 sm:p-6 border border-[#232f26] shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1f2821]">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30 tracking-wider">
+                Objectifs & Projets
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Projets Liés à une Épargne
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Affectez vos versements à des objectifs précis. Une fois l'objectif atteint, vous pouvez clôturer le projet.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Nouveau Projet</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Synthèse globale des projets actifs */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227]">
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">
+              Projets en cours
+            </span>
+            <span className="text-lg font-black text-white mt-0.5 block">
+              {activeProjects.length} projet{activeProjects.length > 1 ? 's' : ''} actif{activeProjects.length > 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227]">
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">
+              Capital alloué aux projets
+            </span>
+            <span className="text-lg font-black text-[#ccff00] mt-0.5 block truncate">
+              {formatCurrency(totalSaved, currency)}
+            </span>
+            <span className="text-[10px] text-slate-400">
+              sur {formatCurrency(totalTarget, currency)} visés
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                Progression globale
+              </span>
+              <span className="text-xs font-black text-[#ccff00]">{globalProgress}%</span>
+            </div>
+            <div className="w-full bg-[#0d120e] h-2 rounded-full overflow-hidden mt-1.5 border border-[#1e2a20]">
+              <div 
+                className="h-full bg-gradient-to-r from-[#ccff00] to-[#10b981] transition-all duration-300"
+                style={{ width: `${globalProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Onglets Filtre : En cours vs Clôturés */}
+        <div className="flex items-center gap-2 mt-5 pt-3 border-t border-[#1f2821]">
+          <button
+            onClick={() => setViewFilter('active')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all ${
+              viewFilter === 'active'
+                ? 'bg-[#ccff00] text-black shadow-sm'
+                : 'bg-[#161c17] text-slate-400 hover:text-white border border-[#253227]'
+            }`}
+          >
+            En cours ({activeProjects.length})
+          </button>
+
+          <button
+            onClick={() => setViewFilter('closed')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all ${
+              viewFilter === 'closed'
+                ? 'bg-[#ccff00] text-black shadow-sm'
+                : 'bg-[#161c17] text-slate-400 hover:text-white border border-[#253227]'
+            }`}
+          >
+            Clôturés / Réalisés ({closedProjects.length})
+          </button>
+        </div>
+      </div>
+
+      {/* Grille des Cartes Projets */}
+      {displayedProjects.length === 0 ? (
+        <div className="py-10 text-center bg-[#121613] rounded-3xl border border-[#232f26] p-6">
+          <Target className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+          <p className="text-sm font-bold text-white">
+            {viewFilter === 'active' ? 'Aucun projet d\'épargne en cours' : 'Aucun projet clôturé pour le moment'}
+          </p>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+            {viewFilter === 'active' 
+              ? 'Créez votre premier projet (voyage, équipement, urgence...) pour suivre votre progression pas-à-pas.' 
+              : 'Les projets dont l\'objectif est atteint et que vous clôturez apparaîtront ici.'}
+          </p>
+          {viewFilter === 'active' && (
+            <button
+              onClick={handleOpenAdd}
+              className="mt-4 px-4 py-2 rounded-full bg-[#ccff00] text-black font-extrabold text-xs hover:bg-[#d9ff33] transition-all"
+            >
+              + Créer un premier projet
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {displayedProjects.map((project) => {
+            const progress = project.targetAmount > 0 
+              ? Math.min(100, Math.round((project.currentAmount / project.targetAmount) * 100))
+              : 0;
+            const isCompleted = project.currentAmount >= project.targetAmount;
+            const remaining = Math.max(0, project.targetAmount - project.currentAmount);
+
+            return (
+              <div
+                key={project.id}
+                className={`p-5 rounded-3xl border transition-all duration-200 flex flex-col justify-between ${
+                  project.isClosed
+                    ? 'bg-[#111612]/70 border-[#232f26] opacity-80'
+                    : isCompleted
+                    ? 'bg-gradient-to-b from-[#162218] to-[#121713] border-[#ccff00]/60 shadow-[0_0_20px_rgba(204,255,0,0.15)]'
+                    : 'bg-[#121613] border-[#232f26] hover:border-[#2d3d2e]'
+                }`}
+              >
+                <div>
+                  {/* Top Bar du projet */}
+                  <div className="flex items-start justify-between gap-2 mb-2.5">
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                        {project.category || 'Épargne Projet'}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-black text-white tracking-tight truncate mt-0.5">
+                        {project.title}
+                      </h3>
+                    </div>
+
+                    {/* Badge Statut */}
+                    {project.isClosed ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
+                        <FolderCheck className="w-3 h-3 text-emerald-400" />
+                        <span>Clôturé</span>
+                      </span>
+                    ) : isCompleted ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ccff00] text-black shadow-sm shrink-0 animate-pulse">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                        <span>Objectif Atteint !</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-extrabold text-[#ccff00] px-2 py-0.5 rounded-full bg-[#18231a] border border-[#27372b] shrink-0">
+                        {progress}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Notes / Description */}
+                  {project.note && (
+                    <p className="text-xs text-slate-300 mb-3 line-clamp-2">
+                      {project.note}
+                    </p>
+                  )}
+
+                  {/* Chiffres & Progression */}
+                  <div className="my-3 space-y-1.5">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                        {formatCurrency(project.currentAmount, currency)}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">
+                        sur <strong className="text-white">{formatCurrency(project.targetAmount, currency)}</strong>
+                      </span>
+                    </div>
+
+                    {/* Barre de progression */}
+                    <div className="w-full bg-[#0d120e] h-2.5 rounded-full overflow-hidden border border-[#1e2a20]">
+                      <div
+                        className={`h-full transition-all duration-300 ${
+                          isCompleted
+                            ? 'bg-gradient-to-r from-[#ccff00] via-[#10b981] to-[#ccff00]'
+                            : 'bg-gradient-to-r from-[#ccff00] to-[#10b981]'
+                        }`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                      <span>
+                        {isCompleted ? (
+                          <span className="text-[#ccff00] font-bold">Objectif 100% complété</span>
+                        ) : (
+                          <span>Reste : <strong className="text-slate-300">{formatCurrency(remaining, currency)}</strong></span>
+                        )}
+                      </span>
+                      {project.targetDate && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>Échéance : {project.targetDate}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions sur le projet */}
+                <div className="pt-3 border-t border-[#1f2821] flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {/* Clôturer / Réaliser le projet si objectif atteint ou projet ouvert */}
+                    {!project.isClosed && isCompleted ? (
+                      <button
+                        onClick={() => handleClose(project.id)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-black text-xs shadow-[0_0_15px_rgba(204,255,0,0.35)] transition-all active:scale-95 cursor-pointer animate-pulse"
+                        title="Objectif atteint à 100% ! Cliquez pour fermer / archiver ce projet"
+                      >
+                        <FolderCheck className="w-4 h-4 stroke-[2.8]" />
+                        <span>Fermer le projet • Objectif atteint</span>
+                      </button>
+                    ) : !project.isClosed ? (
+                      <button
+                        onClick={() => {
+                          setContributeProject(project);
+                          setContributeAmount('');
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1b251d] hover:bg-[#233126] text-[#ccff00] border border-[#2b3d2e] font-extrabold text-xs transition-all active:scale-95"
+                      >
+                        <Plus className="w-3 h-3 stroke-[3]" />
+                        <span>Verser des fonds</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => onCloseProject(project.id, false)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161f18] hover:bg-[#1e2a20] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                      >
+                        <RefreshCcw className="w-3 h-3" />
+                        <span>Rouvrir le projet</span>
+                      </button>
+                    )}
+
+                    {/* Si projet non clôturé et déjà des fonds, permettre quand même de clôturer si souhaité */}
+                    {!project.isClosed && !isCompleted && (
+                      <button
+                        onClick={() => handleClose(project.id)}
+                        className="text-[11px] text-slate-400 hover:text-white px-2 py-1"
+                        title="Fermer ce projet manuellement"
+                      >
+                        Fermer
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Boutons d'édition & suppression */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(project)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1a231b] transition-colors"
+                      title="Modifier le projet"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onDeleteProject(project.id)}
+                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors"
+                      title="Supprimer définitivement"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL CRÉATION / ÉDITION PROJET                          */}
+      {/* ======================================================== */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div 
+            className="w-full max-w-md bg-[#121613] border border-[#2b3a2e] rounded-3xl p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#1f2821]">
+              <h3 className="text-base sm:text-lg font-black text-white">
+                {editingProject ? 'Modifier le Projet' : 'Nouveau Projet d\'Épargne'}
+              </h3>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProjectForm} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  Intitulé du projet à réaliser
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={projectTitle}
+                  onChange={(e) => setProjectTitle(e.target.value)}
+                  placeholder="ex: Achat Ordinateur, Voyage, Urgence..."
+                  className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Objectif visé ({currency})
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={targetAmount}
+                    onChange={(e) => setTargetAmount(e.target.value)}
+                    placeholder="500000"
+                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Apport déjà versé ({currency})
+                  </label>
+                  <input
+                    type="number"
+                    value={initialAmount}
+                    onChange={(e) => setInitialAmount(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FintechSelect
+                    label="Catégorie"
+                    value={category}
+                    options={CATEGORIES.map((cat) => ({ value: cat, label: cat }))}
+                    onChange={setCategory}
+                  />
+                </div>
+
+                <div>
+                  <DatePicker
+                    label="Date limite (Optionnel)"
+                    value={targetDate}
+                    onChange={setTargetDate}
+                    placeholder="Choisir une date d'échéance"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  Note ou détails (Optionnel)
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Détails du projet..."
+                  rows={2}
+                  className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2 text-xs text-white focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-full bg-[#18201a] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md"
+                >
+                  {editingProject ? 'Enregistrer les modifications' : 'Créer le projet'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL VERSER DES FONDS SUR UN PROJET                     */}
+      {/* ======================================================== */}
+      {contributeProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div 
+            className="w-full max-w-sm bg-[#121613] border border-[#2b3a2e] rounded-3xl p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#1f2821]">
+              <div>
+                <span className="text-[10px] font-black text-[#ccff00] uppercase">
+                  Alimenter le projet
+                </span>
+                <h3 className="text-base font-black text-white truncate">
+                  {contributeProject.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setContributeProject(null)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleContributeSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  Montant à verser en {currency}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={contributeAmount}
+                    onChange={(e) => setContributeAmount(e.target.value)}
+                    placeholder="ex: 50000"
+                    autoFocus
+                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-4 pr-16 py-3 text-base font-black text-white focus:outline-none"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-[#ccff00]">
+                    {currency}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
+                  <span>Actuellement : {formatCurrency(contributeProject.currentAmount, currency)}</span>
+                  <span>Objectif : {formatCurrency(contributeProject.targetAmount, currency)}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setContributeProject(null)}
+                  className="flex-1 py-2.5 rounded-full bg-[#18201a] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md"
+                >
+                  Confirmer le versement
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

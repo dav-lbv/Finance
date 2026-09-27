@@ -1,0 +1,6 @@
+{
+  "name": "MonSalaire - Gestion Mensuelle de Salaire, Dépenses & Épargne",
+  "description": "Application intuitive de gestion mensuelle du salaire : suivi des dépenses, récurrences, calendrier d'épargne et verrouillage sécurisé.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

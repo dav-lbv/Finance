@@ -1,0 +1,553 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { Navbar } from './components/Navbar';
+import { Dashboard } from './components/Dashboard';
+import { ExpensesPage } from './components/ExpensesPage';
+import { SavingsPage } from './components/SavingsPage';
+import { SettingsPage } from './components/SettingsPage';
+import { LockScreen } from './components/LockScreen';
+import { ExpenseModal } from './components/ExpenseModal';
+import { SavingsModal } from './components/SavingsModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
+import { SettingsSection } from './components/SettingsPage';
+import { AuthOnboardingModal } from './components/AuthOnboardingModal';
+import { 
+  AppData, 
+  Expense, 
+  SavingsDeposit, 
+  UserProfile, 
+  SecuritySettings,
+  ExpensePreset,
+  SavingsProject
+} from './types';
+import { 
+  loadAppData, 
+  saveAppData, 
+  getDefaultData, 
+  ensureMonthInitialized 
+} from './utils/storage';
+import { getCurrentMonthKey } from './utils/date';
+
+export default function App() {
+  const [data, setData] = useState<AppData>(() => {
+    const loaded = loadAppData();
+    return ensureMonthInitialized(loaded, getCurrentMonthKey());
+  });
+
+  const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthKey());
+  const [currentTab, setCurrentTab] = useState<'dashboard' | 'expenses' | 'savings' | 'settings'>('dashboard');
+  const [initialSettingsSection, setInitialSettingsSection] = useState<SettingsSection>('menu');
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+
+  // Modales
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isSavingsModalOpen, setIsSavingsModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+
+  // Navigation fluide avec support des sous-sections de paramètres
+  const handleNavigateToTab = (tab: 'expenses' | 'savings' | 'settings', section?: SettingsSection) => {
+    if (tab === 'settings' && section) {
+      setInitialSettingsSection(section);
+    } else if (tab === 'settings') {
+      setInitialSettingsSection('menu');
+    }
+    setCurrentTab(tab);
+  };
+
+  // Assurer l'initialisation du mois lorsque l'utilisateur change de mois
+  useEffect(() => {
+    setData((prev) => ensureMonthInitialized(prev, selectedMonth));
+  }, [selectedMonth]);
+
+  // Écouter les changements éventuels
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setData(loadAppData());
+    };
+    window.addEventListener('monsalaire_data_changed', handleStorageChange);
+    return () => window.removeEventListener('monsalaire_data_changed', handleStorageChange);
+  }, []);
+
+  // Gestion du budget de base alloué (Page Dépenses)
+  const handleUpdateBaseBudget = (monthKey: string, newAmount: number) => {
+    const updated: AppData = {
+      ...data,
+      monthlyBudgets: {
+        ...data.monthlyBudgets,
+        [monthKey]: {
+          ...(data.monthlyBudgets[monthKey] || {
+            monthKey,
+            salaryReceived: data.user.defaultSalary,
+          }),
+          baseBudget: newAmount,
+        },
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Ajout d'une dépense
+  const handleAddExpense = (expenseData: Omit<Expense, 'id'>) => {
+    const newExpense: Expense = {
+      ...expenseData,
+      id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    const currentMonthExpenses = data.expenses[selectedMonth] || [];
+    const updated: AppData = {
+      ...data,
+      expenses: {
+        ...data.expenses,
+        [selectedMonth]: [newExpense, ...currentMonthExpenses],
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Mise à jour d'une dépense
+  const handleUpdateExpense = (updatedExpense: Expense) => {
+    const currentMonthExpenses = data.expenses[selectedMonth] || [];
+    const updatedList = currentMonthExpenses.map((e) =>
+      e.id === updatedExpense.id ? updatedExpense : e
+    );
+
+    const updated: AppData = {
+      ...data,
+      expenses: {
+        ...data.expenses,
+        [selectedMonth]: updatedList,
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Suppression d'une dépense
+  const handleDeleteExpense = (expenseId: string) => {
+    const currentMonthExpenses = data.expenses[selectedMonth] || [];
+    const updatedList = currentMonthExpenses.filter((e) => e.id !== expenseId);
+
+    const updated: AppData = {
+      ...data,
+      expenses: {
+        ...data.expenses,
+        [selectedMonth]: updatedList,
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Validation / Dévalidation : Les dépenses non récurrentes sont réglées/archivées, les récurrentes ne s'effacent pas et restent actives
+  const handleValidateAllMonthExpenses = (monthKey: string, validate: boolean = true) => {
+    const currentMonthExpenses = data.expenses[monthKey] || [];
+    const updatedList = currentMonthExpenses.map((e) => ({
+      ...e,
+      // Si on valide : les dépenses récurrentes restent actives (isPaid: false), le reste est réglé (isPaid: true)
+      // Si on dévalide : tout redevient actif (isPaid: false)
+      isPaid: validate ? (e.isRecurring ? false : true) : false,
+    }));
+
+    const updated: AppData = {
+      ...data,
+      expenses: {
+        ...data.expenses,
+        [monthKey]: updatedList,
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Gestion des modèles de dépenses prédéfinies (Presets)
+  const handleAddExpensePreset = (presetData: Omit<ExpensePreset, 'id'>) => {
+    const newPreset: ExpensePreset = {
+      ...presetData,
+      id: `pre-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    const updated: AppData = {
+      ...data,
+      expensePresets: [...(data.expensePresets || []), newPreset],
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleUpdateExpensePreset = (updatedPreset: ExpensePreset) => {
+    const currentPresets = data.expensePresets || [];
+    const updatedList = currentPresets.map((p) =>
+      p.id === updatedPreset.id ? updatedPreset : p
+    );
+
+    const updated: AppData = {
+      ...data,
+      expensePresets: updatedList,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleDeleteExpensePreset = (presetId: string) => {
+    const currentPresets = data.expensePresets || [];
+    const updatedList = currentPresets.filter((p) => p.id !== presetId);
+
+    const updated: AppData = {
+      ...data,
+      expensePresets: updatedList,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Ajout d'un versement d'épargne (montant variable chaque mois)
+  const handleAddSavings = (depositData: Omit<SavingsDeposit, 'id'>) => {
+    const newDeposit: SavingsDeposit = {
+      ...depositData,
+      id: `sav-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    let updatedProjects = data.savingsProjects;
+    if (depositData.projectId && data.savingsProjects) {
+      updatedProjects = data.savingsProjects.map((p) => {
+        if (p.id === depositData.projectId) {
+          return {
+            ...p,
+            currentAmount: p.currentAmount + depositData.amount,
+          };
+        }
+        return p;
+      });
+    }
+
+    const updated: AppData = {
+      ...data,
+      savings: [newDeposit, ...data.savings],
+      savingsProjects: updatedProjects,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Suppression d'un versement d'épargne
+  const handleDeleteSavings = (depositId: string) => {
+    const updated: AppData = {
+      ...data,
+      savings: data.savings.filter((s) => s.id !== depositId),
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Gestion des projets d'épargne (Création, Modification, Clôture, Contribution)
+  const handleAddSavingsProject = (projectData: Omit<SavingsProject, 'id' | 'createdAt' | 'isClosed'>) => {
+    const newProject: SavingsProject = {
+      ...projectData,
+      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      createdAt: new Date().toISOString().split('T')[0],
+      isClosed: false,
+    };
+
+    const updated: AppData = {
+      ...data,
+      savingsProjects: [newProject, ...(data.savingsProjects || [])],
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleUpdateSavingsProject = (updatedProject: SavingsProject) => {
+    const current = data.savingsProjects || [];
+    const updatedList = current.map((p) => (p.id === updatedProject.id ? updatedProject : p));
+    const updated: AppData = {
+      ...data,
+      savingsProjects: updatedList,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleDeleteSavingsProject = (projectId: string) => {
+    const current = data.savingsProjects || [];
+    const updatedList = current.filter((p) => p.id !== projectId);
+    const updated: AppData = {
+      ...data,
+      savingsProjects: updatedList,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleCloseSavingsProject = (projectId: string, close: boolean) => {
+    const current = data.savingsProjects || [];
+    const updatedList = current.map((p) => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          isClosed: close,
+          closedAt: close ? new Date().toISOString().split('T')[0] : undefined,
+        };
+      }
+      return p;
+    });
+
+    const updated: AppData = {
+      ...data,
+      savingsProjects: updatedList,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleContributeToSavingsProject = (
+    projectId: string,
+    amount: number,
+    alsoRecordSavings: boolean = true,
+    closeProjectIfReached: boolean = false,
+    customDate?: string,
+    customNote?: string
+  ) => {
+    const current = data.savingsProjects || [];
+    let projectTitle = '';
+    const updatedProjects = current.map((p) => {
+      if (p.id === projectId) {
+        projectTitle = p.title;
+        const newTotal = p.currentAmount + amount;
+        const isReached = newTotal >= p.targetAmount;
+        const shouldClose = closeProjectIfReached && isReached;
+        return {
+          ...p,
+          currentAmount: newTotal,
+          isClosed: shouldClose ? true : p.isClosed,
+          closedAt: shouldClose ? new Date().toISOString().split('T')[0] : p.closedAt,
+        };
+      }
+      return p;
+    });
+
+    let updatedSavings = data.savings;
+    if (alsoRecordSavings) {
+      const newDeposit: SavingsDeposit = {
+        id: `sav-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        amount,
+        date: customDate || `${selectedMonth}-01`,
+        note: customNote || `Affectation projet : ${projectTitle}`,
+        depositType: 'project',
+        projectId,
+        projectName: projectTitle,
+      };
+      updatedSavings = [newDeposit, ...data.savings];
+    }
+
+    const updated: AppData = {
+      ...data,
+      savings: updatedSavings,
+      savingsProjects: updatedProjects,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Mise à jour du profil utilisateur (Nom, Téléphone, E-mail)
+  const handleUpdateUser = (newUser: UserProfile) => {
+    const updated: AppData = {
+      ...data,
+      user: newUser,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Mise à jour des paramètres de sécurité (mot de passe / verrouillage)
+  const handleUpdateSecurity = (newSecurity: SecuritySettings) => {
+    const updated: AppData = {
+      ...data,
+      security: newSecurity,
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Mise à jour du salaire spécifique au mois
+  const handleUpdateMonthSalary = (monthKey: string, salary: number) => {
+    const updated: AppData = {
+      ...data,
+      monthlyBudgets: {
+        ...data.monthlyBudgets,
+        [monthKey]: {
+          ...(data.monthlyBudgets[monthKey] || {
+            monthKey,
+            baseBudget: Math.round(salary * 0.8),
+          }),
+          salaryReceived: salary,
+        },
+      },
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  // Réinitialisation aux données d'exemple
+  const handleResetData = () => {
+    const initial = getDefaultData();
+    setData(initial);
+    saveAppData(initial);
+  };
+
+  const appCurrency = data.user.currency || 'FCFA';
+
+  const currentExpenses = data.expenses[selectedMonth] || [];
+  const currentTotalExpenses = currentExpenses.reduce((sum, item) => sum + item.amount, 0);
+  const currentTotalSavings = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
+
+  return (
+    <div className="min-h-screen bg-[#080a08] text-white flex flex-col selection:bg-[#ccff00] selection:text-black">
+      {/* Écran de verrouillage si activé */}
+      {isLocked && data.security.isLockEnabled && (
+        <LockScreen
+          user={data.user}
+          security={data.security}
+          onUnlock={() => setIsLocked(false)}
+          onUpdateSecurity={handleUpdateSecurity}
+        />
+      )}
+
+      {/* Barre de navigation principale GesFin avec forme connectée (Bell + Période + Avatar) */}
+      <Navbar
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        user={data.user}
+        security={data.security}
+        onLockApp={() => setIsLocked(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        totalExpenses={currentTotalExpenses}
+        totalSavings={currentTotalSavings}
+      />
+
+      {/* Contenu principal (avec padding inférieur optimisé pour la barre mobile) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8">
+        {currentTab === 'dashboard' && (
+          <Dashboard
+            data={data}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            onNavigateToTab={handleNavigateToTab}
+            onOpenAddExpense={() => setIsExpenseModalOpen(true)}
+            onOpenAddSavings={() => setIsSavingsModalOpen(true)}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          />
+        )}
+
+        {currentTab === 'expenses' && (
+          <ExpensesPage
+            data={data}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            onUpdateBaseBudget={handleUpdateBaseBudget}
+            onAddExpense={handleAddExpense}
+            onUpdateExpense={handleUpdateExpense}
+            onDeleteExpense={handleDeleteExpense}
+            onOpenAddModal={() => setIsExpenseModalOpen(true)}
+            onValidateAllMonthExpenses={handleValidateAllMonthExpenses}
+          />
+        )}
+
+        {currentTab === 'savings' && (
+          <SavingsPage
+            data={data}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            onAddSavings={handleAddSavings}
+            onDeleteSavings={handleDeleteSavings}
+            onOpenAddModal={() => setIsSavingsModalOpen(true)}
+            onAddSavingsProject={handleAddSavingsProject}
+            onUpdateSavingsProject={handleUpdateSavingsProject}
+            onDeleteSavingsProject={handleDeleteSavingsProject}
+            onCloseSavingsProject={handleCloseSavingsProject}
+            onContributeToSavingsProject={handleContributeToSavingsProject}
+          />
+        )}
+
+        {currentTab === 'settings' && (
+          <SettingsPage
+            data={data}
+            selectedMonth={selectedMonth}
+            initialSection={initialSettingsSection}
+            onUpdateUser={handleUpdateUser}
+            onUpdateSecurity={handleUpdateSecurity}
+            onUpdateMonthSalary={handleUpdateMonthSalary}
+            onResetData={handleResetData}
+            onLockAppNow={() => {
+              if (data.security.isLockEnabled) {
+                setIsLocked(true);
+              } else {
+                alert('Veuillez activer le verrouillage et définir un mot de passe d\'abord.');
+              }
+            }}
+            onAddPreset={handleAddExpensePreset}
+            onUpdatePreset={handleUpdateExpensePreset}
+            onDeletePreset={handleDeleteExpensePreset}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          />
+        )}
+      </main>
+
+      {/* Barre de navigation basse pour smartphones (Style Workout App Dock) */}
+      <MobileBottomNav
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+      />
+
+      {/* Modal Assistant de Connexion & Onboarding Setup */}
+      <AuthOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        currentUser={data.user}
+        currentSecurity={data.security}
+        onComplete={(updatedUser, updatedSecurity) => {
+          handleUpdateUser(updatedUser);
+          handleUpdateSecurity(updatedSecurity);
+          setIsOnboardingOpen(false);
+        }}
+      />
+
+      {/* Modal Ajout Dépense avec sélection de modèles et popup d'enregistrement */}
+      <ExpenseModal
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSave={handleAddExpense}
+        selectedMonth={selectedMonth}
+        currency={appCurrency}
+        expensePresets={data.expensePresets || []}
+        onAddPreset={handleAddExpensePreset}
+      />
+
+      {/* Modal Ajout Épargne avec choix versement mensuel ou projet non clôturé */}
+      <SavingsModal
+        isOpen={isSavingsModalOpen}
+        onClose={() => setIsSavingsModalOpen(false)}
+        onSave={handleAddSavings}
+        selectedMonth={selectedMonth}
+        currency={appCurrency}
+        projects={data.savingsProjects || []}
+        onContributeToProject={handleContributeToSavingsProject}
+        onOpenCreateProject={() => {
+          setCurrentTab('savings');
+        }}
+      />
+
+      {/* Footer épuré (masqué sur smartphone pour privilégier la bottom nav) */}
+      <footer className="hidden md:block border-t border-[#171e19] bg-[#090b09] py-4 text-center text-xs text-slate-500">
+        <p>GesFin • Gestion financière, dépenses & épargne</p>
+      </footer>
+    </div>
+  );
+}
