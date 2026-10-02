@@ -105,6 +105,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   // Section 1: User Profile state
   const [fullName, setFullName] = useState(data.user.fullName);
+  const [username, setUsername] = useState(data.user.username || '');
   const [phone, setPhone] = useState(data.user.phone);
   const [email, setEmail] = useState(data.user.email);
   const [defaultSalary, setDefaultSalary] = useState(data.user.defaultSalary.toString());
@@ -156,11 +157,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   // Save User Info
   const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsedSalary = parseFloat(defaultSalary) || 750000;
+    const parsedSalary = parseFloat(defaultSalary) || 0;
     
     const updatedUser: UserProfile = {
       ...data.user,
       fullName: fullName.trim(),
+      firstName: fullName.trim().split(/\s+/)[0] || '',
+      lastName: fullName.trim().split(/\s+/).slice(1).join(' '),
+      username: username.trim(),
       phone: phone.trim(),
       email: email.trim().toLowerCase(),
       defaultSalary: parsedSalary,
@@ -659,7 +663,23 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Davy Papet"
+                      placeholder="Prénom Nom"
+                      className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Pseudo
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Pseudo (optionnel)"
                       className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
                     />
                   </div>
@@ -675,7 +695,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+225 07 42 78 91"
+                      placeholder="Numéro de téléphone"
                       className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
                     />
                   </div>
@@ -692,7 +712,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="davypapet@gmail.com"
+                      placeholder="Adresse e-mail"
                       className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
                     />
                   </div>
@@ -1513,7 +1533,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                   <div>
                     <h3 className="font-bold text-xs sm:text-sm text-rose-300">Réinitialiser les données</h3>
-                    <p className="text-[11px] text-rose-400/80">Remet les données de démonstration en FCFA</p>
+                    <p className="text-[11px] text-rose-400/80">Efface toutes vos données et relance la configuration</p>
                   </div>
                 </div>
                 <button
@@ -1538,7 +1558,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div className="text-center">
               <h3 className="text-lg font-black text-white">Réinitialiser les données ?</h3>
               <p className="text-xs text-slate-300 mt-1">
-                Cette action rétablira les données de démonstration par défaut en FCFA (750 000 FCFA de salaire, dépenses et épargne du mois).
+                Cette action supprimera définitivement votre profil, vos dépenses, votre épargne et vos projets. L'assistant de configuration se relancera ensuite.
               </p>
             </div>
             <div className="flex gap-2.5 pt-2">
@@ -1558,7 +1578,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 }}
                 className="flex-1 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs shadow-md"
               >
-                Confirmer la réinitialisation
+                Tout effacer
               </button>
             </div>
           </div>

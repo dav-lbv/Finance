@@ -86,7 +86,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
             className="w-6 h-6 rounded-full object-cover border border-[#ccff00]"
           />
           <span className="text-xs font-bold text-white">
-            {user.fullName || 'Davy Papet'}
+            {user.fullName || 'Utilisateur'}
           </span>
           <span className="text-[10px] text-slate-400">
             ({user.email})

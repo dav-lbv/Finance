@@ -28,40 +28,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
   totalSavings,
   currency,
 }) => {
-  const [notifications, setNotifications] = React.useState<NotificationItem[]>([
-    {
-      id: 'notif-1',
-      title: 'Période active sélectionnée',
-      message: `Vous consultez actuellement le budget pour ${formatMonthKey(selectedMonth)}.`,
-      time: 'Il y a 5 min',
-      type: 'info',
-      isRead: false,
-    },
-    {
-      id: 'notif-2',
-      title: 'Charges fixes reconduites',
-      message: 'Vos dépenses récurrentes (Loyer, Abonnements, CIE) sont automatiquement préservées et actives ce mois-ci.',
-      time: 'Il y a 2 h',
-      type: 'finance',
-      isRead: false,
-    },
-    {
-      id: 'notif-3',
-      title: 'Solde d\'épargne consolidé',
-      message: 'Votre trésorerie d\'épargne est mise à jour avec succès.',
-      time: 'Hier',
-      type: 'success',
-      isRead: true,
-    },
-    {
-      id: 'notif-4',
-      title: 'Protection des données GesFin',
-      message: 'Toutes vos données financières sont sauvegardées localement en toute confidentialité.',
-      time: 'Il y a 2 jours',
-      type: 'info',
-      isRead: true,
-    },
-  ]);
+  const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
 
   if (!isOpen) return null;
 
@@ -105,6 +72,12 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
         {/* Content list */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5 divide-y divide-[#1b241d]/50">
+          {notifications.length === 0 && (
+            <div className="py-10 text-center text-xs text-slate-400">
+              <Bell className="w-6 h-6 mx-auto mb-2 text-slate-500" />
+              Aucune notification pour le moment.
+            </div>
+          )}
           {notifications.map((notif) => {
             return (
               <div

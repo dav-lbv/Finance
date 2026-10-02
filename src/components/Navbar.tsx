@@ -111,10 +111,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   title="Voir les notifications & alertes"
                 >
                   <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  {/* Pastille / Badge de notifications non lues */}
-                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#ccff00] text-black text-[9px] font-black flex items-center justify-center shadow-[0_0_6px_#ccff00]">
-                    2
-                  </span>
                 </button>
 
                 {/* Séparateur subtil vertical */}

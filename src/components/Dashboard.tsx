@@ -65,7 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const prevTotalExpenses = prevExpenses.reduce((sum, item) => sum + item.amount, 0);
 
   // Budget et Salaire perçu du mois
-  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 750000;
+  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
 
   // Calculs Épargne
   const totalSavingsAccrued = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
@@ -151,7 +151,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               Welcome,
             </span>
             <h2 className="text-base sm:text-lg font-black text-white truncate tracking-tight">
-              {data.user.fullName || 'John Doe'}
+              {data.user.username || data.user.firstName || data.user.fullName || 'Utilisateur'}
             </h2>
           </div>
         </div>
@@ -165,9 +165,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             title="Notifications"
           >
             <Bell className="w-5 h-5 text-slate-200" />
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF4D00] text-white text-[10px] font-black flex items-center justify-center border-2 border-[#0e120f] shadow-sm">
-              3
-            </span>
           </button>
         </div>
       </div>
