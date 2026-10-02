@@ -33,6 +33,7 @@ export function getDefaultData(): AppData {
     savings: [],
     savingsProjects: [],
     expensePresets: [],
+    projectCategories: [],
   };
 }
 
@@ -57,6 +58,7 @@ export function loadAppData(): AppData {
     data.savings = data.savings || [];
     data.savingsProjects = data.savingsProjects || [];
     data.expensePresets = data.expensePresets || [];
+    data.projectCategories = data.projectCategories || [];
 
     return data;
   } catch (err) {

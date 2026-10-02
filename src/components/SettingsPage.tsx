@@ -21,6 +21,7 @@ import {
   X, 
   Sparkles, 
   Sun, 
+  Target,
   Moon, 
   Laptop, 
   Palette, 
@@ -39,6 +40,7 @@ import { ANIMAL_AVATARS, DEFAULT_AVATAR } from '../utils/avatars';
 import { PWAInstallButton } from './PWAInstallButton';
 import { useTheme } from '../hooks/useTheme';
 import { CategorySelect } from './CategorySelect';
+import { ProjectCategoriesSettings } from './ProjectCategoriesSettings';
 import { FintechSelect } from './FintechSelect';
 
 export type SettingsSection = 
@@ -46,6 +48,7 @@ export type SettingsSection =
   | 'user_info' 
   | 'budget_salary' 
   | 'categories' 
+  | 'project_categories' 
   | 'appearance' 
   | 'security' 
   | 'backup';
@@ -57,6 +60,9 @@ interface SettingsPageProps {
   onUpdateSecurity: (newSecurity: SecuritySettings) => void;
   onUpdateMonthSalary: (monthKey: string, salary: number) => void;
   onResetData: () => void;
+  onAddProjectCategory: (name: string) => void;
+  onRenameProjectCategory: (oldName: string, newName: string) => void;
+  onDeleteProjectCategory: (name: string) => void;
   onLockAppNow: () => void;
   onAddPreset: (preset: Omit<ExpensePreset, 'id'>) => void;
   onUpdatePreset: (preset: ExpensePreset) => void;
@@ -85,6 +91,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onUpdateSecurity,
   onUpdateMonthSalary,
   onResetData,
+  onAddProjectCategory,
+  onRenameProjectCategory,
+  onDeleteProjectCategory,
   onLockAppNow,
   onAddPreset,
   onUpdatePreset,
@@ -301,7 +310,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
-                Paramètres de GesFin
+                Paramètres de Mon_Kanda
               </h1>
               <p className="text-xs sm:text-sm text-fg-2 mt-0.5">
                 Organisation en grille Bento pour une gestion claire et intuitive de votre application.
@@ -470,6 +479,30 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </div>
             </div>
 
+            {/* TUILE : CATÉGORIES DE PROJETS D'ÉPARGNE */}
+            <div
+              onClick={() => setActiveSection('project_categories')}
+              className="group bg-surface hover:bg-surface-2 p-5 rounded-3xl border border-line hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted">
+                    Projets d'épargne
+                  </span>
+                  <Target className="w-4 h-4 text-fg-2" />
+                </div>
+                <h3 className="font-black text-base text-fg tracking-tight">Catégories de projets</h3>
+                <div className="mt-2 text-xl font-black text-fg">
+                  {(data.projectCategories || []).length} catégorie{(data.projectCategories || []).length > 1 ? 's' : ''}
+                </div>
+                <p className="text-[11px] text-fg-muted mt-0.5">Définissez vos propres catégories.</p>
+              </div>
+              <div className="mt-4 pt-2.5 border-t border-line flex items-center justify-between text-xs text-fg-muted">
+                <span>Gérer les catégories</span>
+                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
+              </div>
+            </div>
+
             {/* TUILE BENTO 5 (SÉCURITÉ & VERROUILLAGE) */}
             <div
               onClick={() => setActiveSection('security')}
@@ -513,7 +546,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   <Database className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-sm text-fg">Sauvegarde & Données GesFin</h3>
+                  <h3 className="font-black text-sm text-fg">Sauvegarde & Données Mon_Kanda</h3>
                   <p className="text-xs text-fg-muted mt-0.5">
                     Exportez l'ensemble de vos transactions, salaires et projets d'épargne en fichier JSON sécurisé.
                   </p>
@@ -981,6 +1014,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
       {/* ======================================================== */}
       {/* SOUS-PAGE 4 : APPARENCE & THÈME D'AFFICHAGE              */}
+      {activeSection === 'project_categories' && (
+        <ProjectCategoriesSettings
+          categories={data.projectCategories || []}
+          usage={(data.savingsProjects || []).reduce<Record<string, number>>((acc, p) => {
+            if (p.category) acc[p.category] = (acc[p.category] || 0) + 1;
+            return acc;
+          }, {})}
+          onAdd={onAddProjectCategory}
+          onRename={onRenameProjectCategory}
+          onDelete={onDeleteProjectCategory}
+          onBack={() => setActiveSection('menu')}
+        />
+      )}
+
       {/* ======================================================== */}
       {activeSection === 'appearance' && (
         <div className="space-y-6 animate-fadeIn">
@@ -1116,7 +1163,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div>
               <h2 className="text-xl font-black text-fg">Sécurité & Verrouillage</h2>
               <p className="text-xs text-fg-muted mt-1">
-                Gérez la protection par mot de passe et l'accès biométrique à votre GesFin.
+                Gérez la protection par mot de passe et l'accès biométrique à Mon_Kanda.
               </p>
             </div>
 
@@ -1201,7 +1248,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       Déverrouillage biométrique (Face ID & Empreinte)
                     </span>
                     <span className="text-[11px] text-fg-muted">
-                      Permet d'ouvrir GesFin avec le capteur de votre smartphone
+                      Permet d'ouvrir Mon_Kanda avec le capteur de votre smartphone
                     </span>
                   </div>
                 </div>
@@ -1235,7 +1282,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     onClick={onLockAppNow}
                     className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-brand/30 font-extrabold text-xs transition-all active:scale-95"
                   >
-                    Verrouiller immédiatement GesFin
+                    Verrouiller immédiatement Mon_Kanda
                   </button>
                 ) : <div />}
 
@@ -1268,7 +1315,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>
-              <h2 className="text-xl font-black text-fg">Sauvegarde & Données GesFin</h2>
+              <h2 className="text-xl font-black text-fg">Sauvegarde & Données Mon_Kanda</h2>
               <p className="text-xs text-fg-muted mt-1">
                 Exportez vos données financières locales ou réinitialisez l'application.
               </p>

@@ -36,7 +36,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'c
                 <span className="px-2 py-0.2 rounded-full bg-brand/15 text-brand text-[10px] font-black border border-brand/30">PWA</span>
               </h4>
               <p className="text-xs text-fg-muted mt-0.5">
-                Utilisez MonSalaire en plein écran sans barre de navigation, comme une vraie application mobile.
+                Utilisez Mon_Kanda en plein écran sans barre de navigation, comme une vraie application mobile.
               </p>
             </div>
           </div>
@@ -86,7 +86,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'c
               Installation sur smartphone
             </h3>
             <p className="text-xs text-fg-muted text-center mt-1 mb-5">
-              Ajoutez <strong className="text-fg">MonSalaire</strong> à votre écran d'accueil :
+              Ajoutez <strong className="text-fg">Mon_Kanda</strong> à votre écran d'accueil :
             </p>
 
             {isIOS ? (

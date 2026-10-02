@@ -72,7 +72,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
         </div>
 
         <h1 className="text-2xl font-black text-fg tracking-tight">
-          GesFin Sécurisé
+          Mon_Kanda Sécurisé
         </h1>
         <p className="text-fg-muted text-xs sm:text-sm mt-1 mb-5">
           Authentification requise pour accéder à votre espace financier.

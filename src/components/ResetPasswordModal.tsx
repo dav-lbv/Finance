@@ -159,11 +159,11 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             {/* Simulation boîte mail */}
             <div className="p-3.5 rounded-2xl bg-surface text-fg-2 border border-line space-y-2 text-xs">
               <div className="flex items-center justify-between pb-1.5 border-b border-line text-[10px] text-fg-muted">
-                <span>De: securite@monsalaire-app.com</span>
+                <span>De: securite@mon-kanda.app</span>
                 <span>À l'instant</span>
               </div>
               <div className="font-bold text-fg">
-                Objet : Votre code de réinitialisation MonSalaire
+                Objet : Votre code de réinitialisation Mon_Kanda
               </div>
               <div className="flex items-center justify-between bg-surface p-2.5 rounded-xl border border-line-strong">
                 <span className="font-mono text-xl font-black text-brand tracking-widest">
@@ -296,7 +296,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                 Mot de passe mis à jour !
               </h2>
               <p className="text-xs sm:text-sm text-fg-muted mt-1">
-                Votre application MonSalaire est déverrouillée.
+                Votre application Mon_Kanda est déverrouillée.
               </p>
             </div>
 

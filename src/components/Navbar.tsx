@@ -77,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             
-            {/* 1. Brand Logo GesFin : Logo à gauche */}
+            {/* 1. Brand Logo Mon_Kanda : Logo à gauche */}
             <div 
               onClick={() => setCurrentTab('dashboard')} 
               className="flex items-center gap-2 shrink-0 cursor-pointer group"
@@ -87,7 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-base sm:text-lg tracking-tight text-fg">
-                  GesFin
+                  Mon_Kanda
                 </span>
                 <span className="text-[9px] font-black tracking-widest uppercase px-1.5 py-0.2 rounded-full bg-brand/15 text-brand border border-brand/30 hidden xs:inline-block">
                   PRO
@@ -265,7 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {security.isLockEnabled && (
                   <button
                     onClick={onLockApp}
-                    title="Verrouiller GesFin"
+                    title="Verrouiller Mon_Kanda"
                     className="p-2 rounded-full bg-surface hover:bg-surface-2 text-brand border border-brand/30 transition-all active:scale-95"
                   >
                     <Lock className="w-3.5 h-3.5" />

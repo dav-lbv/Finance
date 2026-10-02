@@ -17,6 +17,9 @@ interface SavingsPageProps {
   setSelectedMonth: (month: string) => void;
   onAddSavings: (deposit: Omit<SavingsDeposit, 'id'>) => void;
   onDeleteSavings: (depositId: string) => void;
+  /** Catégories de projets configurées dans les Réglages */
+  projectCategories?: string[];
+  onAddProjectCategory?: (name: string) => void;
   /** Ouvre la fenêtre de versement ; `projectId` présélectionne un projet */
   onOpenAddModal?: (projectId?: string) => void;
   onAddSavingsProject?: (project: Omit<SavingsProject, 'id' | 'createdAt' | 'isClosed'>) => void;
@@ -62,6 +65,8 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   selectedMonth,
   selectedDate,
   onDeleteSavings,
+  projectCategories = [],
+  onAddProjectCategory,
   onOpenAddModal,
   onAddSavings,
   onAddSavingsProject,
@@ -169,6 +174,8 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
           onDeleteProject={(id) => onDeleteSavingsProject?.(id)}
           onCloseProject={(id, close) => onCloseSavingsProject?.(id, close)}
           onContributeToProject={(id, amt, alsoRec) => onContributeToSavingsProject?.(id, amt, alsoRec)}
+          categories={projectCategories}
+          onAddCategory={(name) => onAddProjectCategory?.(name)}
         />
       </div>
     );

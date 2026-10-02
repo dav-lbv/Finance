@@ -14,8 +14,8 @@ export default defineConfig(() => {
         includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
           id: '/',
-          name: 'MonSalaire - Gestion Mensuelle',
-          short_name: 'MonSalaire',
+          name: 'Mon_Kanda - Gestion financière',
+          short_name: 'Mon_Kanda',
           description: 'Gestion mensuelle de salaire, dépenses et calendrier d\'épargne',
           theme_color: '#0f172a',
           background_color: '#0f172a',

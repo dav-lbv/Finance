@@ -89,4 +89,5 @@ export interface AppData {
   savings: SavingsDeposit[]; // Global savings transactions
   savingsProjects?: SavingsProject[]; // Projets d'épargne avec objectifs à atteindre
   expensePresets: ExpensePreset[]; // Liste de dépenses configurées dans les paramètres
+  projectCategories?: string[]; // Catégories de projets d'épargne, configurées par l'utilisateur
 }

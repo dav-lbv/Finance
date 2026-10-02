@@ -414,6 +414,38 @@ export default function App() {
     saveAppData(updated);
   };
 
+  // Catégories de projets d'épargne (entièrement configurées par l'utilisateur)
+  const handleAddProjectCategory = (name: string) => {
+    const clean = name.trim();
+    const current = data.projectCategories || [];
+    if (!clean || current.some((c) => c.toLowerCase() === clean.toLowerCase())) return;
+    const updated: AppData = { ...data, projectCategories: [...current, clean] };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleRenameProjectCategory = (oldName: string, newName: string) => {
+    const clean = newName.trim();
+    const current = data.projectCategories || [];
+    if (!clean || clean === oldName || current.some((c) => c !== oldName && c.toLowerCase() === clean.toLowerCase())) return;
+    const updated: AppData = {
+      ...data,
+      projectCategories: current.map((c) => (c === oldName ? clean : c)),
+      savingsProjects: (data.savingsProjects || []).map((p) => (p.category === oldName ? { ...p, category: clean } : p)),
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
+  const handleDeleteProjectCategory = (name: string) => {
+    const updated: AppData = {
+      ...data,
+      projectCategories: (data.projectCategories || []).filter((c) => c !== name),
+    };
+    setData(updated);
+    saveAppData(updated);
+  };
+
   // Réinitialisation complète : base vierge, l'assistant de configuration se relance
   const handleResetData = () => {
     const initial = getDefaultData();
@@ -514,6 +546,8 @@ export default function App() {
             data={data}
             selectedMonth={selectedMonth}
             selectedDate={selectedDate}
+            projectCategories={data.projectCategories || []}
+            onAddProjectCategory={handleAddProjectCategory}
             setSelectedMonth={setSelectedMonth}
             onAddSavings={handleAddSavings}
             onDeleteSavings={handleDeleteSavings}
@@ -538,6 +572,9 @@ export default function App() {
             onUpdateSecurity={handleUpdateSecurity}
             onUpdateMonthSalary={handleUpdateMonthSalary}
             onResetData={handleResetData}
+            onAddProjectCategory={handleAddProjectCategory}
+            onRenameProjectCategory={handleRenameProjectCategory}
+            onDeleteProjectCategory={handleDeleteProjectCategory}
             onLockAppNow={() => {
               if (data.security.isLockEnabled) {
                 setIsLocked(true);
@@ -602,7 +639,7 @@ export default function App() {
 
       {/* Footer épuré (masqué sur smartphone pour privilégier la bottom nav) */}
       <footer className="hidden md:block border-t border-line bg-app py-4 text-center text-xs text-fg-muted">
-        <p>GesFin • Gestion financière, dépenses & épargne</p>
+        <p>Mon_Kanda • Gestion financière, dépenses & épargne</p>
       </footer>
     </div>
   );

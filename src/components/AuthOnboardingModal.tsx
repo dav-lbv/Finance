@@ -157,7 +157,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-app animate-fadeIn">
       <div className="w-full max-w-xl mx-auto flex-1 flex flex-col min-h-0">
-        {/* Top Header bar with GesFin Logo & Close */}
+        {/* Top Header bar with Mon_Kanda Logo & Close */}
         <div className="px-5 pb-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-fg-muted to-brand flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)]">
@@ -165,7 +165,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-base tracking-tight text-fg">GesFin</span>
+                <span className="font-black text-base tracking-tight text-fg">Mon_Kanda</span>
                 <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full bg-brand/15 text-brand border border-brand/30">
                   Setup
                 </span>
@@ -637,7 +637,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   Étape 4 sur 4
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-fg">
-                  Sécurité & Verrouillage de GesFin
+                  Sécurité & Verrouillage de Mon_Kanda
                 </h2>
                 <p className="text-xs text-fg-2">
                   Protégez vos données financières avec un mot de passe et vos données biométriques.
@@ -781,7 +781,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   Configuration terminée avec succès !
                 </h2>
                 <p className="text-xs text-fg-2 mt-1.5 leading-relaxed">
-                  Votre espace <span className="text-brand font-black">GesFin</span> est maintenant configuré et prêt pour la gestion de vos finances.
+                  Votre espace <span className="text-brand font-black">Mon_Kanda</span> est maintenant configuré et prêt pour la gestion de vos finances.
                 </p>
               </div>
 
@@ -822,7 +822,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                 onClick={handleFinalSubmit}
                 className="w-full py-3.5 rounded-2xl bg-brand hover:bg-brand-hover text-brand-fg font-black text-sm tracking-tight shadow-[0_0_25px_rgba(var(--brand-rgb),0.35)] transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Accéder à mon GesFin</span>
+                <span>Accéder à Mon_Kanda</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>

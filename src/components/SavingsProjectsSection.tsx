@@ -31,17 +31,10 @@ interface SavingsProjectsSectionProps {
   onDeleteProject: (projectId: string) => void;
   onCloseProject: (projectId: string, close: boolean) => void;
   onContributeToProject: (projectId: string, amount: number, alsoRecordSavings: boolean) => void;
+  /** Catégories configurées par l'utilisateur (Réglages > Catégories de projets) */
+  categories: string[];
+  onAddCategory: (name: string) => void;
 }
-
-const CATEGORIES = [
-  'Matériel & Équipement',
-  'Voyage & Loisirs',
-  'Sécurité & Urgence',
-  'Immobilier & Habitat',
-  'Véhicule & Mobilité',
-  'Projet Professionnel',
-  'Autre',
-];
 
 export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
   projects,
@@ -52,6 +45,8 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
   onDeleteProject,
   onCloseProject,
   onContributeToProject,
+  categories,
+  onAddCategory,
 }) => {
   // États Modales
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -64,7 +59,8 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
   const [targetAmount, setTargetAmount] = useState('');
   const [initialAmount, setInitialAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState('');
+  const [newCategory, setNewCategory] = useState('');
   const [note, setNote] = useState('');
 
   // Filtre d'affichage
@@ -88,7 +84,8 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
     setTargetAmount('');
     setInitialAmount('');
     setTargetDate('');
-    setCategory(CATEGORIES[0]);
+    setCategory('');
+    setNewCategory('');
     setNote('');
     setIsAddModalOpen(true);
   };
@@ -100,7 +97,8 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
     setTargetAmount(project.targetAmount.toString());
     setInitialAmount(project.currentAmount.toString());
     setTargetDate(project.targetDate || '');
-    setCategory(project.category || CATEGORIES[0]);
+    setCategory(project.category || '');
+    setNewCategory('');
     setNote(project.note || '');
     setIsAddModalOpen(true);
   };
@@ -120,7 +118,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
         targetAmount: parsedTarget,
         currentAmount: parsedCurrent,
         targetDate: targetDate || undefined,
-        category,
+        category: category || undefined,
         note: note.trim() || undefined,
       });
     } else {
@@ -129,7 +127,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
         targetAmount: parsedTarget,
         currentAmount: parsedCurrent,
         targetDate: targetDate || undefined,
-        category,
+        category: category || undefined,
         note: note.trim() || undefined,
       });
     }
@@ -530,14 +528,63 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div>
-                  <FintechSelect
-                    label="Catégorie"
-                    value={category}
-                    options={CATEGORIES.map((cat) => ({ value: cat, label: cat }))}
-                    onChange={setCategory}
-                  />
+                  {categories.length > 0 && (
+                    <FintechSelect
+                      label="Catégorie (optionnel)"
+                      value={category}
+                      options={[
+                        { value: '', label: 'Sans catégorie' },
+                        ...categories.map((cat) => ({ value: cat, label: cat })),
+                      ]}
+                      onChange={setCategory}
+                    />
+                  )}
+
+                  {/* Création d'une catégorie : elle est enregistrée dans les Réglages */}
+                  <label className="block text-xs font-bold text-fg-2 mt-2.5 mb-1">
+                    {categories.length > 0 ? 'Ou créer une nouvelle catégorie' : 'Catégorie (optionnel)'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const name = newCategory.trim();
+                          if (name) {
+                            onAddCategory(name);
+                            setCategory(name);
+                            setNewCategory('');
+                          }
+                        }
+                      }}
+                      placeholder="Ex : Voyage, Urgence…"
+                      className="flex-1 min-w-0 bg-surface-2 border border-line-strong focus:border-brand rounded-2xl px-4 py-2.5 text-sm text-fg focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={!newCategory.trim()}
+                      onClick={() => {
+                        const name = newCategory.trim();
+                        if (!name) return;
+                        onAddCategory(name);
+                        setCategory(name);
+                        setNewCategory('');
+                      }}
+                      className="shrink-0 px-4 py-2.5 rounded-2xl bg-brand text-brand-fg text-xs font-black disabled:opacity-40 cursor-pointer"
+                    >
+                      Ajouter
+                    </button>
+                  </div>
+                  {categories.length === 0 && (
+                    <p className="mt-1.5 text-[11px] text-fg-muted">
+                      Aucune catégorie configurée : saisissez-en une, elle sera conservée dans vos Réglages.
+                    </p>
+                  )}
                 </div>
 
                 <div>

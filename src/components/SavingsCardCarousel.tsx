@@ -118,9 +118,9 @@ const TotalFace: React.FC = () => (
     {/* Marque en bas à droite (équivalent du logo VISA) */}
     <span
       className="absolute font-black italic leading-none"
-      style={{ right: '7%', bottom: '10%', fontSize: '13cqh', letterSpacing: '-0.02em' }}
+      style={{ right: '7%', bottom: '10%', fontSize: '10.5cqh', letterSpacing: '-0.01em' }}
     >
-      GesFin
+      Mon_Kanda
     </span>
   </BankCard>
 );
