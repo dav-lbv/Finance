@@ -43,7 +43,11 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'expenses' | 'savings' | 'settings'>('dashboard');
   const [initialSettingsSection, setInitialSettingsSection] = useState<SettingsSection>('menu');
-  const [isLocked, setIsLocked] = useState<boolean>(false);
+  // L'application démarre verrouillée si l'utilisateur a activé le verrouillage
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    const security = loadAppData().security;
+    return security.isLockEnabled && !!security.passwordHash;
+  });
 
   // Modales
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
@@ -63,6 +67,22 @@ export default function App() {
     }
     setCurrentTab(tab);
   };
+
+  // Re-verrouillage quand l'application revient d'un passage en arrière-plan (> 30 s)
+  useEffect(() => {
+    let hiddenAt = 0;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAt = Date.now();
+      } else if (hiddenAt && Date.now() - hiddenAt > 30_000) {
+        const security = loadAppData().security;
+        if (security.isLockEnabled && security.passwordHash) setIsLocked(true);
+        hiddenAt = 0;
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
 
   // Garder le jour sélectionné dans le mois affiché (changement de mois depuis un autre écran)
   useEffect(() => {
@@ -478,6 +498,10 @@ export default function App() {
           security={data.security}
           onUnlock={() => setIsLocked(false)}
           onUpdateSecurity={handleUpdateSecurity}
+          onEraseEverything={() => {
+            handleResetData();
+            setIsLocked(false);
+          }}
         />
       )}
 

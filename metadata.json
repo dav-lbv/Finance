@@ -1,6 +1,0 @@
-{
-  "name": "Mon_Kanda - Gestion financière, dépenses & épargne",
-  "description": "Application intuitive de gestion mensuelle du salaire : suivi des dépenses, récurrences, calendrier d'épargne et verrouillage sécurisé.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

@@ -40,6 +40,8 @@ import { ANIMAL_AVATARS, DEFAULT_AVATAR } from '../utils/avatars';
 import { PWAInstallButton } from './PWAInstallButton';
 import { useTheme } from '../hooks/useTheme';
 import { CategorySelect } from './CategorySelect';
+import { BiometricToggle } from './BiometricToggle';
+import { hashPassword } from '../utils/crypto';
 import { ProjectCategoriesSettings } from './ProjectCategoriesSettings';
 import { FintechSelect } from './FintechSelect';
 
@@ -141,9 +143,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   // Section 4: Security state
   const [isLockEnabled, setIsLockEnabled] = useState(data.security.isLockEnabled);
-  const [passwordInput, setPasswordInput] = useState(data.security.passwordHash);
-  const [confirmPasswordInput, setConfirmPasswordInput] = useState(data.security.passwordHash);
-  const [useBiometrics, setUseBiometrics] = useState(data.security.useBiometrics ?? true);
+  // Le mot de passe n'est jamais relu : seul son hachage est conservé
+  const hasPassword = !!data.security.passwordHash;
+  const [passwordInput, setPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+  const [useBiometrics, setUseBiometrics] = useState(data.security.useBiometrics ?? false);
+  const [biometricCredentialId, setBiometricCredentialId] = useState(data.security.biometricCredentialId);
   const [showPassword, setShowPassword] = useState(false);
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -198,40 +203,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   // Save Security
-  const handleSaveSecurity = (e: React.FormEvent) => {
+  const handleSaveSecurity = async (e: React.FormEvent) => {
     e.preventDefault();
     setSecurityMessage(null);
 
-    if (isLockEnabled) {
-      if (!passwordInput || passwordInput.trim().length < 4) {
-        setSecurityMessage({
-          type: 'error',
-          text: 'Le mot de passe doit comporter au moins 4 caractères.',
-        });
-        return;
-      }
+    let nextHash = data.security.passwordHash;
 
-      if (passwordInput !== confirmPasswordInput) {
-        setSecurityMessage({
-          type: 'error',
-          text: 'Les deux mots de passe ne correspondent pas.',
-        });
-        return;
+    if (isLockEnabled) {
+      const typed = passwordInput.trim();
+      if (!hasPassword || typed) {
+        if (typed.length < 4) {
+          setSecurityMessage({ type: 'error', text: 'Le mot de passe doit comporter au moins 4 caractères.' });
+          return;
+        }
+        if (passwordInput !== confirmPasswordInput) {
+          setSecurityMessage({ type: 'error', text: 'Les deux mots de passe ne correspondent pas.' });
+          return;
+        }
+        nextHash = await hashPassword(typed);
       }
+    } else {
+      nextHash = '';
     }
 
     onUpdateSecurity({
-      isLockEnabled: isLockEnabled,
-      passwordHash: isLockEnabled ? passwordInput.trim() : '',
-      useBiometrics,
+      ...data.security,
+      isLockEnabled,
+      passwordHash: nextHash,
+      useBiometrics: isLockEnabled && useBiometrics,
       biometricType: 'both',
+      biometricCredentialId: isLockEnabled && useBiometrics ? biometricCredentialId : undefined,
     });
+    setPasswordInput('');
+    setConfirmPasswordInput('');
 
     setSecurityMessage({
       type: 'success',
-      text: isLockEnabled 
-        ? 'Sécurité et mot de passe mis à jour avec succès.' 
-        : 'Verrouillage désactivé.',
+      text: isLockEnabled ? 'Sécurité mise à jour avec succès.' : 'Verrouillage désactivé.',
     });
     setTimeout(() => setSecurityMessage(null), 3000);
   };
@@ -1237,32 +1245,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
               )}
 
-              {/* Toggle Biométrie Face ID / Empreinte */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-2 border border-line-strong">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                    <ScanFace className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs sm:text-sm font-extrabold text-fg block">
-                      Déverrouillage biométrique (Face ID & Empreinte)
-                    </span>
-                    <span className="text-[11px] text-fg-muted">
-                      Permet d'ouvrir Mon_Kanda avec le capteur de votre smartphone
-                    </span>
-                  </div>
-                </div>
-
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={useBiometrics}
-                    onChange={(e) => setUseBiometrics(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-surface-3 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
-                </label>
-              </div>
+              {/* Déverrouillage biométrique (demande l'autorisation au système) */}
+              <BiometricToggle
+                enabled={useBiometrics && isLockEnabled}
+                lockEnabled={isLockEnabled}
+                onChange={(enabled, credentialId) => {
+                  setUseBiometrics(enabled);
+                  setBiometricCredentialId(credentialId);
+                }}
+              />
 
               {securityMessage && (
                 <div className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 ${

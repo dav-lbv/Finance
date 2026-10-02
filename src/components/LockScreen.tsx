@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Lock, Unlock, Eye, EyeOff, Mail, AlertCircle, ScanFace, Fingerprint, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Lock, Unlock, Eye, EyeOff, KeyRound, AlertCircle, ScanFace } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { UserProfile, SecuritySettings } from '../types';
-import { ResetPasswordModal } from './ResetPasswordModal';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
+import { hashPassword, isHashed, verifyPassword } from '../utils/crypto';
+import { authenticateBiometric } from '../utils/biometrics';
 import { DEFAULT_AVATAR } from '../utils/avatars';
 
 interface LockScreenProps {
@@ -9,6 +12,8 @@ interface LockScreenProps {
   security: SecuritySettings;
   onUnlock: () => void;
   onUpdateSecurity: (newSecurity: SecuritySettings) => void;
+  /** Efface toutes les données (mot de passe oublié) */
+  onEraseEverything: () => void;
 }
 
 export const LockScreen: React.FC<LockScreenProps> = ({
@@ -16,48 +21,61 @@ export const LockScreen: React.FC<LockScreenProps> = ({
   security,
   onUnlock,
   onUpdateSecurity,
+  onEraseEverything,
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isBiometricScanning, setIsBiometricScanning] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   const fallbackAvatar = DEFAULT_AVATAR;
   const avatarImage = user.avatarUrl || fallbackAvatar;
 
-  const handleAttemptUnlock = (e: React.FormEvent) => {
+  const handleAttemptUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
       setError('Veuillez saisir votre mot de passe.');
       return;
     }
 
-    if (password === security.passwordHash) {
+    setIsChecking(true);
+    try {
+      const ok = await verifyPassword(password, security.passwordHash);
+      if (!ok) {
+        setError('Mot de passe incorrect.');
+        return;
+      }
+      // Ancien format (texte brut) : on le remplace par un hachage dès la première connexion réussie
+      if (!isHashed(security.passwordHash)) {
+        onUpdateSecurity({ ...security, passwordHash: await hashPassword(password) });
+      }
       setError('');
       onUnlock();
-    } else {
-      setError('Mot de passe incorrect. Réessayez ou utilisez "Mot de passe oublié ?".');
+    } catch {
+      setError('Vérification impossible sur cet appareil.');
+    } finally {
+      setIsChecking(false);
     }
   };
 
-  const handleBiometricUnlock = () => {
+  const handleBiometricUnlock = async () => {
     setIsBiometricScanning(true);
     setError('');
-    setTimeout(() => {
-      setIsBiometricScanning(false);
-      onUnlock();
-    }, 700);
+    const result = await authenticateBiometric('Déverrouiller Mon_Kanda', security.biometricCredentialId);
+    setIsBiometricScanning(false);
+    if (result.ok) onUnlock();
+    else if (!result.cancelled) setError(result.error || 'Authentification biométrique échouée.');
   };
 
-  const handlePasswordResetSuccess = (newPassword: string) => {
-    onUpdateSecurity({
-      ...security,
-      isLockEnabled: true,
-      passwordHash: newPassword,
-    });
-    onUnlock();
-  };
+  // En application native, la demande Face ID / empreinte s'affiche dès l'ouverture
+  useEffect(() => {
+    if (security.useBiometrics && Capacitor.isNativePlatform()) {
+      void handleBiometricUnlock();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-app/98 backdrop-blur-2xl animate-fadeIn">
@@ -87,9 +105,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({
           />
           <span className="text-xs font-bold text-fg">
             {user.fullName || 'Utilisateur'}
-          </span>
-          <span className="text-[10px] text-fg-muted">
-            ({user.email})
           </span>
         </div>
 
@@ -129,7 +144,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
               className="w-full py-3 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-sm shadow-[0_0_20px_rgba(var(--brand-rgb),0.35)] transition-all duration-150 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Unlock className="w-4 h-4 stroke-[2.5]" />
-              <span>Déverrouiller avec le mot de passe</span>
+              <span>{isChecking ? 'Vérification…' : 'Déverrouiller avec le mot de passe'}</span>
             </button>
 
             {/* Bouton de déverrouillage biométrique */}
@@ -143,12 +158,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({
                 {isBiometricScanning ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin"></span>
-                    <span>Scan biométrique en cours...</span>
+                    <span>Vérification en cours...</span>
                   </>
                 ) : (
                   <>
                     <ScanFace className="w-4 h-4" />
-                    <span>Déverrouiller avec Face ID / Empreinte</span>
+                    <span>Déverrouiller avec la biométrie</span>
                   </>
                 )}
               </button>
@@ -161,22 +176,22 @@ export const LockScreen: React.FC<LockScreenProps> = ({
           <button
             type="button"
             onClick={() => setIsResetModalOpen(true)}
-            className="text-xs font-bold text-fg-muted hover:text-brand transition-colors inline-flex items-center gap-1.5"
+            className="text-xs font-bold text-fg-muted hover:text-fg transition-colors inline-flex items-center gap-1.5 cursor-pointer py-2"
           >
-            <Mail className="w-3.5 h-3.5" />
+            <KeyRound className="w-3.5 h-3.5" />
             <span>Mot de passe oublié ?</span>
           </button>
-          <p className="text-[11px] text-fg-muted mt-0.5">
-            Réinitialisation strictement sur <strong className="text-fg-2">{user.email}</strong>
-          </p>
         </div>
       </div>
 
-      <ResetPasswordModal
+      <ForgotPasswordModal
         isOpen={isResetModalOpen}
+        biometricsEnabled={!!security.useBiometrics}
         onClose={() => setIsResetModalOpen(false)}
-        user={user}
-        onPasswordResetSuccess={handlePasswordResetSuccess}
+        onEraseEverything={() => {
+          setIsResetModalOpen(false);
+          onEraseEverything();
+        }}
       />
     </div>
   );

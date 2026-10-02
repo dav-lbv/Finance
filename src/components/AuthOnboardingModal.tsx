@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { UserProfile, SecuritySettings } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { BiometricToggle } from './BiometricToggle';
+import { hashPassword } from '../utils/crypto';
 import { formatCurrency } from '../utils/date';
 import { ANIMAL_AVATARS, DEFAULT_AVATAR } from '../utils/avatars';
 
@@ -70,9 +72,10 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
 
   // Security & Lock state
   const [isLockEnabled, setIsLockEnabled] = useState(currentSecurity.isLockEnabled || false);
-  const [password, setPassword] = useState(currentSecurity.passwordHash || '');
-  const [confirmPassword, setConfirmPassword] = useState(currentSecurity.passwordHash || '');
-  const [useBiometrics, setUseBiometrics] = useState(currentSecurity.useBiometrics ?? true);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [useBiometrics, setUseBiometrics] = useState(currentSecurity.useBiometrics ?? false);
+  const [biometricCredentialId, setBiometricCredentialId] = useState(currentSecurity.biometricCredentialId);
   const [biometricType, setBiometricType] = useState<'faceid' | 'fingerprint' | 'both'>('both');
   const [securityError, setSecurityError] = useState('');
 
@@ -125,7 +128,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   };
 
   // Final Complete
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     const updatedUser: UserProfile = {
       ...currentUser,
       firstName: firstName.trim(),
@@ -144,8 +147,9 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
     const updatedSecurity: SecuritySettings = {
       ...currentSecurity,
       isLockEnabled,
-      passwordHash: isLockEnabled ? password : '',
-      useBiometrics,
+      passwordHash: isLockEnabled ? (password ? await hashPassword(password) : currentSecurity.passwordHash) : '',
+      useBiometrics: isLockEnabled && useBiometrics,
+      biometricCredentialId: isLockEnabled && useBiometrics ? biometricCredentialId : undefined,
       biometricType,
     };
 
@@ -709,32 +713,15 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   </div>
                 )}
 
-                {/* Toggle Face ID / Empreinte */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-2 border border-line-strong">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-success/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                      <ScanFace className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-extrabold text-fg block">
-                        Déverrouillage biométrique (Face ID & Empreinte)
-                      </span>
-                      <span className="text-[11px] text-fg-muted">
-                        Authentification instantanée via capteur biométrique
-                      </span>
-                    </div>
-                  </div>
-
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={useBiometrics}
-                      onChange={(e) => setUseBiometrics(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-surface-3 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
-                  </label>
-                </div>
+                {/* Déverrouillage biométrique (demande l'autorisation au système) */}
+                <BiometricToggle
+                  enabled={useBiometrics && isLockEnabled}
+                  lockEnabled={isLockEnabled}
+                  onChange={(enabled, credentialId) => {
+                    setUseBiometrics(enabled);
+                    setBiometricCredentialId(credentialId);
+                  }}
+                />
 
                 {securityError && (
                   <p className="text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl">

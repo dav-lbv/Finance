@@ -1,11 +1,12 @@
 import { AppData, Expense, UserProfile, SecuritySettings } from '../types';
 import { DEFAULT_AVATAR } from './avatars';
+import { Capacitor } from '@capacitor/core';
+import { LOCAL_STORAGE_KEY, StorageBackend, createBackend } from '../db/backends';
 
-// v3 : base vierge (les anciennes données de démonstration v2 sont abandonnées)
-const STORAGE_KEY = 'monsalaire_app_data_v3';
+/** Anciennes clés de stockage local (jeu de test v2) : supprimées au démarrage. */
 const LEGACY_STORAGE_KEYS = ['monsalaire_app_data_v2_fcfa'];
 
-// Données initiales : application vierge, l'assistant de configuration se charge du profil
+// Application vierge : l'assistant de configuration se charge du profil
 export function getDefaultData(): AppData {
   const defaultUser: UserProfile = {
     fullName: '',
@@ -21,7 +22,7 @@ export function getDefaultData(): AppData {
   const defaultSecurity: SecuritySettings = {
     isLockEnabled: false,
     passwordHash: '',
-    useBiometrics: true,
+    useBiometrics: false,
     biometricType: 'both',
   };
 
@@ -37,43 +38,99 @@ export function getDefaultData(): AppData {
   };
 }
 
-export function loadAppData(): AppData {
-  try {
-    // Purge des anciennes données de démonstration
-    LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+/** Complète d'éventuels champs manquants (données écrites par une ancienne version). */
+function normalize(data: AppData): AppData {
+  const defaults = getDefaultData();
+  const security = { ...defaults.security, ...data.security };
+  // Anciennes versions : la biométrie était « activée » par défaut sans jamais avoir été autorisée.
+  // Sur le web, elle n'est valide que si une clé a été enregistrée.
+  if (!Capacitor.isNativePlatform() && security.useBiometrics && !security.biometricCredentialId) {
+    security.useBiometrics = false;
+  }
+  return {
+    ...data,
+    user: { ...defaults.user, ...data.user },
+    security,
+    monthlyBudgets: data.monthlyBudgets || {},
+    expenses: data.expenses || {},
+    savings: data.savings || [],
+    savingsProjects: data.savingsProjects || [],
+    expensePresets: data.expensePresets || [],
+    projectCategories: data.projectCategories || [],
+  };
+}
 
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const initial = getDefaultData();
-      saveAppData(initial);
-      return initial;
+// ------------------------------------------------------------------
+// Cache mémoire + écriture asynchrone en base
+// ------------------------------------------------------------------
+let backend: StorageBackend | null = null;
+let cache: AppData = getDefaultData();
+let writing = false;
+let dirty = false;
+
+export function getStorageKind(): string {
+  return backend?.kind ?? 'none';
+}
+
+/**
+ * À appeler UNE fois avant d'afficher l'application : ouvre la base (SQLite sur
+ * iOS / Android, IndexedDB sur le web) et charge les données en mémoire.
+ */
+export async function initStorage(): Promise<AppData> {
+  LEGACY_STORAGE_KEYS.forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* ignoré */
     }
-    const data: AppData = JSON.parse(raw);
-    const defaults = getDefaultData();
+  });
 
-    data.user = { ...defaults.user, ...data.user };
-    data.security = { ...defaults.security, ...data.security };
-    data.monthlyBudgets = data.monthlyBudgets || {};
-    data.expenses = data.expenses || {};
-    data.savings = data.savings || [];
-    data.savingsProjects = data.savingsProjects || [];
-    data.expensePresets = data.expensePresets || [];
-    data.projectCategories = data.projectCategories || [];
+  backend = await createBackend();
+  let stored = await backend.load();
 
-    return data;
+  // Migration web : les données de l'ancienne version étaient dans localStorage
+  if (!stored && backend.kind !== 'localstorage') {
+    try {
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (raw) {
+        stored = JSON.parse(raw) as AppData;
+        await backend.save(normalize(stored));
+        localStorage.removeItem(LOCAL_STORAGE_KEY); // plus de doublon des données financières
+      }
+    } catch (err) {
+      console.error('Migration depuis localStorage impossible', err);
+    }
+  }
+
+  cache = stored ? normalize(stored) : getDefaultData();
+  if (!stored) await backend.save(cache);
+  return cache;
+}
+
+export function loadAppData(): AppData {
+  return cache;
+}
+
+async function flush(): Promise<void> {
+  if (writing || !backend) return;
+  writing = true;
+  try {
+    while (dirty) {
+      dirty = false;
+      await backend.save(cache);
+    }
   } catch (err) {
-    console.error('Erreur chargement données', err);
-    return getDefaultData();
+    console.error('Erreur sauvegarde données', err);
+  } finally {
+    writing = false;
   }
 }
 
 export function saveAppData(data: AppData): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    window.dispatchEvent(new CustomEvent('monsalaire_data_changed'));
-  } catch (err) {
-    console.error('Erreur sauvegarde données', err);
-  }
+  cache = data;
+  dirty = true;
+  void flush();
+  window.dispatchEvent(new CustomEvent('monsalaire_data_changed'));
 }
 
 /**

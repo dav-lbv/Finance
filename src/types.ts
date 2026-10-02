@@ -66,6 +66,8 @@ export interface SecuritySettings {
   lastLockedAt?: number;
   useBiometrics?: boolean;
   biometricType?: 'faceid' | 'fingerprint' | 'both';
+  /** Identifiant de la clé WebAuthn (PWA) ; vide en application native */
+  biometricCredentialId?: string;
 }
 
 export interface SavingsProject {

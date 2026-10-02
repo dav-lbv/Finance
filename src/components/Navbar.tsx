@@ -185,9 +185,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <div className="px-4 py-2 border-b border-line">
                           <p className="text-xs font-black text-fg truncate">{user.fullName}</p>
                           <p className="text-[10px] text-fg-muted truncate">{user.email}</p>
-                          <span className="inline-block mt-1 text-[9px] font-black text-brand bg-brand/15 px-2 py-0.2 rounded-full border border-brand/30">
-                            Compte vérifié
-                          </span>
                         </div>
 
                         <button
