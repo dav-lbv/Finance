@@ -410,7 +410,7 @@ export default function App() {
   const currentTotalSavings = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
-    <div className="min-h-screen bg-[#080a08] text-white flex flex-col selection:bg-[#ccff00] selection:text-black">
+    <div className="min-h-screen bg-app text-fg flex flex-col selection:bg-brand selection:text-brand-fg">
       {/* Écran de verrouillage si activé */}
       {isLocked && data.security.isLockEnabled && (
         <LockScreen
@@ -550,7 +550,7 @@ export default function App() {
       />
 
       {/* Footer épuré (masqué sur smartphone pour privilégier la bottom nav) */}
-      <footer className="hidden md:block border-t border-[#171e19] bg-[#090b09] py-4 text-center text-xs text-slate-500">
+      <footer className="hidden md:block border-t border-line bg-app py-4 text-center text-xs text-fg-muted">
         <p>GesFin • Gestion financière, dépenses & épargne</p>
       </footer>
     </div>

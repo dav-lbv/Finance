@@ -106,38 +106,38 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
   };
 
   return (
-    <div className="bg-[#121613] rounded-3xl p-5 sm:p-6 shadow-sm border border-[#232f26] space-y-4">
+    <div className="bg-surface rounded-3xl p-5 sm:p-6 shadow-sm border border-line space-y-4">
       
       {/* En-tête du graphique avec switcher Courbe / Barres */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1c241e]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2c3a2f]">
+          <div className="w-10 h-10 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
             <TrendingUp className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-extrabold text-white">
+              <h3 className="text-base font-extrabold text-fg">
                 Tendance des dépenses mensuelles
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-brand/15 text-brand border border-brand/30">
                 6 mois
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-fg-muted">
               Courbe basée sur le montant total dépensé chaque mois
             </p>
           </div>
         </div>
 
         {/* Switcher Courbe / Barres */}
-        <div className="flex items-center gap-1 bg-[#18201a] p-1 rounded-full border border-[#263529] self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-full border border-line-strong self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setChartType('curve')}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
               chartType === 'curve'
-                ? 'bg-[#ccff00] text-black shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-brand text-brand-fg shadow-sm'
+                : 'text-fg-muted hover:text-fg'
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -148,8 +148,8 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
             onClick={() => setChartType('bars')}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
               chartType === 'bars'
-                ? 'bg-[#ccff00] text-black shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-brand text-brand-fg shadow-sm'
+                : 'text-fg-muted hover:text-fg'
             }`}
           >
             <BarChart2 className="w-3.5 h-3.5" />
@@ -161,32 +161,32 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
       {/* Résumé clair du montant et libellé de dépenses */}
       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pt-1">
         <div>
-          <span className="text-xs font-medium text-slate-400 block">
+          <span className="text-xs font-medium text-fg-muted block">
             {activePoint?.data.fullLabel} :
           </span>
           <div className="flex items-baseline gap-2 mt-0.5">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
               {formatCurrency(activePoint?.data.total || 0, currency)}
             </span>
-            <span className="text-xs text-slate-400 font-semibold">
+            <span className="text-xs text-fg-muted font-semibold">
               ({activePoint?.data.count || 0} dépense{(activePoint?.data.count || 0) > 1 ? 's' : ''})
             </span>
           </div>
         </div>
 
         <div className="self-start sm:self-auto sm:text-right">
-          <span className="text-[11px] text-slate-400 block">Évolution vs mois précédent</span>
+          <span className="text-[11px] text-fg-muted block">Évolution vs mois précédent</span>
           <div className="flex items-center sm:justify-end gap-1.5 mt-0.5">
             {diffPercent > 0 ? (
               <span className="inline-flex items-center text-xs font-black text-rose-400 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/25">
                 +{diffPercent}%
               </span>
             ) : diffPercent < 0 ? (
-              <span className="inline-flex items-center text-xs font-black text-[#ccff00] bg-[#ccff00]/15 px-2.5 py-0.5 rounded-full border border-[#ccff00]/25">
+              <span className="inline-flex items-center text-xs font-black text-brand bg-brand/15 px-2.5 py-0.5 rounded-full border border-brand/25">
                 {diffPercent}%
               </span>
             ) : (
-              <span className="text-xs font-bold text-slate-400">Stable (0%)</span>
+              <span className="text-xs font-bold text-fg-muted">Stable (0%)</span>
             )}
           </div>
         </div>
@@ -203,9 +203,9 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
               <defs>
                 {/* Dégradé sous la courbe néon */}
                 <linearGradient id="neonAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ccff00" stopOpacity="0.28" />
-                  <stop offset="65%" stopColor="#10b981" stopOpacity="0.08" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="var(--brand)" stopOpacity="0.28" />
+                  <stop offset="65%" stopColor="var(--brand)" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="var(--brand)" stopOpacity="0.0" />
                 </linearGradient>
 
                 {/* Filtre de glow néon pour la courbe */}
@@ -219,14 +219,14 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
               </defs>
 
               {/* Lignes de repère horizontales discrètes avec graduation des chiffres */}
-              <g className="text-[10px] font-bold fill-slate-500">
+              <g className="text-[10px] font-bold fill-fg-muted">
                 {/* Ligne Max */}
                 <line 
                   x1={paddingLeft} 
                   y1={paddingTop} 
                   x2={svgWidth - paddingRight} 
                   y2={paddingTop} 
-                  stroke="#1c251e" 
+                  stroke="var(--line)" 
                   strokeDasharray="4 4" 
                 />
                 <text x={paddingLeft - 8} y={paddingTop + 3} textAnchor="end">
@@ -239,7 +239,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                   y1={paddingTop + usableHeight / 2} 
                   x2={svgWidth - paddingRight} 
                   y2={paddingTop + usableHeight / 2} 
-                  stroke="#1c251e" 
+                  stroke="var(--line)" 
                   strokeDasharray="4 4" 
                 />
                 <text x={paddingLeft - 8} y={paddingTop + usableHeight / 2 + 3} textAnchor="end">
@@ -252,7 +252,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                   y1={svgHeight - paddingBottom} 
                   x2={svgWidth - paddingRight} 
                   y2={svgHeight - paddingBottom} 
-                  stroke="#232f26" 
+                  stroke="var(--line-strong)" 
                 />
                 <text x={paddingLeft - 8} y={svgHeight - paddingBottom + 3} textAnchor="end">
                   0
@@ -266,7 +266,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
               <path 
                 d={linePath} 
                 fill="none" 
-                stroke="#ccff00" 
+                stroke="var(--brand)" 
                 strokeWidth="3.2" 
                 strokeLinecap="round"
                 filter="url(#neonGlow)"
@@ -279,7 +279,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                   y1={activePoint.y}
                   x2={activePoint.x}
                   y2={svgHeight - paddingBottom}
-                  stroke="#ccff00"
+                  stroke="var(--brand)"
                   strokeWidth="1.5"
                   strokeDasharray="3 3"
                 />
@@ -306,8 +306,8 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       cx={pt.x}
                       cy={pt.y}
                       r={isActive ? "7" : "5"}
-                      fill={isActive ? "#ccff00" : "#121613"}
-                      stroke="#ccff00"
+                      fill={isActive ? "var(--brand)" : "var(--surface-solid)"}
+                      stroke="var(--brand)"
                       strokeWidth={isActive ? "2.5" : "2"}
                       className="transition-all duration-150"
                     />
@@ -317,7 +317,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       cx={pt.x}
                       cy={pt.y}
                       r={isActive ? "3" : "2"}
-                      fill={isActive ? "#000000" : "#ccff00"}
+                      fill={isActive ? "var(--brand-fg)" : "var(--brand)"}
                     />
 
                     {/* Chiffre de dépense affiché au-dessus du point (quand inactif) */}
@@ -326,7 +326,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                         x={pt.x}
                         y={Math.max(16, pt.y - 10)}
                         textAnchor="middle"
-                        className="text-[9.5px] font-bold fill-slate-400"
+                        className="text-[9.5px] font-bold fill-fg-muted"
                       >
                         {formatScaleValue(pt.data.total)}
                       </text>
@@ -338,7 +338,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       y={svgHeight - 14}
                       textAnchor="middle"
                       className={`text-[11px] font-extrabold ${
-                        isActive ? 'fill-[#ccff00]' : 'fill-slate-300'
+                        isActive ? 'fill-brand' : 'fill-fg-muted'
                       }`}
                     >
                       {pt.data.shortLabel}
@@ -367,8 +367,8 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       width={tooltipWidth}
                       height={tooltipHeight}
                       rx="12"
-                      fill="#18221a"
-                      stroke="#ccff00"
+                      fill="var(--surface-3)"
+                      stroke="var(--brand)"
                       strokeWidth="1.2"
                       className="shadow-lg"
                     />
@@ -376,7 +376,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       x="0"
                       y={-tooltipHeight / 2 + 4}
                       textAnchor="middle"
-                      fill="#ccff00"
+                      fill="var(--brand)"
                       className="text-[10px] font-black tracking-tight"
                     >
                       {formatCurrency(activePoint.data.total, currency)}
@@ -406,18 +406,18 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                   >
                     {/* Chiffre toujours lisible au-dessus de la barre */}
                     <span className={`text-[10px] font-black mb-1.5 whitespace-nowrap ${
-                      isCurrent ? 'text-[#ccff00]' : 'text-slate-300'
+                      isCurrent ? 'text-brand' : 'text-fg-2'
                     }`}>
                       {formatScaleValue(item.total)}
                     </span>
 
                     {/* Barre néon */}
-                    <div className="w-full max-w-[42px] bg-[#161c17] rounded-2xl h-full flex items-end p-1 border border-[#232f26]">
+                    <div className="w-full max-w-[42px] bg-surface-2 rounded-2xl h-full flex items-end p-1 border border-line">
                       <div 
                         className={`w-full rounded-xl transition-all duration-300 ${
                           isCurrent
-                            ? 'bg-[#ccff00] shadow-[0_0_15px_rgba(204,255,0,0.4)]'
-                            : 'bg-[#2a3a2d] hover:bg-[#ccff00]'
+                            ? 'bg-brand shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)]'
+                            : 'bg-surface-3 hover:bg-brand'
                         }`}
                         style={{ height: `${heightPercent}%` }}
                       />
@@ -425,7 +425,7 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
 
                     {/* Libellé du mois */}
                     <span className={`text-[11px] font-bold mt-2 ${
-                      isCurrent ? 'text-[#ccff00]' : 'text-slate-400'
+                      isCurrent ? 'text-brand' : 'text-fg-muted'
                     }`}>
                       {item.shortLabel}
                     </span>

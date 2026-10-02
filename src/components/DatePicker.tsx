@@ -51,7 +51,7 @@ export function DatePicker({
   return (
     <div className={`space-y-1.5 ${className}`}>
       {label && (
-        <label className="block text-[10px] font-bold uppercase text-slate-300 mb-1">
+        <label className="block text-[10px] font-bold uppercase text-fg-2 mb-1">
           {label}
         </label>
       )}
@@ -63,20 +63,20 @@ export function DatePicker({
               variant="outline"
               type="button"
               data-empty={!date}
-              className="w-full justify-between text-left font-normal bg-[#161c17] hover:bg-[#1a231b] border-[#28362b] text-white hover:text-white rounded-2xl h-10 px-3.5 focus-visible:border-[#ccff00] focus-visible:ring-[#ccff00]/30 cursor-pointer shadow-sm data-[empty=true]:text-muted-foreground"
+              className="w-full justify-between text-left font-normal bg-surface-2 hover:bg-surface-2 border-line-strong text-fg hover:text-fg rounded-2xl h-10 px-3.5 focus-visible:border-brand focus-visible:ring-brand/30 cursor-pointer shadow-sm data-[empty=true]:text-muted-foreground"
             >
               <span className="flex items-center gap-2 truncate">
-                <CalendarIcon className="w-3.5 h-3.5 text-[#ccff00] shrink-0" />
-                <span className={date ? "text-white font-medium" : "text-slate-400"}>
+                <CalendarIcon className="w-3.5 h-3.5 text-brand shrink-0" />
+                <span className={date ? "text-fg font-medium" : "text-fg-muted"}>
                   {date ? format(date, "d MMMM yyyy", { locale: fr }) : <span>{placeholder}</span>}
                 </span>
               </span>
-              <ChevronDownIcon data-icon="inline-end" className="w-4 h-4 text-slate-400 shrink-0" />
+              <ChevronDownIcon data-icon="inline-end" className="w-4 h-4 text-fg-muted shrink-0" />
             </Button>
           }
         />
         <PopoverContent
-          className="w-auto p-0 bg-[#121613] border-[#29382c] text-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+          className="w-auto p-0 bg-surface border-line-strong text-fg rounded-2xl shadow-2xl z-50 overflow-hidden"
           align="start"
         >
           <Calendar
@@ -85,7 +85,7 @@ export function DatePicker({
             onSelect={handleSelect}
             defaultMonth={date || new Date()}
             locale={fr}
-            className="rounded-2xl bg-[#121613] text-white p-3"
+            className="rounded-2xl bg-surface text-fg p-3"
           />
         </PopoverContent>
       </Popover>

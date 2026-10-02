@@ -64,7 +64,7 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {label && (
-        <label className="block text-[10px] font-bold uppercase text-slate-300 mb-1 tracking-wider">
+        <label className="block text-[10px] font-bold uppercase text-fg-2 mb-1 tracking-wider">
           {label}
         </label>
       )}
@@ -73,10 +73,10 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full bg-[#18201a] border text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none ${
+        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full bg-surface-2 border text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none ${
           isOpen
-            ? 'border-[#ccff00] ring-2 ring-[#ccff00]/25 bg-[#1b251e]'
-            : 'border-[#28362b] hover:border-[#384c3d] hover:bg-[#1c261e]'
+            ? 'border-brand ring-2 ring-brand/25 bg-surface-2'
+            : 'border-line-strong hover:border-line-strong hover:bg-surface-2'
         } ${triggerClassName}`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -85,18 +85,18 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
           {selectedOption?.icon && (
             <span className="shrink-0">{selectedOption.icon}</span>
           )}
-          <span className={`truncate ${selectedOption ? 'text-white font-medium' : 'text-slate-400'}`}>
+          <span className={`truncate ${selectedOption ? 'text-fg font-medium' : 'text-fg-muted'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           {selectedOption?.badge && (
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30 shrink-0">
+            <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-brand/15 text-brand border border-brand/30 shrink-0">
               {selectedOption.badge}
             </span>
           )}
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[#ccff00]' : ''
+          className={`w-4 h-4 text-fg-muted shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-brand' : ''
           }`}
         />
       </button>
@@ -104,7 +104,7 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
       {/* Popover Content */}
       {isOpen && (
         <div 
-          className="absolute z-50 left-0 right-0 mt-1.5 p-1.5 rounded-2xl bg-[#121713] border border-[#26372a] shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-fadeIn max-h-64 overflow-y-auto no-scrollbar"
+          className="absolute z-50 left-0 right-0 mt-1.5 p-1.5 rounded-2xl bg-surface border border-line-strong shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-fadeIn max-h-64 overflow-y-auto no-scrollbar"
           role="listbox"
         >
           <div className="space-y-0.5">
@@ -123,8 +123,8 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
                   aria-selected={isSelected}
                   className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm transition-all cursor-pointer text-left ${
                     isSelected
-                      ? 'bg-[#1a261c] text-[#ccff00] font-bold shadow-sm'
-                      : 'text-slate-300 hover:bg-[#172019] hover:text-white font-medium'
+                      ? 'bg-surface-2 text-brand font-bold shadow-sm'
+                      : 'text-fg-2 hover:bg-surface-2 hover:text-fg font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">
@@ -133,19 +133,19 @@ export const FintechSelect: React.FC<FintechSelectProps> = ({
                       <div className="flex items-center gap-1.5">
                         <span className="truncate">{opt.label}</span>
                         {opt.badge && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30 shrink-0">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-brand/15 text-brand border border-brand/30 shrink-0">
                             {opt.badge}
                           </span>
                         )}
                       </div>
                       {opt.description && (
-                        <p className="text-[10px] text-slate-400 truncate">{opt.description}</p>
+                        <p className="text-[10px] text-fg-muted truncate">{opt.description}</p>
                       )}
                     </div>
                   </div>
 
                   {isSelected && (
-                    <Check className="w-4 h-4 text-[#ccff00] shrink-0 stroke-[2.5]" />
+                    <Check className="w-4 h-4 text-brand shrink-0 stroke-[2.5]" />
                   )}
                 </button>
               );

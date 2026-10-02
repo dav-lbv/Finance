@@ -138,10 +138,10 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="bg-[#121613] rounded-3xl max-w-md w-full p-5 sm:p-7 shadow-2xl border border-[#232f26] text-white relative my-auto">
+      <div className="bg-surface rounded-3xl max-w-md w-full p-5 sm:p-7 shadow-2xl border border-line text-fg relative my-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-[#1a221b] transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
           title="Fermer"
         >
           <X className="w-5 h-5" />
@@ -149,18 +149,18 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
 
         {/* Titre & Icône */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2c3a2f] shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong shrink-0">
             {savingsMode === 'monthly' ? (
               <PiggyBank className="w-5 h-5 stroke-[2.2]" />
             ) : (
-              <Target className="w-5 h-5 text-[#ccff00] stroke-[2.2]" />
+              <Target className="w-5 h-5 text-brand stroke-[2.2]" />
             )}
           </div>
           <div>
-            <h2 className="text-lg font-black text-white tracking-tight">
+            <h2 className="text-lg font-black text-fg tracking-tight">
               Saisir une Épargne
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-fg-muted">
               Choisissez d'effectuer un versement ou d'alimenter un projet
             </p>
           </div>
@@ -169,7 +169,7 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
         {/* ============================================================== */}
         {/* LE CHOIX DEMANDÉ : D'UN CÔTÉ "VERSEMENT" ET DE L'AUTRE "PROJETS"*/}
         {/* ============================================================== */}
-        <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#0d120e] rounded-2xl border border-[#1e2a20] mb-5">
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-surface rounded-2xl border border-line mb-5">
           <button
             type="button"
             onClick={() => {
@@ -178,8 +178,8 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
             }}
             className={`py-2.5 px-3 rounded-xl transition-all cursor-pointer text-xs font-black flex items-center justify-center gap-2 ${
               savingsMode === 'monthly'
-                ? 'bg-[#ccff00] text-black shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-[#151c16]'
+                ? 'bg-brand text-brand-fg shadow-md'
+                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             }`}
           >
             <span>Versement</span>
@@ -193,16 +193,16 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
             }}
             className={`py-2.5 px-3 rounded-xl transition-all cursor-pointer text-xs font-black flex items-center justify-center gap-2 ${
               savingsMode === 'project'
-                ? 'bg-[#ccff00] text-black shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-[#151c16]'
+                ? 'bg-brand text-brand-fg shadow-md'
+                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             }`}
           >
             <span>Projets</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[9px] font-black ${
                 savingsMode === 'project'
-                  ? 'bg-black text-[#ccff00]'
-                  : 'bg-[#ccff00]/20 text-[#ccff00]'
+                  ? 'bg-brand text-brand-fg'
+                  : 'bg-brand/20 text-brand'
               }`}
             >
               {activeProjects.length}
@@ -218,12 +218,12 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
           {savingsMode === 'project' && (
             <div className="space-y-3 animate-fadeIn">
               {activeProjects.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-[#171e18] border border-[#253628] text-center">
-                  <Target className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                  <p className="text-xs font-bold text-white">
+                <div className="p-4 rounded-2xl bg-surface-2 border border-line-strong text-center">
+                  <Target className="w-8 h-8 text-fg-muted mx-auto mb-2" />
+                  <p className="text-xs font-bold text-fg">
                     Aucun projet en cours pour l'instant
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1 mb-3">
+                  <p className="text-[11px] text-fg-muted mt-1 mb-3">
                     Créez un premier projet avec un objectif (ordinateur, voyage...) pour l'alimenter.
                   </p>
                   {onOpenCreateProject && (
@@ -233,7 +233,7 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
                         onClose();
                         onOpenCreateProject();
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#ccff00] text-black font-extrabold text-xs shadow-md hover:bg-[#d9ff33]"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand text-brand-fg font-extrabold text-xs shadow-md hover:bg-brand-hover"
                     >
                       <Plus className="w-3.5 h-3.5 stroke-[3]" />
                       <span>Créer un projet</span>
@@ -256,27 +256,27 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
 
                   {/* Fiche récapitulative du projet choisi */}
                   {selectedProject && (
-                    <div className="mt-2.5 p-3 rounded-2xl bg-[#161e18] border border-[#273a2b]">
+                    <div className="mt-2.5 p-3 rounded-2xl bg-surface-2 border border-line-strong">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-black text-white truncate">{selectedProject.title}</span>
-                        <span className="text-[10px] font-black text-[#ccff00] bg-[#0f1510] px-2 py-0.5 rounded-full border border-[#273a2b]">
+                        <span className="font-black text-fg truncate">{selectedProject.title}</span>
+                        <span className="text-[10px] font-black text-brand bg-surface px-2 py-0.5 rounded-full border border-line-strong">
                           {currentPercentage}% atteint
                         </span>
                       </div>
                       
-                      <div className="w-full bg-[#0d120e] h-2 rounded-full overflow-hidden my-1.5 border border-[#1e2a20]">
+                      <div className="w-full bg-surface h-2 rounded-full overflow-hidden my-1.5 border border-line">
                         <div
-                          className="h-full bg-gradient-to-r from-[#ccff00] to-[#10b981] transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-fg-muted to-brand transition-all duration-300"
                           style={{ width: `${currentPercentage}%` }}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                      <div className="flex items-center justify-between text-[10px] text-fg-muted">
                         <span>Actuel : {formatCurrency(selectedProject.currentAmount, currency)}</span>
                         <span>Objectif : {formatCurrency(selectedProject.targetAmount, currency)}</span>
                       </div>
-                      <div className="text-[10px] text-slate-300 mt-1">
-                        Reste à verser : <strong className="text-white">{formatCurrency(remainingBefore, currency)}</strong>
+                      <div className="text-[10px] text-fg-2 mt-1">
+                        Reste à verser : <strong className="text-fg">{formatCurrency(remainingBefore, currency)}</strong>
                       </div>
                     </div>
                   )}
@@ -289,7 +289,7 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
           {/* MONTANT                                                    */}
           {/* ========================================================== */}
           <div>
-            <label className="block text-[10px] font-bold uppercase text-slate-300 mb-1">
+            <label className="block text-[10px] font-bold uppercase text-fg-2 mb-1">
               Montant du versement ({currency})
             </label>
             <input
@@ -300,7 +300,7 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
               placeholder={currency === 'FCFA' || currency === 'CFA' ? 'Ex: 50000' : 'Ex: 400'}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-full bg-[#18201a] border border-[#28362b] text-base font-black text-white focus:outline-none focus:border-[#ccff00]"
+              className="w-full px-4 py-2.5 rounded-full bg-surface-2 border border-line-strong text-base font-black text-fg focus:outline-none focus:border-brand"
               autoFocus
             />
           </div>
@@ -309,41 +309,41 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
           {savingsMode === 'project' && selectedProject && parsedAmount > 0 && (
             <div className={`p-3 rounded-2xl border transition-all animate-fadeIn ${
               isGoalReachedWithThisDeposit
-                ? 'bg-[#152317] border-[#ccff00] text-white shadow-[0_0_15px_rgba(204,255,0,0.15)]'
-                : 'bg-[#151c16] border-[#253527]'
+                ? 'bg-surface-2 border-brand text-fg shadow-[0_0_15px_rgba(var(--brand-rgb),0.15)]'
+                : 'bg-surface-2 border-line-strong'
             }`}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-slate-300">Nouveau total visé :</span>
-                <span className="font-black text-[#ccff00] text-xs">
+                <span className="font-bold text-fg-2">Nouveau total visé :</span>
+                <span className="font-black text-brand text-xs">
                   {newPercentage}% • {formatCurrency(newProjAmount, currency)} sur {formatCurrency(targetProjAmount, currency)}
                 </span>
               </div>
 
-              <div className="w-full bg-[#0d120e] h-2 rounded-full overflow-hidden my-1 border border-[#1e2a20]">
+              <div className="w-full bg-surface h-2 rounded-full overflow-hidden my-1 border border-line">
                 <div
-                  className="h-full bg-gradient-to-r from-[#ccff00] via-[#10b981] to-[#ccff00] transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-fg-muted via-fg-2 to-brand transition-all duration-300"
                   style={{ width: `${newPercentage}%` }}
                 />
               </div>
 
               {isGoalReachedWithThisDeposit ? (
                 <div className="pt-1 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-[#ccff00]">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-brand">
                     <Sparkles className="w-4 h-4 shrink-0" />
                     <span>Objectif atteint à 100% avec ce versement !</span>
                   </div>
-                  <label className="flex items-center gap-2 text-xs text-white font-bold bg-[#1b2b1d] p-2 rounded-xl border border-[#304834] cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs text-fg font-bold bg-surface-3 p-2 rounded-xl border border-line-strong cursor-pointer">
                     <input
                       type="checkbox"
                       checked={autoCloseIfReached}
                       onChange={(e) => setAutoCloseIfReached(e.target.checked)}
-                      className="accent-[#ccff00] rounded"
+                      className="accent-brand rounded"
                     />
                     <span>Fermer et clôturer ce projet</span>
                   </label>
                 </div>
               ) : (
-                <span className="text-[10px] text-slate-400 block">
+                <span className="text-[10px] text-fg-muted block">
                   Reste après versement : {formatCurrency(Math.max(0, targetProjAmount - newProjAmount), currency)}
                 </span>
               )}
@@ -369,18 +369,18 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#1e2820]">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-full bg-[#1b221d] hover:bg-[#232d26] text-slate-300 text-xs font-semibold"
+              className="px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 text-xs font-semibold"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={savingsMode === 'project' && activeProjects.length === 0}
-              className="px-5 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] disabled:opacity-40 disabled:cursor-not-allowed text-black font-extrabold text-xs shadow-[0_0_15px_rgba(204,255,0,0.3)] flex items-center gap-1.5 transition-all"
+              className="px-5 py-2.5 rounded-full bg-brand hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-brand-fg font-extrabold text-xs shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] flex items-center gap-1.5 transition-all"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>

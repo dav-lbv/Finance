@@ -87,38 +87,38 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#121613] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[#232f26] text-white relative">
+      <div className="bg-surface rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-line text-fg relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-[#1a221b] transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {step === 'request' && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2c3a2f]">
+            <div className="w-12 h-12 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
               <Mail className="w-6 h-6 stroke-[2.2]" />
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-white">
+              <h2 className="text-xl font-black text-fg">
                 Réinitialisation du mot de passe
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Le code sera envoyé <strong className="text-white">strictement à l'e-mail de votre profil</strong> :
+              <p className="text-xs sm:text-sm text-fg-muted mt-1">
+                Le code sera envoyé <strong className="text-fg">strictement à l'e-mail de votre profil</strong> :
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#263529] flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#ccff00] text-black font-black flex items-center justify-center text-xs">
+            <div className="p-3.5 rounded-2xl bg-surface-2 border border-line-strong flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-brand text-brand-fg font-black flex items-center justify-center text-xs">
                 @
               </div>
               <div className="truncate">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                <span className="text-[10px] font-bold text-fg-muted uppercase block">
                   Email vérifié du compte
                 </span>
-                <span className="text-sm font-black text-white truncate block">
+                <span className="text-sm font-black text-fg truncate block">
                   {user.email || 'votre adresse e-mail'}
                 </span>
               </div>
@@ -127,7 +127,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             <button
               onClick={handleSendEmail}
               disabled={isSending}
-              className="w-full py-3 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] disabled:opacity-50 text-black font-extrabold text-xs sm:text-sm shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-full bg-brand hover:bg-brand-hover disabled:opacity-50 text-brand-fg font-extrabold text-xs sm:text-sm shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] transition-all flex items-center justify-center gap-2"
             >
               {isSending ? (
                 <span>Envoi en cours...</span>
@@ -143,38 +143,38 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
         {step === 'verify' && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2c3a2f]">
+            <div className="w-12 h-12 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
               <Inbox className="w-6 h-6 stroke-[2.2]" />
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-white">
+              <h2 className="text-xl font-black text-fg">
                 Code de sécurité transmis
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Envoyé strictement à : <strong className="text-[#ccff00]">{user.email}</strong>.
+              <p className="text-xs sm:text-sm text-fg-muted mt-1">
+                Envoyé strictement à : <strong className="text-brand">{user.email}</strong>.
               </p>
             </div>
 
             {/* Simulation boîte mail */}
-            <div className="p-3.5 rounded-2xl bg-[#0d100e] text-slate-100 border border-[#222e25] space-y-2 text-xs">
-              <div className="flex items-center justify-between pb-1.5 border-b border-[#1b241e] text-[10px] text-slate-400">
+            <div className="p-3.5 rounded-2xl bg-surface text-fg-2 border border-line space-y-2 text-xs">
+              <div className="flex items-center justify-between pb-1.5 border-b border-line text-[10px] text-fg-muted">
                 <span>De: securite@monsalaire-app.com</span>
                 <span>À l'instant</span>
               </div>
-              <div className="font-bold text-white">
+              <div className="font-bold text-fg">
                 Objet : Votre code de réinitialisation MonSalaire
               </div>
-              <div className="flex items-center justify-between bg-[#141a15] p-2.5 rounded-xl border border-[#273429]">
-                <span className="font-mono text-xl font-black text-[#ccff00] tracking-widest">
+              <div className="flex items-center justify-between bg-surface p-2.5 rounded-xl border border-line-strong">
+                <span className="font-mono text-xl font-black text-brand tracking-widest">
                   {generatedOtp}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="px-2.5 py-1 rounded-full bg-[#1e2720] hover:bg-[#27342b] text-white text-[10px] font-bold flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-full bg-surface-3 hover:bg-surface-3 text-fg text-[10px] font-bold flex items-center gap-1"
                 >
-                  {hasCopied ? <Check className="w-3 h-3 text-[#ccff00]" /> : <Copy className="w-3 h-3" />}
+                  {hasCopied ? <Check className="w-3 h-3 text-brand" /> : <Copy className="w-3 h-3" />}
                   <span>{hasCopied ? 'Copié' : 'Copier'}</span>
                 </button>
               </div>
@@ -182,7 +182,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
             <form onSubmit={handleVerifyOtp} className="space-y-3 pt-1">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Saisissez le code à 6 chiffres :
                 </label>
                 <input
@@ -192,7 +192,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                   placeholder="Ex: 849201"
                   value={enteredOtp}
                   onChange={(e) => setEnteredOtp(e.target.value.replace(/\D/g, ''))}
-                  className="w-full text-center tracking-[0.3em] font-mono text-2xl font-black py-2.5 rounded-2xl bg-[#161c17] border border-[#28362b] text-white focus:outline-none focus:border-[#ccff00]"
+                  className="w-full text-center tracking-[0.3em] font-mono text-2xl font-black py-2.5 rounded-2xl bg-surface-2 border border-line-strong text-fg focus:outline-none focus:border-brand"
                   autoFocus
                 />
               </div>
@@ -206,7 +206,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>Vérifier le code</span>
               </button>
@@ -216,22 +216,22 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
         {step === 'new_password' && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2c3a2f]">
+            <div className="w-12 h-12 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
               <KeyRound className="w-6 h-6 stroke-[2.2]" />
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-white">
+              <h2 className="text-xl font-black text-fg">
                 Nouveau mot de passe
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-fg-muted mt-1">
                 Choisissez un nouveau code pour protéger l'application.
               </p>
             </div>
 
             <form onSubmit={handleSetNewPassword} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Nouveau mot de passe
                 </label>
                 <div className="relative">
@@ -241,13 +241,13 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                     placeholder="Au moins 4 caractères"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-full bg-[#161c17] border border-[#28362b] text-white text-xs sm:text-sm focus:outline-none focus:border-[#ccff00]"
+                    className="w-full px-3.5 py-2.5 rounded-full bg-surface-2 border border-line-strong text-fg text-xs sm:text-sm focus:outline-none focus:border-brand"
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -255,7 +255,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Confirmer le mot de passe
                 </label>
                 <input
@@ -264,7 +264,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                   placeholder="Répétez le mot de passe"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-full bg-[#161c17] border border-[#28362b] text-white text-xs sm:text-sm focus:outline-none focus:border-[#ccff00]"
+                  className="w-full px-3.5 py-2.5 rounded-full bg-surface-2 border border-line-strong text-fg text-xs sm:text-sm focus:outline-none focus:border-brand"
                 />
               </div>
 
@@ -277,7 +277,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-md transition-all"
+                className="w-full py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs sm:text-sm shadow-md transition-all"
               >
                 Enregistrer et déverrouiller
               </button>
@@ -287,22 +287,22 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
         {step === 'done' && (
           <div className="space-y-4 text-center py-3">
-            <div className="w-14 h-14 rounded-full bg-[#1c241e] text-[#ccff00] flex items-center justify-center mx-auto border border-[#2c3a2f]">
+            <div className="w-14 h-14 rounded-full bg-surface-2 text-brand flex items-center justify-center mx-auto border border-line-strong">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-white">
+              <h2 className="text-xl font-black text-fg">
                 Mot de passe mis à jour !
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-fg-muted mt-1">
                 Votre application MonSalaire est déverrouillée.
               </p>
             </div>
 
             <button
               onClick={onClose}
-              className="w-full py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm"
+              className="w-full py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs sm:text-sm"
             >
               Accéder à l'application
             </button>

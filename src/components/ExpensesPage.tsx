@@ -175,15 +175,15 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
   );
 
   return (
-    <div className="space-y-5 pb-12 animate-fadeIn">
+    <div className="space-y-5 pb-28 stagger">
       {/* EN-TÊTE PAGE DÉPENSES - Totalement adaptatif smartphone */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
             Gestion des Dépenses
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-            Période de <span className="font-bold text-[#ccff00]">{formatMonthKey(selectedMonth)}</span>
+          <p className="text-fg-muted text-xs sm:text-sm mt-0.5">
+            Période de <span className="font-bold text-brand">{formatMonthKey(selectedMonth)}</span>
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
         <div className="flex items-center gap-2 self-start sm:self-auto w-full sm:w-auto">
           <button
             onClick={onOpenAddModal}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all duration-150 active:scale-95 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs sm:text-sm shadow-[0_0_20px_rgba(var(--brand-rgb),0.3)] transition-all duration-150 active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Nouvelle Dépense</span>
@@ -201,14 +201,14 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
       {/* TOAST FEEDBACK VALIDATION DÉPENSES */}
       {validationToast && (
-        <div className="p-3.5 rounded-2xl bg-[#162419] border border-[#2d4732] text-xs font-bold text-[#ccff00] flex items-center justify-between shadow-lg animate-fadeIn">
+        <div className="p-3.5 rounded-2xl bg-surface-2 border border-line-strong text-xs font-bold text-brand flex items-center justify-between shadow-lg animate-fadeIn">
           <div className="flex items-center gap-2 pr-2">
             <CheckCheck className="w-4 h-4 stroke-[2.5] shrink-0" />
             <span className="leading-snug">{validationToast}</span>
           </div>
           <button 
             onClick={() => setValidationToast(null)} 
-            className="text-slate-400 hover:text-white shrink-0 p-1"
+            className="text-fg-muted hover:text-fg shrink-0 p-1"
             aria-label="Fermer"
           >
             <X className="w-4 h-4" />
@@ -223,127 +223,127 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         
         {/* 1. TOTAL DES DÉPENSES DU MOIS */}
-        <div className="bg-[#121613] rounded-3xl p-5 shadow-sm border border-[#232f26] relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-surface rounded-3xl p-5 shadow-sm border border-line relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2d3b2f] shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong shrink-0">
                   <Receipt className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-[#ccff00] block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-brand block truncate">
                     Total Dépenses
                   </span>
-                  <h3 className="text-xs text-slate-300 font-medium truncate">
+                  <h3 className="text-xs text-fg-2 font-medium truncate">
                     Total engagé ce mois
                   </h3>
                 </div>
               </div>
 
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#1b231d] text-slate-300 border border-[#2b392e] shrink-0">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-surface-2 text-fg-2 border border-line-strong shrink-0">
                 {expenses.length} au total
               </span>
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight break-words">
+              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
                 {formatCurrency(totalExpenses, currency)}
               </span>
             </div>
             
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-fg-muted mt-1">
               {settledExpenses.length} réglée{settledExpenses.length > 1 ? 's' : ''} • {unsettledExpenses.length} en cours
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#1e2720] flex items-center justify-between text-xs text-slate-300">
-            <span>Réglé : <strong className="text-[#ccff00]">{formatCurrency(totalPaidExpenses, currency)}</strong></span>
+          <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs text-fg-2">
+            <span>Réglé : <strong className="text-brand">{formatCurrency(totalPaidExpenses, currency)}</strong></span>
             {totalPendingExpenses > 0 && (
-              <span className="text-slate-400 text-[11px]">En attente : {formatCurrency(totalPendingExpenses, currency)}</span>
+              <span className="text-fg-muted text-[11px]">En attente : {formatCurrency(totalPendingExpenses, currency)}</span>
             )}
           </div>
         </div>
 
         {/* 2. DÉPENSES RÉCURRENTES (CHARGES FIXES CONSERVÉES À CHAQUE VALIDATION) */}
-        <div className="bg-[#121613] rounded-3xl p-5 shadow-sm border border-[#232f26] relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-surface rounded-3xl p-5 shadow-sm border border-line relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-[#1c241e] text-[#ccff00] flex items-center justify-center border border-[#2d3b2f] shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong shrink-0">
                   <Repeat className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-[#ccff00] block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-brand block truncate">
                     Charges Récurrentes
                   </span>
-                  <h3 className="text-xs text-slate-300 font-medium truncate">
+                  <h3 className="text-xs text-fg-2 font-medium truncate">
                     Loyer, factures, abonnements...
                   </h3>
                 </div>
               </div>
 
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1b2b1d] text-[#ccff00] border border-[#2d4732] shrink-0">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-3 text-brand border border-line-strong shrink-0">
                 {recurringExpenses.length} fixes
               </span>
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight break-words">
+              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
                 {formatCurrency(totalRecurring, currency)}
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-fg-muted mt-1">
               Ne s'effacent pas lors de la validation du mois.
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#1e2720] flex items-center justify-between text-[11px] text-[#ccff00] font-semibold">
+          <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px] text-brand font-semibold">
             <span className="inline-flex items-center gap-1">
               <Check className="w-3.5 h-3.5 stroke-[3]" />
               <span>Conservées chaque mois</span>
             </span>
-            <span className="text-slate-400">
+            <span className="text-fg-muted">
               {totalExpenses > 0 ? Math.round((totalRecurring / totalExpenses) * 100) : 0}% du total
             </span>
           </div>
         </div>
 
         {/* 3. DÉPENSES PONCTUELLES (VARIABLES QUI S'EFFACENT LORS DE LA VALIDATION) */}
-        <div className="bg-[#121613] rounded-3xl p-5 shadow-sm border border-[#232f26] relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-surface rounded-3xl p-5 shadow-sm border border-line relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-[#1c241e] text-slate-300 flex items-center justify-center border border-[#2d3b2f] shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-surface-2 text-fg-2 flex items-center justify-center border border-line-strong shrink-0">
                   <TrendingDown className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted block truncate">
                     Dépenses Ponctuelles
                   </span>
-                  <h3 className="text-xs text-slate-300 font-medium truncate">
+                  <h3 className="text-xs text-fg-2 font-medium truncate">
                     Courses, sorties, imprévus...
                   </h3>
                 </div>
               </div>
 
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1a211b] text-slate-400 border border-[#273429] shrink-0">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-2 text-fg-muted border border-line-strong shrink-0">
                 {oneOffExpenses.length} variables
               </span>
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight break-words">
+              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
                 {formatCurrency(totalOneOff, currency)}
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-fg-muted mt-1">
               S'effacent et s'archivent lors de la validation.
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#1e2720] flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+          <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px] text-fg-muted font-semibold">
             <span>S'effacent à la validation</span>
             <span>
               {totalExpenses > 0 ? Math.round((totalOneOff / totalExpenses) * 100) : 0}% du total
@@ -362,9 +362,9 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
       />
 
       {/* RECHERCHE & FILTRES - Responsive Smartphone */}
-      <div className="bg-[#111512] rounded-3xl p-3 sm:p-4 border border-[#1f2821] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+      <div className="bg-surface rounded-3xl p-3 sm:p-4 border border-line flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Rechercher une dépense (Loyer, CIE, Courses)..."
@@ -373,7 +373,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
               setSearchQuery(e.target.value);
               setActivePage(1);
             }}
-            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#161c17] border border-[#243026] text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-[#ccff00]"
+            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-2 border border-line text-xs sm:text-sm text-fg placeholder-slate-400 focus:outline-none focus:border-brand"
           />
         </div>
 
@@ -402,8 +402,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
             }}
             className={`px-3 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors border ${
               filterRecurringOnly
-                ? 'bg-[#ccff00] text-black border-[#ccff00]'
-                : 'bg-[#161c17] text-slate-300 border-[#243026] hover:text-white'
+                ? 'bg-brand text-brand-fg border-brand'
+                : 'bg-surface-2 text-fg-2 border-line hover:text-fg'
             }`}
           >
             <Repeat className="w-3.5 h-3.5" />
@@ -415,20 +415,20 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
       {/* ========================================================================= */}
       {/* LISTE DES DÉPENSES DU MOIS (PAGINÉE STRICTEMENT À 5 MAXI AVEC FLÈCHES)    */}
       {/* ========================================================================= */}
-      <div className="bg-[#111512] rounded-3xl border border-[#1f2821] overflow-hidden shadow-sm">
-        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-[#1b221d] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="bg-surface rounded-3xl border border-line overflow-hidden shadow-sm">
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <h2 className="text-sm sm:text-base font-extrabold text-fg flex items-center gap-2">
               <span>Dépenses du mois</span>
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#1b231d] text-[#ccff00] border border-[#ccff00]/25">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-surface-2 text-brand border border-brand/25">
               {displayedActiveExpenses.length} en cours
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400">Total en cours :</span>
-            <span className="font-black px-2.5 py-1 rounded-full bg-[#18211a] border border-[#2c3d2e] text-xs text-[#ccff00]">
+            <span className="text-fg-muted">Total en cours :</span>
+            <span className="font-black px-2.5 py-1 rounded-full bg-surface-2 border border-line-strong text-xs text-brand">
               {formatCurrency(activeTotal, currency)}
             </span>
           </div>
@@ -436,15 +436,15 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
         {displayedActiveExpenses.length === 0 ? (
           <div className="py-12 text-center px-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#161c17] text-[#ccff00] flex items-center justify-center mx-auto mb-3 border border-[#243026]">
+            <div className="w-14 h-14 rounded-2xl bg-surface-2 text-brand flex items-center justify-center mx-auto mb-3 border border-line">
               <Receipt className="w-7 h-7" />
             </div>
-            <h3 className="text-base font-extrabold text-white">
+            <h3 className="text-base font-extrabold text-fg">
               {settledExpenses.length > 0 
                 ? `Toutes les dépenses ponctuelles de ${formatMonthKey(selectedMonth)} ont été réglées !`
                 : 'Aucune dépense en cours pour ce mois'}
             </h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+            <p className="text-xs text-fg-muted max-w-sm mx-auto mt-1">
               {settledExpenses.length > 0 
                 ? 'Les dépenses réglées sont archivées. Vous pouvez rajouter une nouvelle dépense à tout moment.'
                 : 'Commencez à lister vos dépenses en cliquant sur le bouton ci-dessous.'}
@@ -453,7 +453,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
               <button
                 type="button"
                 onClick={onOpenAddModal}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-[0_0_20px_rgba(204,255,0,0.35)] active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs sm:text-sm shadow-[0_0_20px_rgba(var(--brand-rgb),0.35)] active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Ajouter une dépense</span>
@@ -462,7 +462,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
           </div>
         ) : (
           <div>
-            <div className="divide-y divide-[#18201a]">
+            <div className="divide-y divide-line">
               {paginatedActiveExpenses.map((exp) => {
                 const isEditingThis = editingExpenseId === exp.id;
                 const hasVariation = exp.recurringOriginalAmount !== undefined && exp.recurringOriginalAmount !== exp.amount;
@@ -470,21 +470,21 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                 return (
                   <div
                     key={exp.id}
-                    className="p-3.5 sm:p-4 flex flex-col xs:flex-row xs:items-center justify-between gap-3 transition-colors hover:bg-[#151b16]"
+                    className="p-3.5 sm:p-4 flex flex-col xs:flex-row xs:items-center justify-between gap-3 transition-colors hover:bg-surface"
                   >
                     <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-[#161c17] text-[#ccff00] flex items-center justify-center border border-[#243026] shrink-0 mt-0.5">
+                      <div className="w-9 h-9 rounded-xl bg-surface-2 text-brand flex items-center justify-center border border-line shrink-0 mt-0.5">
                         <Receipt className="w-4 h-4 stroke-[2.2]" />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="text-sm font-bold text-white break-words">
+                          <span className="text-sm font-bold text-fg break-words">
                             {exp.title}
                           </span>
 
                           {exp.isRecurring && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1b231d] text-[#ccff00] border border-[#ccff00]/30 shrink-0">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-2 text-brand border border-brand/30 shrink-0">
                               <Repeat className="w-3 h-3" />
                               <span>Récurrente • Conservée</span>
                             </span>
@@ -497,42 +497,42 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-slate-400 mt-1">
-                          <span className="font-semibold text-slate-300">{exp.category}</span>
+                        <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-fg-muted mt-1">
+                          <span className="font-semibold text-fg-2">{exp.category}</span>
                           <span>•</span>
                           <span>{formatDateFr(exp.date)}</span>
                           {exp.note && (
                             <>
                               <span>•</span>
-                              <span className="italic text-slate-400 truncate max-w-xs">{exp.note}</span>
+                              <span className="italic text-fg-muted truncate max-w-xs">{exp.note}</span>
                             </>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between xs:justify-end gap-2.5 pt-1 xs:pt-0 shrink-0 border-t xs:border-t-0 border-[#1c241e]">
+                    <div className="flex items-center justify-between xs:justify-end gap-2.5 pt-1 xs:pt-0 shrink-0 border-t xs:border-t-0 border-line">
                       {isEditingThis ? (
-                        <div className="flex items-center gap-1.5 bg-[#171d18] p-1 rounded-full border border-[#2b392e]">
+                        <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-full border border-line-strong">
                           <input
                             type="number"
                             step="100"
                             min="0"
                             value={tempAmount}
                             onChange={(e) => setTempAmount(e.target.value)}
-                            className="w-24 px-2 py-0.5 text-xs font-bold bg-[#0d100e] text-white rounded-full border border-[#344638] focus:outline-none"
+                            className="w-24 px-2 py-0.5 text-xs font-bold bg-surface text-fg rounded-full border border-line-strong focus:outline-none"
                             autoFocus
                           />
                           <button
                             onClick={() => handleSaveExpenseAmount(exp)}
-                            className="p-1 rounded-full bg-[#ccff00] text-black hover:bg-[#d9ff33]"
+                            className="p-1 rounded-full bg-brand text-brand-fg hover:bg-brand-hover"
                             title="Confirmer"
                           >
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                           </button>
                           <button
                             onClick={() => setEditingExpenseId(null)}
-                            className="p-1 rounded-full bg-slate-700 text-slate-200"
+                            className="p-1 rounded-full bg-surface-3 text-fg-2"
                             title="Annuler"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -541,19 +541,19 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                       ) : (
                         <button
                           onClick={() => handleStartEditAmount(exp)}
-                          className="group flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161c17] hover:bg-[#1d261e] border border-[#243026] text-right"
+                          className="group flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 hover:bg-surface-2 border border-line text-right"
                           title="Cliquer pour ajuster le montant"
                         >
-                          <span className="text-sm font-black text-white">
+                          <span className="text-sm font-black text-fg">
                             {formatCurrency(exp.amount, currency)}
                           </span>
-                          <Edit3 className="w-3 h-3 text-slate-400 group-hover:text-[#ccff00]" />
+                          <Edit3 className="w-3 h-3 text-fg-muted group-hover:text-brand" />
                         </button>
                       )}
 
                       <button
                         onClick={() => onDeleteExpense(exp.id)}
-                        className="p-1.5 rounded-full text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                        className="p-1.5 rounded-full text-fg-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                         title="Supprimer la dépense"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -566,8 +566,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
             {/* BARRE DE NAVIGATION FLÈCHES GAUCHE / DROITE SI PLUS DE 5 DÉPENSES */}
             {displayedActiveExpenses.length > ITEMS_PER_PAGE && (
-              <div className="px-4 sm:px-5 py-3 border-t border-[#1b221d] flex items-center justify-between text-xs bg-[#0f1310]">
-                <span className="text-slate-400 font-medium text-[11px] sm:text-xs">
+              <div className="px-4 sm:px-5 py-3 border-t border-line flex items-center justify-between text-xs bg-surface">
+                <span className="text-fg-muted font-medium text-[11px] sm:text-xs">
                   {displayedActiveExpenses.length} dépenses • Page {activePage} sur {totalActivePages} (5 maxi par vue)
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -575,7 +575,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                     type="button"
                     disabled={activePage === 1}
                     onClick={() => setActivePage((p) => Math.max(1, p - 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
                     title="Page précédente"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -585,7 +585,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                     type="button"
                     disabled={activePage === totalActivePages}
                     onClick={() => setActivePage((p) => Math.min(totalActivePages, p + 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
                     title="Page suivante"
                   >
                     <span className="hidden sm:inline">Suivant</span>
@@ -602,14 +602,14 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
       {/* Conserve les récurrentes et règle les dépenses ponctuelles */}
       {displayedActiveExpenses.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-          <p className="text-xs text-slate-400 text-center sm:text-left">
-            <span className="text-[#ccff00] font-bold">Astuce :</span> Les dépenses récurrentes resteront dans la liste. Le reste des dépenses ponctuelles sera validé et archivé.
+          <p className="text-xs text-fg-muted text-center sm:text-left">
+            <span className="text-brand font-bold">Astuce :</span> Les dépenses récurrentes resteront dans la liste. Le reste des dépenses ponctuelles sera validé et archivé.
           </p>
 
           <button
             type="button"
             onClick={handleValidate}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-sm sm:text-base shadow-[0_0_25px_rgba(204,255,0,0.4)] transition-all duration-150 active:scale-95 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-sm sm:text-base shadow-[0_0_25px_rgba(var(--brand-rgb),0.4)] transition-all duration-150 active:scale-95 cursor-pointer"
             title="Valider les dépenses du mois"
           >
             <Check className="w-5 h-5 stroke-[3]" />
@@ -620,11 +620,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
       {/* HISTORIQUE CONSULTATIF DES DÉPENSES RÉGLÉES (PAGINÉ À 5 MAXI AVEC FLÈCHES) */}
       {settledExpenses.length > 0 && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-[#121613] border border-[#232f26] space-y-3 shadow-sm">
+        <div className="p-4 sm:p-5 rounded-3xl bg-surface border border-line space-y-3 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5 text-[#ccff00]">
+            <div className="flex items-center gap-2.5 text-brand">
               <CheckCheck className="w-4 h-4 stroke-[2.5] shrink-0" />
-              <span className="font-extrabold text-white">
+              <span className="font-extrabold text-fg">
                 {settledExpenses.length} dépense{settledExpenses.length > 1 ? 's' : ''} réglée{settledExpenses.length > 1 ? 's' : ''} en {formatMonthKey(selectedMonth)} ({formatCurrency(totalPaidExpenses, currency)})
               </span>
             </div>
@@ -633,7 +633,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
               <button
                 type="button"
                 onClick={() => setShowSettledHistory(!showSettledHistory)}
-                className="px-3.5 py-1.5 rounded-full bg-[#18201a] hover:bg-[#202b23] text-slate-300 hover:text-white border border-[#28362b] text-[11px] font-bold transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 hover:text-fg border border-line-strong text-[11px] font-bold transition-all cursor-pointer"
               >
                 {showSettledHistory ? 'Masquer les réglées' : `Consulter les réglées (${settledExpenses.length})`}
               </button>
@@ -641,7 +641,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
               <button
                 type="button"
                 onClick={() => onValidateAllMonthExpenses(selectedMonth, false)}
-                className="px-3 py-1.5 rounded-full bg-[#1b251d] text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-[#27372a] text-[10px] font-semibold transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-full bg-surface-2 text-fg-muted hover:text-rose-400 hover:bg-rose-500/10 border border-line-strong text-[10px] font-semibold transition-all cursor-pointer"
                 title="Dévalider pour réactiver ces dépenses dans la liste"
               >
                 Dévalider
@@ -650,24 +650,24 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
           </div>
 
           {showSettledHistory && (
-            <div className="pt-2 border-t border-[#1a221b] animate-fadeIn">
-              <div className="divide-y divide-[#18201a]">
+            <div className="pt-2 border-t border-line animate-fadeIn">
+              <div className="divide-y divide-line">
                 {paginatedSettledExpenses.map((exp) => (
                   <div key={exp.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2 truncate">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#ccff00] shrink-0" />
-                      <span className="font-bold text-slate-200 truncate">{exp.title}</span>
-                      <span className="text-[10px] text-slate-400 shrink-0">({exp.category})</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+                      <span className="font-bold text-fg-2 truncate">{exp.title}</span>
+                      <span className="text-[10px] text-fg-muted shrink-0">({exp.category})</span>
                     </div>
-                    <span className="font-black text-[#ccff00] shrink-0">{formatCurrency(exp.amount, currency)}</span>
+                    <span className="font-black text-brand shrink-0">{formatCurrency(exp.amount, currency)}</span>
                   </div>
                 ))}
               </div>
 
               {/* Navigation flèches si plus de 5 dépenses réglées */}
               {settledExpenses.length > ITEMS_PER_PAGE && (
-                <div className="pt-3 mt-2 border-t border-[#1a221b] flex items-center justify-between text-xs">
-                  <span className="text-slate-400 text-[11px]">
+                <div className="pt-3 mt-2 border-t border-line flex items-center justify-between text-xs">
+                  <span className="text-fg-muted text-[11px]">
                     Page {settledPage} sur {totalSettledPages} (5 réglées par vue)
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -675,7 +675,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                       type="button"
                       disabled={settledPage === 1}
                       onClick={() => setSettledPage((p) => Math.max(1, p - 1))}
-                      className="p-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       title="Page précédente"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -684,7 +684,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                       type="button"
                       disabled={settledPage === totalSettledPages}
                       onClick={() => setSettledPage((p) => Math.min(totalSettledPages, p + 1))}
-                      className="p-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       title="Page suivante"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -702,28 +702,28 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
       {/* "la vue de l'historique des dépenses des mois doit avoir la meme logique    */}
       {/* que celle de épargne (5lignes maxi et au delà...)"                        */}
       {/* ========================================================================= */}
-      <div className="bg-[#111512] rounded-3xl border border-[#1f2821] overflow-hidden shadow-sm">
-        <div className="px-4 sm:px-5 py-4 border-b border-[#1b221d] flex items-center justify-between">
+      <div className="bg-surface rounded-3xl border border-line overflow-hidden shadow-sm">
+        <div className="px-4 sm:px-5 py-4 border-b border-line flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#1a231c] text-[#ccff00] flex items-center justify-center border border-[#27372b]">
+            <div className="w-8 h-8 rounded-xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
               <CalendarDays className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white">
+              <h2 className="text-sm sm:text-base font-extrabold text-fg">
                 Historique des dépenses des mois
               </h2>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-fg-muted">
                 Consultez le bilan de chaque mois enregistré (5 mois maxi par vue)
               </p>
             </div>
           </div>
 
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#1b231d] text-[#ccff00] border border-[#ccff00]/25 shrink-0">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-surface-2 text-brand border border-brand/25 shrink-0">
             {allRecordedMonths.length} mois au total
           </span>
         </div>
 
-        <div className="divide-y divide-[#18201a]">
+        <div className="divide-y divide-line">
           {paginatedRecordedMonths.map((mKey) => {
             const mExpenses = data.expenses[mKey] || [];
             const mTotal = mExpenses.reduce((s, e) => s + e.amount, 0);
@@ -735,30 +735,30 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                 key={mKey}
                 onClick={() => setSelectedMonth && setSelectedMonth(mKey)}
                 className={`p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors cursor-pointer ${
-                  isSelected ? 'bg-[#152017]' : 'hover:bg-[#141a15]'
+                  isSelected ? 'bg-surface-2' : 'hover:bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs border shrink-0 ${
                     isSelected 
-                      ? 'bg-[#ccff00] text-black border-[#ccff00]' 
-                      : 'bg-[#161c17] text-slate-300 border-[#243026]'
+                      ? 'bg-brand text-brand-fg border-brand' 
+                      : 'bg-surface-2 text-fg-2 border-line'
                   }`}>
                     <Clock className="w-4 h-4" />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-extrabold text-white">
+                      <span className="text-sm font-extrabold text-fg">
                         {formatMonthKey(mKey)}
                       </span>
                       {isSelected && (
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-brand/15 text-brand border border-brand/30">
                           Mois actif
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
+                    <div className="text-[11px] text-fg-muted mt-0.5 flex flex-wrap items-center gap-2">
                       <span>{mExpenses.length} dépense{mExpenses.length > 1 ? 's' : ''}</span>
                       <span>•</span>
                       <span>Dont {formatCurrency(mRecurring, currency)} fixes récurrentes</span>
@@ -766,8 +766,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-[#1c241e]">
-                  <span className="text-sm font-black text-[#ccff00]">
+                <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-line">
+                  <span className="text-sm font-black text-brand">
                     {formatCurrency(mTotal, currency)}
                   </span>
                 </div>
@@ -778,8 +778,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
         {/* Navigation flèches gauche / droite de l'historique des mois si > 5 mois */}
         {allRecordedMonths.length > ITEMS_PER_PAGE && (
-          <div className="px-4 sm:px-5 py-3 border-t border-[#1b221d] flex items-center justify-between text-xs bg-[#0f1310]">
-            <span className="text-slate-400 font-medium text-[11px] sm:text-xs">
+          <div className="px-4 sm:px-5 py-3 border-t border-line flex items-center justify-between text-xs bg-surface">
+            <span className="text-fg-muted font-medium text-[11px] sm:text-xs">
               Affichage de {paginatedRecordedMonths.length} sur {allRecordedMonths.length} mois (Page {monthsHistoryPage} sur {totalMonthsPages})
             </span>
             <div className="flex items-center gap-1.5">
@@ -787,7 +787,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                 type="button"
                 disabled={monthsHistoryPage === 1}
                 onClick={() => setMonthsHistoryPage((p) => Math.max(1, p - 1))}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
                 title="Mois précédents"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -797,7 +797,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                 type="button"
                 disabled={monthsHistoryPage === totalMonthsPages}
                 onClick={() => setMonthsHistoryPage((p) => Math.min(totalMonthsPages, p + 1))}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#18201a] hover:bg-[#202b23] border border-[#28362b] text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
                 title="Mois suivants"
               >
                 <span className="hidden sm:inline">Suivant</span>

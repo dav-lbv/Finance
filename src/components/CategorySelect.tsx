@@ -25,8 +25,8 @@ export const CATEGORY_CONFIG: Record<
   },
   'Alimentation': {
     label: 'Alimentation',
-    color: 'text-[#ccff00]',
-    bg: 'bg-[#ccff00]/10 border-[#ccff00]/30',
+    color: 'text-brand',
+    bg: 'bg-brand/10 border-brand/30',
     icon: Utensils,
   },
   'Factures & Abonnements': {
@@ -61,8 +61,8 @@ export const CATEGORY_CONFIG: Record<
   },
   'Autre': {
     label: 'Autre',
-    color: 'text-slate-400',
-    bg: 'bg-slate-400/10 border-slate-400/30',
+    color: 'text-fg-muted',
+    bg: 'bg-fg-muted/10 border-line-strong',
     icon: Tag,
   },
 };
@@ -87,8 +87,8 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
 
   const selectedConfig = CATEGORY_CONFIG[value] || {
     label: value,
-    color: 'text-slate-300',
-    bg: 'bg-slate-800 border-slate-700',
+    color: 'text-fg-2',
+    bg: 'bg-surface-3 border-line-strong',
     icon: Tag,
   };
   const SelectedIcon = selectedConfig.icon;
@@ -126,7 +126,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {label && (
-        <label className="block text-[10px] font-bold uppercase text-slate-300 mb-1 tracking-wider">
+        <label className="block text-[10px] font-bold uppercase text-fg-2 mb-1 tracking-wider">
           {label}
         </label>
       )}
@@ -135,10 +135,10 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full bg-[#18201a] border text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none ${
+        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full bg-surface-2 border text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none ${
           isOpen
-            ? 'border-[#ccff00] ring-2 ring-[#ccff00]/25 bg-[#1b251e]'
-            : 'border-[#28362b] hover:border-[#384c3d] hover:bg-[#1c261e]'
+            ? 'border-brand ring-2 ring-brand/25 bg-surface-2'
+            : 'border-line-strong hover:border-line-strong hover:bg-surface-2'
         }`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -147,11 +147,11 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
           <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${selectedConfig.bg} border`}>
             <SelectedIcon className={`w-3 h-3 ${selectedConfig.color}`} />
           </div>
-          <span className="text-white truncate font-medium">{selectedConfig.label}</span>
+          <span className="text-fg truncate font-medium">{selectedConfig.label}</span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[#ccff00]' : ''
+          className={`w-4 h-4 text-fg-muted shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-brand' : ''
           }`}
         />
       </button>
@@ -159,15 +159,15 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
       {/* Menu déroulant style shadcn/ui Popover */}
       {isOpen && (
         <div 
-          className="absolute z-50 left-0 right-0 mt-1.5 p-1.5 rounded-2xl bg-[#121713] border border-[#26372a] shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-fadeIn max-h-64 overflow-y-auto no-scrollbar"
+          className="absolute z-50 left-0 right-0 mt-1.5 p-1.5 rounded-2xl bg-surface border border-line-strong shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-fadeIn max-h-64 overflow-y-auto no-scrollbar"
           role="listbox"
         >
           <div className="space-y-0.5">
             {categories.map((cat) => {
               const config = CATEGORY_CONFIG[cat] || {
                 label: cat,
-                color: 'text-slate-300',
-                bg: 'bg-slate-800 border-slate-700',
+                color: 'text-fg-2',
+                bg: 'bg-surface-3 border-line-strong',
                 icon: Tag,
               };
               const ItemIcon = config.icon;
@@ -185,8 +185,8 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
                   aria-selected={isSelected}
                   className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm transition-all cursor-pointer text-left ${
                     isSelected
-                      ? 'bg-[#1a261c] text-[#ccff00] font-bold shadow-sm'
-                      : 'text-slate-300 hover:bg-[#172019] hover:text-white font-medium'
+                      ? 'bg-surface-2 text-brand font-bold shadow-sm'
+                      : 'text-fg-2 hover:bg-surface-2 hover:text-fg font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
@@ -197,7 +197,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
                   </div>
 
                   {isSelected && (
-                    <Check className="w-4 h-4 text-[#ccff00] shrink-0 stroke-[2.5]" />
+                    <Check className="w-4 h-4 text-brand shrink-0 stroke-[2.5]" />
                   )}
                 </button>
               );

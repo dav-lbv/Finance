@@ -169,14 +169,14 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
     <div className="space-y-4 pt-2">
       {/* Toast Célébration */}
       {celebrationToast && (
-        <div className="p-4 rounded-2xl bg-[#142318] border-2 border-[#ccff00] text-white flex items-center justify-between gap-3 shadow-xl animate-fadeIn">
+        <div className="p-4 rounded-2xl bg-surface-2 border-2 border-brand text-fg flex items-center justify-between gap-3 shadow-xl animate-fadeIn">
           <div className="flex items-center gap-2.5">
-            <Sparkles className="w-5 h-5 text-[#ccff00] shrink-0" />
+            <Sparkles className="w-5 h-5 text-brand shrink-0" />
             <p className="text-xs sm:text-sm font-bold leading-snug">{celebrationToast}</p>
           </div>
           <button
             onClick={() => setCelebrationToast(null)}
-            className="text-slate-400 hover:text-white p-1"
+            className="text-fg-muted hover:text-fg p-1"
           >
             <X className="w-4 h-4" />
           </button>
@@ -184,18 +184,18 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
       )}
 
       {/* En-tête de section Projets */}
-      <div className="bg-[#121613] rounded-3xl p-5 sm:p-6 border border-[#232f26] shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1f2821]">
+      <div className="bg-surface rounded-3xl p-5 sm:p-6 border border-line shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30 tracking-wider">
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-brand/15 text-brand border border-brand/30 tracking-wider">
                 Objectifs & Projets
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-fg tracking-tight">
               Projets Liés à une Épargne
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-fg-muted mt-0.5">
               Affectez vos versements à des objectifs précis. Une fois l'objectif atteint, vous pouvez clôturer le projet.
             </p>
           </div>
@@ -203,7 +203,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
             <button
               onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>Nouveau Projet</span>
@@ -213,37 +213,37 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
         {/* Synthèse globale des projets actifs */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">
+          <div className="p-3.5 rounded-2xl bg-surface-2 border border-line-strong">
+            <span className="text-[10px] font-bold uppercase text-fg-muted block">
               Projets en cours
             </span>
-            <span className="text-lg font-black text-white mt-0.5 block">
+            <span className="text-lg font-black text-fg mt-0.5 block">
               {activeProjects.length} projet{activeProjects.length > 1 ? 's' : ''} actif{activeProjects.length > 1 ? 's' : ''}
             </span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">
+          <div className="p-3.5 rounded-2xl bg-surface-2 border border-line-strong">
+            <span className="text-[10px] font-bold uppercase text-fg-muted block">
               Capital alloué aux projets
             </span>
-            <span className="text-lg font-black text-[#ccff00] mt-0.5 block truncate">
+            <span className="text-lg font-black text-brand mt-0.5 block truncate">
               {formatCurrency(totalSaved, currency)}
             </span>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-fg-muted">
               sur {formatCurrency(totalTarget, currency)} visés
             </span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#161c17] border border-[#253227] flex flex-col justify-between">
+          <div className="p-3.5 rounded-2xl bg-surface-2 border border-line-strong flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase text-slate-400 block">
+              <span className="text-[10px] font-bold uppercase text-fg-muted block">
                 Progression globale
               </span>
-              <span className="text-xs font-black text-[#ccff00]">{globalProgress}%</span>
+              <span className="text-xs font-black text-brand">{globalProgress}%</span>
             </div>
-            <div className="w-full bg-[#0d120e] h-2 rounded-full overflow-hidden mt-1.5 border border-[#1e2a20]">
+            <div className="w-full bg-surface h-2 rounded-full overflow-hidden mt-1.5 border border-line">
               <div 
-                className="h-full bg-gradient-to-r from-[#ccff00] to-[#10b981] transition-all duration-300"
+                className="h-full bg-gradient-to-r from-fg-muted to-brand transition-all duration-300"
                 style={{ width: `${globalProgress}%` }}
               />
             </div>
@@ -251,13 +251,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
         </div>
 
         {/* Onglets Filtre : En cours vs Clôturés */}
-        <div className="flex items-center gap-2 mt-5 pt-3 border-t border-[#1f2821]">
+        <div className="flex items-center gap-2 mt-5 pt-3 border-t border-line">
           <button
             onClick={() => setViewFilter('active')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all ${
               viewFilter === 'active'
-                ? 'bg-[#ccff00] text-black shadow-sm'
-                : 'bg-[#161c17] text-slate-400 hover:text-white border border-[#253227]'
+                ? 'bg-brand text-brand-fg shadow-sm'
+                : 'bg-surface-2 text-fg-muted hover:text-fg border border-line-strong'
             }`}
           >
             En cours ({activeProjects.length})
@@ -267,8 +267,8 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
             onClick={() => setViewFilter('closed')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all ${
               viewFilter === 'closed'
-                ? 'bg-[#ccff00] text-black shadow-sm'
-                : 'bg-[#161c17] text-slate-400 hover:text-white border border-[#253227]'
+                ? 'bg-brand text-brand-fg shadow-sm'
+                : 'bg-surface-2 text-fg-muted hover:text-fg border border-line-strong'
             }`}
           >
             Clôturés / Réalisés ({closedProjects.length})
@@ -278,12 +278,12 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
       {/* Grille des Cartes Projets */}
       {displayedProjects.length === 0 ? (
-        <div className="py-10 text-center bg-[#121613] rounded-3xl border border-[#232f26] p-6">
-          <Target className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-          <p className="text-sm font-bold text-white">
+        <div className="py-10 text-center bg-surface rounded-3xl border border-line p-6">
+          <Target className="w-10 h-10 text-fg-muted mx-auto mb-2" />
+          <p className="text-sm font-bold text-fg">
             {viewFilter === 'active' ? 'Aucun projet d\'épargne en cours' : 'Aucun projet clôturé pour le moment'}
           </p>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+          <p className="text-xs text-fg-muted max-w-sm mx-auto mt-1">
             {viewFilter === 'active' 
               ? 'Créez votre premier projet (voyage, équipement, urgence...) pour suivre votre progression pas-à-pas.' 
               : 'Les projets dont l\'objectif est atteint et que vous clôturez apparaîtront ici.'}
@@ -291,7 +291,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
           {viewFilter === 'active' && (
             <button
               onClick={handleOpenAdd}
-              className="mt-4 px-4 py-2 rounded-full bg-[#ccff00] text-black font-extrabold text-xs hover:bg-[#d9ff33] transition-all"
+              className="mt-4 px-4 py-2 rounded-full bg-brand text-brand-fg font-extrabold text-xs hover:bg-brand-hover transition-all"
             >
               + Créer un premier projet
             </button>
@@ -311,37 +311,37 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 key={project.id}
                 className={`p-5 rounded-3xl border transition-all duration-200 flex flex-col justify-between ${
                   project.isClosed
-                    ? 'bg-[#111612]/70 border-[#232f26] opacity-80'
+                    ? 'bg-surface/70 border-line opacity-80'
                     : isCompleted
-                    ? 'bg-gradient-to-b from-[#162218] to-[#121713] border-[#ccff00]/60 shadow-[0_0_20px_rgba(204,255,0,0.15)]'
-                    : 'bg-[#121613] border-[#232f26] hover:border-[#2d3d2e]'
+                    ? 'bg-gradient-to-b from-surface-2 to-surface border-brand/60 shadow-[0_0_20px_rgba(var(--brand-rgb),0.15)]'
+                    : 'bg-surface border-line hover:border-line-strong'
                 }`}
               >
                 <div>
                   {/* Top Bar du projet */}
                   <div className="flex items-start justify-between gap-2 mb-2.5">
                     <div className="min-w-0">
-                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                      <span className="text-[10px] font-black uppercase text-fg-muted tracking-wider block">
                         {project.category || 'Épargne Projet'}
                       </span>
-                      <h3 className="text-base sm:text-lg font-black text-white tracking-tight truncate mt-0.5">
+                      <h3 className="text-base sm:text-lg font-black text-fg tracking-tight truncate mt-0.5">
                         {project.title}
                       </h3>
                     </div>
 
                     {/* Badge Statut */}
                     {project.isClosed ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-surface-3 text-fg-2 border border-line-strong shrink-0">
                         <FolderCheck className="w-3 h-3 text-emerald-400" />
                         <span>Clôturé</span>
                       </span>
                     ) : isCompleted ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ccff00] text-black shadow-sm shrink-0 animate-pulse">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-brand text-brand-fg shadow-sm shrink-0 animate-pulse">
                         <Check className="w-3 h-3 stroke-[3]" />
                         <span>Objectif Atteint !</span>
                       </span>
                     ) : (
-                      <span className="text-[11px] font-extrabold text-[#ccff00] px-2 py-0.5 rounded-full bg-[#18231a] border border-[#27372b] shrink-0">
+                      <span className="text-[11px] font-extrabold text-brand px-2 py-0.5 rounded-full bg-surface-2 border border-line-strong shrink-0">
                         {progress}%
                       </span>
                     )}
@@ -349,7 +349,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
                   {/* Notes / Description */}
                   {project.note && (
-                    <p className="text-xs text-slate-300 mb-3 line-clamp-2">
+                    <p className="text-xs text-fg-2 mb-3 line-clamp-2">
                       {project.note}
                     </p>
                   )}
@@ -357,32 +357,32 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                   {/* Chiffres & Progression */}
                   <div className="my-3 space-y-1.5">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                      <span className="text-xl sm:text-2xl font-black text-fg tracking-tight">
                         {formatCurrency(project.currentAmount, currency)}
                       </span>
-                      <span className="text-xs font-bold text-slate-400">
-                        sur <strong className="text-white">{formatCurrency(project.targetAmount, currency)}</strong>
+                      <span className="text-xs font-bold text-fg-muted">
+                        sur <strong className="text-fg">{formatCurrency(project.targetAmount, currency)}</strong>
                       </span>
                     </div>
 
                     {/* Barre de progression */}
-                    <div className="w-full bg-[#0d120e] h-2.5 rounded-full overflow-hidden border border-[#1e2a20]">
+                    <div className="w-full bg-surface h-2.5 rounded-full overflow-hidden border border-line">
                       <div
                         className={`h-full transition-all duration-300 ${
                           isCompleted
-                            ? 'bg-gradient-to-r from-[#ccff00] via-[#10b981] to-[#ccff00]'
-                            : 'bg-gradient-to-r from-[#ccff00] to-[#10b981]'
+                            ? 'bg-gradient-to-r from-fg-muted via-fg-2 to-brand'
+                            : 'bg-gradient-to-r from-fg-muted to-brand'
                         }`}
                         style={{ width: `${progress}%` }}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                    <div className="flex items-center justify-between text-[11px] text-fg-muted pt-0.5">
                       <span>
                         {isCompleted ? (
-                          <span className="text-[#ccff00] font-bold">Objectif 100% complété</span>
+                          <span className="text-brand font-bold">Objectif 100% complété</span>
                         ) : (
-                          <span>Reste : <strong className="text-slate-300">{formatCurrency(remaining, currency)}</strong></span>
+                          <span>Reste : <strong className="text-fg-2">{formatCurrency(remaining, currency)}</strong></span>
                         )}
                       </span>
                       {project.targetDate && (
@@ -396,13 +396,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 </div>
 
                 {/* Actions sur le projet */}
-                <div className="pt-3 border-t border-[#1f2821] flex flex-wrap items-center justify-between gap-2">
+                <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {/* Clôturer / Réaliser le projet si objectif atteint ou projet ouvert */}
                     {!project.isClosed && isCompleted ? (
                       <button
                         onClick={() => handleClose(project.id)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-black text-xs shadow-[0_0_15px_rgba(204,255,0,0.35)] transition-all active:scale-95 cursor-pointer animate-pulse"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-black text-xs shadow-[0_0_15px_rgba(var(--brand-rgb),0.35)] transition-all active:scale-95 cursor-pointer animate-pulse"
                         title="Objectif atteint à 100% ! Cliquez pour fermer / archiver ce projet"
                       >
                         <FolderCheck className="w-4 h-4 stroke-[2.8]" />
@@ -414,7 +414,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                           setContributeProject(project);
                           setContributeAmount('');
                         }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1b251d] hover:bg-[#233126] text-[#ccff00] border border-[#2b3d2e] font-extrabold text-xs transition-all active:scale-95"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-line-strong font-extrabold text-xs transition-all active:scale-95"
                       >
                         <Plus className="w-3 h-3 stroke-[3]" />
                         <span>Verser des fonds</span>
@@ -422,7 +422,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     ) : (
                       <button
                         onClick={() => onCloseProject(project.id, false)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161f18] hover:bg-[#1e2a20] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 hover:text-fg border border-line-strong font-bold text-xs"
                       >
                         <RefreshCcw className="w-3 h-3" />
                         <span>Rouvrir le projet</span>
@@ -433,7 +433,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     {!project.isClosed && !isCompleted && (
                       <button
                         onClick={() => handleClose(project.id)}
-                        className="text-[11px] text-slate-400 hover:text-white px-2 py-1"
+                        className="text-[11px] text-fg-muted hover:text-fg px-2 py-1"
                         title="Fermer ce projet manuellement"
                       >
                         Fermer
@@ -445,7 +445,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEdit(project)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1a231b] transition-colors"
+                      className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
                       title="Modifier le projet"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -471,16 +471,16 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
           <div 
-            className="w-full max-w-md bg-[#121613] border border-[#2b3a2e] rounded-3xl p-6 shadow-2xl space-y-4"
+            className="w-full max-w-md bg-surface border border-line-strong rounded-3xl p-6 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#1f2821]">
-              <h3 className="text-base sm:text-lg font-black text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <h3 className="text-base sm:text-lg font-black text-fg">
                 {editingProject ? 'Modifier le Projet' : 'Nouveau Projet d\'Épargne'}
               </h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-fg-muted hover:text-fg p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -488,7 +488,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
             <form onSubmit={handleSaveProjectForm} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Intitulé du projet à réaliser
                 </label>
                 <input
@@ -497,13 +497,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
                   placeholder="ex: Achat Ordinateur, Voyage, Urgence..."
-                  className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                  className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-fg-2 mb-1">
                     Objectif visé ({currency})
                   </label>
                   <input
@@ -512,12 +512,12 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     value={targetAmount}
                     onChange={(e) => setTargetAmount(e.target.value)}
                     placeholder="500000"
-                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-fg-2 mb-1">
                     Apport déjà versé ({currency})
                   </label>
                   <input
@@ -525,7 +525,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     value={initialAmount}
                     onChange={(e) => setInitialAmount(e.target.value)}
                     placeholder="0"
-                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
                   />
                 </div>
               </div>
@@ -551,7 +551,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Note ou détails (Optionnel)
                 </label>
                 <textarea
@@ -559,7 +559,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Détails du projet..."
                   rows={2}
-                  className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl px-4 py-2 text-xs text-white focus:outline-none resize-none"
+                  className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl px-4 py-2 text-xs text-fg focus:outline-none resize-none"
                 />
               </div>
 
@@ -567,13 +567,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-full bg-[#18201a] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                  className="flex-1 py-2.5 rounded-full bg-surface-2 text-fg-2 hover:text-fg border border-line-strong font-bold text-xs"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md"
+                  className="flex-1 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs shadow-md"
                 >
                   {editingProject ? 'Enregistrer les modifications' : 'Créer le projet'}
                 </button>
@@ -589,21 +589,21 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
       {contributeProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
           <div 
-            className="w-full max-w-sm bg-[#121613] border border-[#2b3a2e] rounded-3xl p-6 shadow-2xl space-y-4"
+            className="w-full max-w-sm bg-surface border border-line-strong rounded-3xl p-6 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#1f2821]">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
               <div>
-                <span className="text-[10px] font-black text-[#ccff00] uppercase">
+                <span className="text-[10px] font-black text-brand uppercase">
                   Alimenter le projet
                 </span>
-                <h3 className="text-base font-black text-white truncate">
+                <h3 className="text-base font-black text-fg truncate">
                   {contributeProject.title}
                 </h3>
               </div>
               <button
                 onClick={() => setContributeProject(null)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-fg-muted hover:text-fg p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -611,7 +611,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
             <form onSubmit={handleContributeSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-fg-2 mb-1">
                   Montant à verser en {currency}
                 </label>
                 <div className="relative">
@@ -623,13 +623,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     onChange={(e) => setContributeAmount(e.target.value)}
                     placeholder="ex: 50000"
                     autoFocus
-                    className="w-full bg-[#161c17] border border-[#28362b] focus:border-[#ccff00] rounded-2xl pl-4 pr-16 py-3 text-base font-black text-white focus:outline-none"
+                    className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-4 pr-16 py-3 text-base font-black text-fg focus:outline-none"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-[#ccff00]">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-brand">
                     {currency}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
+                <div className="flex items-center justify-between text-[11px] text-fg-muted mt-1.5">
                   <span>Actuellement : {formatCurrency(contributeProject.currentAmount, currency)}</span>
                   <span>Objectif : {formatCurrency(contributeProject.targetAmount, currency)}</span>
                 </div>
@@ -639,13 +639,13 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => setContributeProject(null)}
-                  className="flex-1 py-2.5 rounded-full bg-[#18201a] text-slate-300 hover:text-white border border-[#253227] font-bold text-xs"
+                  className="flex-1 py-2.5 rounded-full bg-surface-2 text-fg-2 hover:text-fg border border-line-strong font-bold text-xs"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs shadow-md"
+                  className="flex-1 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs shadow-md"
                 >
                   Confirmer le versement
                 </button>

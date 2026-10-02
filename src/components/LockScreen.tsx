@@ -60,35 +60,35 @@ export const LockScreen: React.FC<LockScreenProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080a08]/98 backdrop-blur-2xl animate-fadeIn">
-      <div className="max-w-md w-full bg-[#121613] border border-[#232f26] rounded-3xl p-7 sm:p-8 shadow-2xl text-center relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-app/98 backdrop-blur-2xl animate-fadeIn">
+      <div className="max-w-md w-full bg-surface border border-line rounded-3xl p-7 sm:p-8 shadow-2xl text-center relative overflow-hidden">
         
         {/* Glow neon de fond */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-[#ccff00]/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-brand/15 rounded-full blur-3xl pointer-events-none"></div>
 
         {/* Cadenas néon vibrant */}
-        <div className="relative mx-auto w-16 h-16 rounded-3xl bg-[#ccff00] text-black flex items-center justify-center shadow-[0_0_30px_rgba(204,255,0,0.4)] mb-4">
+        <div className="relative mx-auto w-16 h-16 rounded-3xl bg-brand text-brand-fg flex items-center justify-center shadow-[0_0_30px_rgba(var(--brand-rgb),0.4)] mb-4">
           <Lock className="w-8 h-8 stroke-[2.8]" />
         </div>
 
-        <h1 className="text-2xl font-black text-white tracking-tight">
+        <h1 className="text-2xl font-black text-fg tracking-tight">
           GesFin Sécurisé
         </h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1 mb-5">
+        <p className="text-fg-muted text-xs sm:text-sm mt-1 mb-5">
           Authentification requise pour accéder à votre espace financier.
         </p>
 
         {/* Profil utilisateur reconnu avec photo */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#18211a] border border-[#27362a] mb-5">
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-2 border border-line-strong mb-5">
           <img
             src={avatarImage}
             alt={user.fullName}
-            className="w-6 h-6 rounded-full object-cover border border-[#ccff00]"
+            className="w-6 h-6 rounded-full object-cover border border-brand"
           />
-          <span className="text-xs font-bold text-white">
+          <span className="text-xs font-bold text-fg">
             {user.fullName || 'Utilisateur'}
           </span>
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[10px] text-fg-muted">
             ({user.email})
           </span>
         </div>
@@ -104,13 +104,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({
                 if (error) setError('');
               }}
               placeholder="Votre mot de passe..."
-              className="w-full px-4 py-3 rounded-full bg-[#0a0d0b] border border-[#27352a] text-white placeholder-slate-500 text-center font-bold tracking-wider focus:outline-none focus:border-[#ccff00] transition-colors"
+              className="w-full px-4 py-3 rounded-full bg-app border border-line-strong text-fg placeholder-slate-500 text-center font-bold tracking-wider focus:outline-none focus:border-brand transition-colors"
               autoFocus
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg p-1"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -126,7 +126,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
           <div className="space-y-2.5">
             <button
               type="submit"
-              className="w-full py-3 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-sm shadow-[0_0_20px_rgba(204,255,0,0.35)] transition-all duration-150 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-sm shadow-[0_0_20px_rgba(var(--brand-rgb),0.35)] transition-all duration-150 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Unlock className="w-4 h-4 stroke-[2.5]" />
               <span>Déverrouiller avec le mot de passe</span>
@@ -138,11 +138,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({
                 type="button"
                 onClick={handleBiometricUnlock}
                 disabled={isBiometricScanning}
-                className="w-full py-2.5 rounded-full bg-[#18231a] hover:bg-[#202e23] text-[#ccff00] border border-[#ccff00]/30 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
+                className="w-full py-2.5 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-brand/30 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
               >
                 {isBiometricScanning ? (
                   <>
-                    <span className="w-3.5 h-3.5 border-2 border-[#ccff00] border-t-transparent rounded-full animate-spin"></span>
+                    <span className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin"></span>
                     <span>Scan biométrique en cours...</span>
                   </>
                 ) : (
@@ -157,17 +157,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({
         </form>
 
         {/* Mot de passe oublié */}
-        <div className="mt-5 pt-5 border-t border-[#1e2720]">
+        <div className="mt-5 pt-5 border-t border-line">
           <button
             type="button"
             onClick={() => setIsResetModalOpen(true)}
-            className="text-xs font-bold text-slate-400 hover:text-[#ccff00] transition-colors inline-flex items-center gap-1.5"
+            className="text-xs font-bold text-fg-muted hover:text-brand transition-colors inline-flex items-center gap-1.5"
           >
             <Mail className="w-3.5 h-3.5" />
             <span>Mot de passe oublié ?</span>
           </button>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            Réinitialisation strictement sur <strong className="text-slate-300">{user.email}</strong>
+          <p className="text-[11px] text-fg-muted mt-0.5">
+            Réinitialisation strictement sur <strong className="text-fg-2">{user.email}</strong>
           </p>
         </div>
       </div>

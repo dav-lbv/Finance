@@ -24,7 +24,7 @@ export function useTheme() {
     } catch {
       // ignore
     }
-    return 'system';
+    return 'dark';
   });
 
   const [colorPalette, setColorPaletteState] = useState<ColorPalette>(() => {
@@ -82,11 +82,7 @@ export function useTheme() {
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      if (colorPalette === 'manga_orange') {
-        metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#F2F2F2' : '#111111');
-      } else {
-        metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#f4f6f8' : '#080a08');
-      }
+      metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#e8e8ec' : '#050506');
     }
   }, [resolvedTheme, colorPalette]);
 

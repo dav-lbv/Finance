@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-[#090b09]/95 backdrop-blur-md border-b border-[#1c241e] text-white shadow-lg pt-[env(safe-area-inset-top,0px)]">
+      <header className="sticky top-0 z-30 bg-app/60 backdrop-blur-xl border-b border-line text-fg pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             
@@ -82,14 +82,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setCurrentTab('dashboard')} 
               className="flex items-center gap-2 shrink-0 cursor-pointer group"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-[#ccff00] to-[#10b981] flex items-center justify-center shadow-[0_0_15px_rgba(204,255,0,0.35)] shrink-0 transition-transform group-hover:scale-105">
-                <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-black stroke-[2.8]" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-fg-muted to-brand flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.35)] shrink-0 transition-transform group-hover:scale-105">
+                <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-brand-fg stroke-[2.6]" />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-[#f4f7f4] to-[#ccff00] bg-clip-text text-transparent">
+                <span className="font-black text-base sm:text-lg tracking-tight text-fg">
                   GesFin
                 </span>
-                <span className="text-[9px] font-black tracking-widest uppercase px-1.5 py-0.2 rounded-full bg-[#ccff00]/15 text-[#ccff00] border border-[#ccff00]/30 hidden xs:inline-block">
+                <span className="text-[9px] font-black tracking-widest uppercase px-1.5 py-0.2 rounded-full bg-brand/15 text-brand border border-brand/30 hidden xs:inline-block">
                   PRO
                 </span>
               </div>
@@ -101,20 +101,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-1.5 sm:gap-2">
               
               {/* Le Widget Capsule Connecté Unifié */}
-              <div className="flex items-center bg-[#131914] hover:bg-[#161d17] border border-[#233126] rounded-full p-0.5 sm:p-1 shadow-[0_2px_10px_rgba(0,0,0,0.4)] transition-all">
+              <div className="flex items-center bg-surface hover:bg-surface-2 border border-line rounded-full p-0.5 sm:p-1 shadow-[0_2px_10px_rgba(0,0,0,0.4)] transition-all">
                 
                 {/* A. Icône des Notifications */}
                 <button
                   type="button"
                   onClick={() => setIsNotificationsOpen(true)}
-                  className="relative p-1.5 sm:p-2 rounded-full text-slate-300 hover:text-[#ccff00] hover:bg-[#1a231b] transition-colors active:scale-95 shrink-0"
+                  className="relative p-1.5 sm:p-2 rounded-full text-fg-2 hover:text-brand hover:bg-surface-2 transition-colors active:scale-95 shrink-0"
                   title="Voir les notifications & alertes"
                 >
                   <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
 
                 {/* Séparateur subtil vertical */}
-                <div className="w-px h-4 sm:h-5 bg-[#233126] mx-0.5 sm:mx-1"></div>
+                <div className="w-px h-4 sm:h-5 bg-surface-3 mx-0.5 sm:mx-1"></div>
 
                 {/* B. Sélecteur de période (remplace la barre de recherche) */}
                 <div className="flex items-center gap-0.5 sm:gap-1 px-0.5">
@@ -122,14 +122,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     type="button"
                     onClick={handlePrevMonth}
                     title="Mois précédent"
-                    className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-[#1a231b] transition-colors active:scale-90"
+                    className="p-1 rounded-full text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors active:scale-90"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
 
                   <div className="flex items-center gap-1 px-1 sm:px-2 text-center select-none">
-                    <CalendarIcon className="w-3 h-3 text-[#ccff00] shrink-0 hidden sm:inline" />
-                    <span className="text-xs sm:text-sm font-black text-white whitespace-nowrap tracking-tight">
+                    <CalendarIcon className="w-3 h-3 text-brand shrink-0 hidden sm:inline" />
+                    <span className="text-xs sm:text-sm font-black text-fg whitespace-nowrap tracking-tight">
                       <span className="sm:hidden">{formatMonthKeyShort(selectedMonth)}</span>
                       <span className="hidden sm:inline">{formatMonthKey(selectedMonth)}</span>
                     </span>
@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     type="button"
                     onClick={handleNextMonth}
                     title="Mois suivant"
-                    className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-[#1a231b] transition-colors active:scale-90"
+                    className="p-1 rounded-full text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors active:scale-90"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -148,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <button
                       onClick={handleJumpToCurrentMonth}
                       title="Revenir au mois en cours"
-                      className="hidden lg:inline-flex ml-1 text-[10px] px-2 py-0.5 rounded-full bg-[#ccff00]/20 text-[#ccff00] hover:bg-[#ccff00]/30 font-black transition-colors"
+                      className="hidden lg:inline-flex ml-1 text-[10px] px-2 py-0.5 rounded-full bg-brand/20 text-brand hover:bg-brand/30 font-black transition-colors"
                     >
                       Aujourd'hui
                     </button>
@@ -156,22 +156,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
 
                 {/* Séparateur subtil vertical */}
-                <div className="w-px h-4 sm:h-5 bg-[#233126] mx-0.5 sm:mx-1"></div>
+                <div className="w-px h-4 sm:h-5 bg-surface-3 mx-0.5 sm:mx-1"></div>
 
                 {/* C. Photo de profil de l'utilisateur liée à la forme */}
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                    className="relative flex items-center gap-1.5 p-0.5 rounded-full hover:ring-2 hover:ring-[#ccff00]/50 transition-all active:scale-95"
+                    className="relative flex items-center gap-1.5 p-0.5 rounded-full hover:ring-2 hover:ring-brand/50 transition-all active:scale-95"
                     title={`Profil : ${user.fullName}`}
                   >
                     <img
                       src={avatarImage}
                       alt={user.fullName}
-                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-[#ccff00]/60 shadow-sm"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-brand/60 shadow-sm"
                     />
-                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#131914]"></span>
+                    <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-line"></span>
                   </button>
 
                   {/* Dropdown Menu profil rapide */}
@@ -181,11 +181,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="fixed inset-0 z-40" 
                         onClick={() => setIsProfileMenuOpen(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-56 bg-[#121813] border border-[#233126] rounded-2xl shadow-2xl py-2 z-50 animate-fadeIn text-left">
-                        <div className="px-4 py-2 border-b border-[#1b261d]">
-                          <p className="text-xs font-black text-white truncate">{user.fullName}</p>
-                          <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
-                          <span className="inline-block mt-1 text-[9px] font-black text-[#ccff00] bg-[#ccff00]/15 px-2 py-0.2 rounded-full border border-[#ccff00]/30">
+                      <div className="absolute right-0 mt-2 w-56 bg-surface border border-line rounded-2xl shadow-2xl py-2 z-50 animate-fadeIn text-left">
+                        <div className="px-4 py-2 border-b border-line">
+                          <p className="text-xs font-black text-fg truncate">{user.fullName}</p>
+                          <p className="text-[10px] text-fg-muted truncate">{user.email}</p>
+                          <span className="inline-block mt-1 text-[9px] font-black text-brand bg-brand/15 px-2 py-0.2 rounded-full border border-brand/30">
                             Compte vérifié
                           </span>
                         </div>
@@ -195,10 +195,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                             setIsProfileMenuOpen(false);
                             setCurrentTab('settings');
                           }}
-                          className="w-full px-4 py-2.5 text-xs text-slate-300 hover:text-white hover:bg-[#1a231b] flex items-center justify-between transition-colors"
+                          className="w-full px-4 py-2.5 text-xs text-fg-2 hover:text-fg hover:bg-surface-2 flex items-center justify-between transition-colors"
                         >
                           <span>Gérer mon profil</span>
-                          <span className="text-[10px] text-slate-500">→</span>
+                          <span className="text-[10px] text-fg-muted">→</span>
                         </button>
 
                         <button
@@ -206,10 +206,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                             setIsProfileMenuOpen(false);
                             setCurrentTab('settings');
                           }}
-                          className="w-full px-4 py-2.5 text-xs text-slate-300 hover:text-white hover:bg-[#1a231b] flex items-center justify-between transition-colors"
+                          className="w-full px-4 py-2.5 text-xs text-fg-2 hover:text-fg hover:bg-surface-2 flex items-center justify-between transition-colors"
                         >
                           <span>Tous les paramètres</span>
-                          <span className="text-[10px] text-slate-500">→</span>
+                          <span className="text-[10px] text-fg-muted">→</span>
                         </button>
 
                         {onOpenOnboarding && (
@@ -218,10 +218,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                               setIsProfileMenuOpen(false);
                               onOpenOnboarding();
                             }}
-                            className="w-full px-4 py-2.5 text-xs text-[#ccff00] hover:bg-[#1a231b] flex items-center justify-between transition-colors font-bold"
+                            className="w-full px-4 py-2.5 text-xs text-brand hover:bg-surface-2 flex items-center justify-between transition-colors font-bold"
                           >
                             <span>Reconfigurer le compte (Setup)</span>
-                            <span className="text-[10px] text-[#ccff00]/60">→</span>
+                            <span className="text-[10px] text-brand/60">→</span>
                           </button>
                         )}
 
@@ -231,7 +231,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                               setIsProfileMenuOpen(false);
                               onLockApp();
                             }}
-                            className="w-full px-4 py-2.5 text-xs text-rose-400 hover:bg-[#1a231b] flex items-center justify-between transition-colors border-t border-[#1b261d]"
+                            className="w-full px-4 py-2.5 text-xs text-rose-400 hover:bg-surface-2 flex items-center justify-between transition-colors border-t border-line"
                           >
                             <span>Verrouiller l'accès</span>
                             <span className="text-[10px] text-rose-400/60">→</span>
@@ -248,13 +248,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="hidden sm:flex items-center gap-1.5">
                 <button
                   onClick={cycleTheme}
-                  className="flex items-center gap-1 p-2 rounded-full bg-[#131914] hover:bg-[#1b231a] text-slate-300 hover:text-[#ccff00] border border-[#233126] text-xs font-semibold transition-all active:scale-95"
+                  className="flex items-center gap-1 p-2 rounded-full bg-surface hover:bg-surface-2 text-fg-2 hover:text-brand border border-line text-xs font-semibold transition-all active:scale-95"
                   title={`Thème : ${themeMode === 'system' ? 'Système' : themeMode === 'dark' ? 'Sombre' : 'Clair'}`}
                 >
                   {themeMode === 'system' ? (
-                    <Laptop className="w-3.5 h-3.5 text-[#ccff00]" />
+                    <Laptop className="w-3.5 h-3.5 text-brand" />
                   ) : resolvedTheme === 'dark' ? (
-                    <Moon className="w-3.5 h-3.5 text-[#ccff00]" />
+                    <Moon className="w-3.5 h-3.5 text-brand" />
                   ) : (
                     <Sun className="w-3.5 h-3.5 text-amber-400" />
                   )}
@@ -266,7 +266,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     onClick={onLockApp}
                     title="Verrouiller GesFin"
-                    className="p-2 rounded-full bg-[#131914] hover:bg-[#1b231a] text-[#ccff00] border border-[#ccff00]/30 transition-all active:scale-95"
+                    className="p-2 rounded-full bg-surface hover:bg-surface-2 text-brand border border-brand/30 transition-all active:scale-95"
                   >
                     <Lock className="w-3.5 h-3.5" />
                   </button>
@@ -278,13 +278,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Navigation Bureau / Tablette en pilules élégantes */}
-          <nav className="hidden md:flex space-x-1.5 py-2.5 border-t border-[#1c241e] overflow-x-auto no-scrollbar">
+          <nav className="hidden md:flex space-x-1.5 py-2.5 border-t border-line overflow-x-auto no-scrollbar">
             <button
               onClick={() => setCurrentTab('dashboard')}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 currentTab === 'dashboard'
-                  ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]'
-                  : 'text-slate-300 hover:text-white hover:bg-[#141915]'
+                  ? 'bg-brand text-brand-fg shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)]'
+                  : 'text-fg-2 hover:text-fg hover:bg-surface'
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
@@ -295,8 +295,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setCurrentTab('expenses')}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 currentTab === 'expenses'
-                  ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]'
-                  : 'text-slate-300 hover:text-white hover:bg-[#141915]'
+                  ? 'bg-brand text-brand-fg shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)]'
+                  : 'text-fg-2 hover:text-fg hover:bg-surface'
               }`}
             >
               <Receipt className="w-4 h-4" />
@@ -307,8 +307,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setCurrentTab('savings')}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 currentTab === 'savings'
-                  ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]'
-                  : 'text-slate-300 hover:text-white hover:bg-[#141915]'
+                  ? 'bg-brand text-brand-fg shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)]'
+                  : 'text-fg-2 hover:text-fg hover:bg-surface'
               }`}
             >
               <PiggyBank className="w-4 h-4" />
@@ -319,8 +319,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setCurrentTab('settings')}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 currentTab === 'settings'
-                  ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]'
-                  : 'text-slate-300 hover:text-white hover:bg-[#141915]'
+                  ? 'bg-brand text-brand-fg shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)]'
+                  : 'text-fg-2 hover:text-fg hover:bg-surface'
               }`}
             >
               <Settings className="w-4 h-4" />
