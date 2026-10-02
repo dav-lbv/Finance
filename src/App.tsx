@@ -449,8 +449,8 @@ export default function App() {
         />
       )}
 
-      {/* En-tête (logo, cloche, période, avatar) : uniquement sur le tableau de bord en mobile ; toujours présent sur ordinateur pour la navigation */}
-      <div className={currentTab === 'dashboard' ? '' : 'hidden md:block'}>
+      {/* En-tête de navigation : ordinateur uniquement (sur mobile, le tableau de bord a son propre en-tête et les autres écrans le calendrier) */}
+      <div className="hidden md:block">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}

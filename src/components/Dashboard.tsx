@@ -23,15 +23,14 @@ import {
   formatCurrency, 
   formatDateFr, 
   formatMonthKey, 
-  getPreviousMonthKey 
+  getPreviousMonthKey,
+  getNextMonthKey
 } from '../utils/date';
 import { SettingsSection } from './SettingsPage';
 import { DEFAULT_AVATAR } from '../utils/avatars';
 import { NotificationsModal } from './NotificationsModal';
 import { CATEGORY_CONFIG } from './CategorySelect';
 import { useCountUp } from '../hooks/useCountUp';
-
-const WEEK_LABELS = ['S1', 'S2', 'S3', 'S4', 'S5'];
 
 function formatCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace('.0', '')}M`;
@@ -125,15 +124,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }))
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
-  // Dépenses réelles regroupées par semaine du mois (S1 = jours 1-7, ... S5 = 29+)
-  const weekTotals = [0, 0, 0, 0, 0];
-  currentExpenses.forEach((exp) => {
-    const day = parseInt(exp.date.slice(8, 10), 10) || 1;
-    weekTotals[Math.min(4, Math.floor((day - 1) / 7))] += exp.amount;
-  });
-  const maxWeek = Math.max(...weekTotals, 1);
-  const peakWeek = weekTotals.indexOf(Math.max(...weekTotals));
-
   // Dépenses réelles par jour de la semaine (Lun → Dim)
   const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
   const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
@@ -152,276 +142,227 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const heroValue = balanceView === 'balance' ? netRemaining : totalSavingsAccrued;
   const animatedHero = useCountUp(heroValue);
 
+  const activeProjects = (data.savingsProjects || []).filter((p) => !p.isClosed);
+  const featuredProject = activeProjects[0];
+  const featuredPct = featuredProject && featuredProject.targetAmount > 0
+    ? Math.min(100, Math.round((featuredProject.currentAmount / featuredProject.targetAmount) * 100))
+    : 0;
+
+  const quickActions = [
+    { label: 'Dépense', icon: ArrowUpRight, onClick: onOpenAddExpense },
+    { label: 'Épargne', icon: ArrowDownLeft, onClick: onOpenAddSavings },
+    { label: 'Projets', icon: Target, onClick: () => onNavigateToTab('savings') },
+    { label: 'Plus', icon: LayoutGrid, onClick: () => onNavigateToTab('expenses') },
+  ];
+
   return (
-    <div className="space-y-6 pb-28 stagger max-w-4xl mx-auto">
+    <div className="pb-28 max-w-4xl mx-auto stagger">
 
       {/* ======================================================== */}
-      {/* 1. EN-TÊTE POCKETPAL : AVATAR, GREETING & CLOCHE NOTIF   */}
+      {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
       {/* ======================================================== */}
-      <div className="flex items-center justify-between gap-4 px-1 pt-1">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative shrink-0">
-            <div className="w-12 h-12 rounded-full p-0.5 border border-line-strong bg-surface overflow-hidden flex items-center justify-center">
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-7 rounded-b-[36px] border-b border-line-strong overflow-hidden bg-gradient-to-b from-success/25 via-surface-2 to-surface">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[120%] h-64 rounded-full bg-success/20 blur-3xl pointer-events-none" />
+
+        {/* Ligne du haut : avatar + bienvenue, cloche */}
+        <div className="relative flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('settings')}
+            className="flex items-center gap-3 min-w-0 text-left cursor-pointer"
+            aria-label="Ouvrir mon profil"
+          >
+            <span className="relative shrink-0">
               <img
                 src={avatarImage}
                 alt={data.user.fullName || 'Profil'}
-                className="w-full h-full object-cover rounded-full"
+                className="w-11 h-11 rounded-full object-cover border border-line-strong"
               />
-            </div>
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-app pulse-dot" />
-          </div>
-
-          <div className="min-w-0">
-            <h2 className="text-lg font-black text-fg truncate tracking-tight">
-              Bonjour, {data.user.username || data.user.firstName || data.user.fullName || 'vous'} !
-            </h2>
-            <span className="text-[11px] font-medium text-fg-muted block tracking-wide first-letter:uppercase">
-              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-app pulse-dot" />
             </span>
-          </div>
+            <span className="min-w-0 leading-tight">
+              <span className="block text-[11px] text-fg-muted">Bon retour</span>
+              <span className="block text-sm font-extrabold text-fg truncate">
+                {data.user.username || data.user.firstName || data.user.fullName || 'vous'}
+              </span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsNotificationsOpen(true)}
+            className="w-11 h-11 rounded-full bg-surface-2 border border-line-strong flex items-center justify-center text-fg-2 cursor-pointer"
+            title="Notifications"
+          >
+            <Bell className="w-[18px] h-[18px]" />
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsNotificationsOpen(true)}
-          className="relative w-11 h-11 rounded-full bg-surface border border-line flex items-center justify-center text-fg transition-all hover:border-line-strong cursor-pointer"
-          title="Notifications"
-        >
-          <Bell className="w-5 h-5 text-fg-2" />
-        </button>
-      </div>
-
-      <h1 className="text-[34px] leading-[1.05] font-black tracking-tight text-fg px-1">
-        Aperçu<br />financier
-      </h1>
-
-      {/* ======================================================== */}
-      {/* HERO : SOLDE + ACTIVITÉ HEBDOMADAIRE (BARRES HACHURÉES)   */}
-      {/* ======================================================== */}
-      <div className="relative rounded-[28px] bg-surface border border-line p-5 sm:p-6 overflow-hidden select-none lift">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold text-fg-muted">
-            {balanceView === 'balance' ? 'Solde du mois' : 'Épargne cumulée'}
-          </span>
-          <div className="p-0.5 rounded-full bg-surface-2 border border-line inline-flex items-center">
+        {/* Solde */}
+        <div className="relative mt-6 text-center">
+          <div className="inline-flex p-0.5 rounded-full bg-surface-2 border border-line">
             {(['balance', 'wallet'] as const).map((v) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setBalanceView(v)}
-                className={`px-3 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                className={`px-3.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
                   balanceView === v ? 'bg-brand text-brand-fg' : 'text-fg-muted hover:text-fg'
                 }`}
               >
-                {v === 'balance' ? 'Solde' : 'Épargne'}
+                {v === 'balance' ? 'Solde du mois' : 'Épargne cumulée'}
               </button>
             ))}
           </div>
-        </div>
 
-        <h1 className="text-4xl sm:text-5xl font-black text-fg tracking-tight mt-2 break-words tabular-nums">
-          {formatCurrency(animatedHero, currency)}
-        </h1>
+          <h1 className="mt-3 text-[40px] sm:text-5xl leading-none font-black text-fg tracking-tight tabular-nums break-words">
+            {formatCurrency(animatedHero, currency)}
+          </h1>
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-            balanceView === 'balance' && !isPositiveNet
-              ? 'text-rose-400 border-rose-400/30 bg-rose-400/10'
-              : 'text-success border-success/30 bg-success/10'
-          }`}>
-            {balanceView === 'balance'
-              ? (isPositiveNet ? `${100 - usedRatio}% disponible` : 'Déficit')
-              : `${data.savings.length} versement${data.savings.length > 1 ? 's' : ''}`}
-          </span>
-          <span className="text-[11px] text-fg-muted">{formatMonthKey(selectedMonth)}</span>
-        </div>
-
-        {/* Barres hachurées : dépenses par semaine */}
-        <div className="mt-5 pt-7 flex items-end justify-between gap-2.5 h-40">
-          {weekTotals.map((amount, i) => {
-            const isPeak = i === peakWeek && amount > 0;
-            const h = amount > 0 ? Math.max(14, Math.round((amount / maxWeek) * 100)) : 6;
-            return (
-              <div key={i} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5">
-                <div className="relative w-full flex-1 flex items-end">
-                  <div
-                    className={`grow-up w-full rounded-2xl border ${
-                      isPeak ? 'bg-brand border-brand' : 'hatch bg-surface-2 border-line-strong'
-                    }`}
-                    style={{ height: `${h}%`, animationDelay: `${i * 90}ms` }}
-                  >
-                    {amount > 0 && (
-                      <span className={`absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full whitespace-nowrap text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
-                        isPeak ? 'bg-brand text-brand-fg border-brand' : 'bg-surface-solid text-fg-2 border-line-strong'
-                      }`}>
-                        {formatCompact(amount)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <span className="text-[10px] font-semibold text-fg-muted">{WEEK_LABELS[i]}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ======================================================== */}
-      {/* 4. BOUTONS D'ACTIONS RAPIDES : DÉPENSES, ÉPARGNE, PROJETS */}
-      {/* ======================================================== */}
-      <div className="bg-surface rounded-3xl p-4 sm:p-6 border border-line shadow-xl">
-        <div className="grid grid-cols-4 gap-2 sm:gap-4">
-          
-          {/* Action 1 : DÉPENSES (DEMANDÉ) */}
-          <button
-            type="button"
-            onClick={onOpenAddExpense}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-            title="Ajouter une dépense"
-          >
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-surface-2 border border-line-strong group-hover:border-brand group-hover:bg-surface-3 text-brand flex items-center justify-center transition-all duration-150 shadow-md group-hover:scale-105 active:scale-95">
-              <div className="w-7 h-7 rounded-full bg-brand/15 flex items-center justify-center border border-brand/30">
-                <ArrowUpRight className="w-4 h-4 stroke-[2.8]" />
-              </div>
-            </div>
-            <span className="text-xs font-bold text-fg-2 group-hover:text-fg transition-colors text-center">
-              Dépenses
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-surface-2 border border-line pl-1 pr-1 py-0.5">
+              <button
+                type="button"
+                onClick={() => setSelectedMonth(getPreviousMonthKey(selectedMonth))}
+                className="p-1 rounded-full text-fg-muted hover:text-fg cursor-pointer"
+                aria-label="Mois précédent"
+              >
+                <ChevronRight className="w-3.5 h-3.5 rotate-180" />
+              </button>
+              <span className="px-1 text-[11px] font-bold text-fg capitalize">{formatMonthKey(selectedMonth)}</span>
+              <button
+                type="button"
+                onClick={() => setSelectedMonth(getNextMonthKey(selectedMonth))}
+                className="p-1 rounded-full text-fg-muted hover:text-fg cursor-pointer"
+                aria-label="Mois suivant"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </span>
-          </button>
-
-          {/* Action 2 : ÉPARGNE (DEMANDÉ) */}
-          <button
-            type="button"
-            onClick={onOpenAddSavings}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-            title="Créer une épargne / Versement"
-          >
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-surface-2 border border-line-strong group-hover:border-brand group-hover:bg-surface-3 text-brand flex items-center justify-center transition-all duration-150 shadow-md group-hover:scale-105 active:scale-95">
-              <div className="w-7 h-7 rounded-full bg-brand/15 flex items-center justify-center border border-brand/30">
-                <ArrowDownLeft className="w-4 h-4 stroke-[2.8]" />
-              </div>
-            </div>
-            <span className="text-xs font-bold text-fg-2 group-hover:text-fg transition-colors text-center">
-              Épargne
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+              balanceView === 'balance' && !isPositiveNet
+                ? 'text-rose-400 border-rose-400/30 bg-rose-400/10'
+                : 'text-success border-success/30 bg-success/10'
+            }`}>
+              <TrendingUp className="w-3 h-3" />
+              {balanceView === 'balance'
+                ? (isPositiveNet ? `${100 - usedRatio}% disponible` : 'Déficit')
+                : `${data.savings.length} versement${data.savings.length > 1 ? 's' : ''}`}
             </span>
-          </button>
-
-          {/* Action 3 : PROJETS (DEMANDÉ) */}
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('savings')}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-            title="Voir et créer des projets d'épargne"
-          >
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-surface-2 border border-line-strong group-hover:border-brand group-hover:bg-surface-3 text-brand flex items-center justify-center transition-all duration-150 shadow-md group-hover:scale-105 active:scale-95">
-              <div className="w-7 h-7 rounded-full bg-brand/15 flex items-center justify-center border border-brand/30">
-                <Target className="w-4 h-4 stroke-[2.5]" />
-              </div>
-            </div>
-            <span className="text-xs font-bold text-fg-2 group-hover:text-fg transition-colors text-center">
-              Projets
-            </span>
-          </button>
-
-          {/* Action 4 : HISTORIQUE / PLUS (COMPLÉMENT POCKETPAL) */}
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('expenses')}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-            title="Historique complet des opérations"
-          >
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-surface-2 border border-line-strong group-hover:border-fg/40 group-hover:bg-surface-3 text-fg-2 group-hover:text-fg flex items-center justify-center transition-all duration-150 shadow-md group-hover:scale-105 active:scale-95">
-              <div className="w-7 h-7 rounded-full bg-fg/5 flex items-center justify-center border border-fg/10">
-                <LayoutGrid className="w-4 h-4 stroke-[2.2]" />
-              </div>
-            </div>
-            <span className="text-xs font-bold text-fg-2 group-hover:text-fg transition-colors text-center">
-              Historique
-            </span>
-          </button>
-
-        </div>
-      </div>
-
-      {/* ======================================================== */}
-      {/* 5. HISTORIQUE DES TRANSACTIONS (STYLE SHEET POCKETPAL)    */}
-      {/* ======================================================== */}
-      <div className="bg-surface rounded-3xl p-5 sm:p-6 border border-line shadow-xl space-y-4">
-        
-        {/* Poignée de feuille élégante (Pull indicator bar) */}
-        <div className="w-10 h-1 bg-surface-3 rounded-full mx-auto -mt-1 mb-2" />
-
-        <div className="flex items-center justify-between pb-3 border-b border-line">
-          <h3 className="text-base sm:text-lg font-black text-fg tracking-tight">
-            Transaction history
-          </h3>
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('expenses')}
-            className="text-xs font-extrabold text-brand hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <span>View all</span>
-            <ChevronRight className="w-3.5 h-3.5 stroke-[3]" />
-          </button>
+          </div>
         </div>
 
-        {recentTransactions.length === 0 ? (
-          <div className="text-center py-8 text-fg-muted text-xs">
-            <Receipt className="w-8 h-8 mx-auto mb-2 opacity-40 text-fg-muted" />
-            <p>Aucune transaction enregistrée pour {formatMonthKey(selectedMonth)}.</p>
+        {/* Actions rapides rondes */}
+        <div className="relative mt-7 grid grid-cols-4 gap-2">
+          {quickActions.map(({ label, icon: Icon, onClick }) => (
             <button
-              onClick={onOpenAddExpense}
-              className="mt-3 px-4 py-1.5 rounded-full bg-brand text-brand-fg text-xs font-extrabold cursor-pointer"
+              key={label}
+              type="button"
+              onClick={onClick}
+              className="flex flex-col items-center gap-2 cursor-pointer group"
             >
-              + Ajouter une première dépense
+              <span className="w-14 h-14 rounded-full bg-surface-2 border border-line-strong flex items-center justify-center text-fg shadow-[inset_0_1px_0_var(--glass-edge)] group-hover:bg-surface-3 transition-colors">
+                <Icon className="w-5 h-5" />
+              </span>
+              <span className="text-[11px] font-semibold text-fg-2">{label}</span>
             </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-5 pt-5">
+        {/* Carte promo : projet d'épargne en cours */}
+        {featuredProject ? (
+          <div className="relative rounded-3xl bg-surface border border-line p-4 overflow-hidden">
+            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-success/15 blur-2xl pointer-events-none" />
+            <div className="relative">
+              <p className="text-sm font-extrabold text-fg">Projet en cours</p>
+              <p className="text-[11px] text-fg-muted truncate">{featuredProject.title}</p>
+              <div className="mt-3 h-2 rounded-full bg-surface-3 overflow-hidden">
+                <div className="h-full rounded-full bg-success transition-all duration-700" style={{ width: `${featuredPct}%` }} />
+              </div>
+              <div className="mt-2.5 flex items-center justify-between">
+                <span className="text-[11px] text-fg-muted tabular-nums">
+                  {formatCurrency(featuredProject.currentAmount, currency)} / {formatCurrency(featuredProject.targetAmount, currency)} • {featuredPct}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToTab('savings')}
+                  className="px-4 py-1.5 rounded-full bg-brand text-brand-fg text-[11px] font-black cursor-pointer"
+                >
+                  Voir
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="space-y-2.5">
-            {recentTransactions.map((tx) => {
-              const isExpense = tx.type === 'expense';
-              const config = CATEGORY_CONFIG[tx.category] || {
-                label: tx.category,
-                color: 'text-fg-2',
-                bg: 'bg-surface-3 border-line-strong',
-                icon: Receipt,
-              };
-              const IconComponent = isExpense ? config.icon : PiggyBank;
-
-              return (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-surface-2 hover:bg-surface-2 border border-line-strong transition-all"
-                >
-                  <div className="flex items-center gap-3 min-w-0 pr-3">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border ${
-                      isExpense ? config.bg : 'bg-brand/15 border-brand/30'
-                    }`}>
-                      <IconComponent className={`w-5 h-5 ${isExpense ? config.color : 'text-brand'}`} />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xs sm:text-sm font-bold text-fg truncate">
-                        {tx.title}
-                      </h4>
-                      <div className="flex items-center gap-2 text-[11px] text-fg-muted mt-0.5">
-                        <span>{formatDateFr(tx.date)}</span>
-                        <span>•</span>
-                        <span className="font-medium text-fg-2">{tx.category}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span className={`text-xs sm:text-sm font-black whitespace-nowrap ${
-                    isExpense ? 'text-rose-400' : 'text-brand'
-                  }`}>
-                    {isExpense ? '-' : '+'}{formatCurrency(tx.amount, currency)}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="rounded-3xl bg-surface border border-dashed border-line-strong p-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-extrabold text-fg">Un objectif en tête ?</p>
+              <p className="text-[11px] text-fg-muted">Créez un projet d'épargne et suivez sa progression.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigateToTab('savings')}
+              className="shrink-0 px-4 py-1.5 rounded-full bg-brand text-brand-fg text-[11px] font-black cursor-pointer"
+            >
+              Créer
+            </button>
           </div>
         )}
-      </div>
+
+        {/* Transactions */}
+        <div className="rounded-3xl bg-surface border border-line overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-4 pb-3">
+            <h3 className="text-base font-extrabold text-fg tracking-tight">Transactions</h3>
+            <button
+              type="button"
+              onClick={() => onNavigateToTab('expenses')}
+              className="text-[11px] font-semibold text-fg-muted hover:text-fg cursor-pointer"
+            >
+              Voir tout
+            </button>
+          </div>
+
+          {recentTransactions.length === 0 ? (
+            <div className="text-center px-4 pb-8 pt-2 text-fg-muted text-xs">
+              <Receipt className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              <p>Aucune transaction pour {formatMonthKey(selectedMonth)}.</p>
+              <button
+                onClick={onOpenAddExpense}
+                className="mt-3 px-4 py-1.5 rounded-full bg-brand text-brand-fg text-xs font-extrabold cursor-pointer"
+              >
+                + Ajouter une première dépense
+              </button>
+            </div>
+          ) : (
+            <ul className="divide-y divide-line">
+              {recentTransactions.map((tx) => {
+                const isExpense = tx.type === 'expense';
+                const config = CATEGORY_CONFIG[tx.category];
+                const IconComponent = isExpense ? (config?.icon || Receipt) : PiggyBank;
+                return (
+                  <li key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-10 h-10 rounded-full bg-surface-2 border border-line-strong flex items-center justify-center shrink-0 text-fg-2">
+                        <IconComponent className="w-[18px] h-[18px]" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-fg truncate">{tx.title}</p>
+                        <p className="text-[11px] text-fg-muted truncate">
+                          {isExpense ? tx.category : 'Épargne'} • {formatDateFr(tx.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`text-sm font-black whitespace-nowrap tabular-nums ${isExpense ? 'text-fg' : 'text-success'}`}>
+                      {isExpense ? '-' : '+'}{formatCurrency(tx.amount, currency)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
 
       {/* ======================================================== */}
       {/* 6. 3 CARTES DE MÉTRIQUES RÉELLES FINTECH DU MOIS         */}
@@ -709,6 +650,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </span>
           </div>
         </div>
+
+      </div>
 
       </div>
 

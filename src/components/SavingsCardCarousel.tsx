@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, PanInfo } from 'motion/react';
-import { Check, Lock, PiggyBank, Target } from 'lucide-react';
+import { Check, Lock, Target, Wifi } from 'lucide-react';
 import { SavingsProject } from '../types';
 import { formatCurrency, formatDateFr } from '../utils/date';
 
@@ -31,38 +31,34 @@ const Chip: React.FC<{ light?: boolean }> = ({ light }) => (
   />
 );
 
-const TotalFace: React.FC<{
-  item: Extract<CarouselItem, { kind: 'total' }>;
-  holder: string;
-  year: string;
-}> = ({ item, holder, year }) => (
-  <div className="relative h-full rounded-[26px] p-5 overflow-hidden text-white bg-gradient-to-br from-[#34343c] via-[#16161a] to-[#050506] border border-white/10 flex flex-col justify-between">
-    <div className="absolute -top-16 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-    <div className="relative flex items-start justify-between">
-      <div className="flex items-center gap-2">
-        <span className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center">
-          <PiggyBank className="w-4 h-4" />
-        </span>
-        <div className="leading-tight">
-          <span className="block text-[9px] font-bold uppercase tracking-widest text-white/50">Compte d'épargne</span>
-          <span className="block text-xs font-extrabold">Total général</span>
-        </div>
-      </div>
-      <Chip />
-    </div>
+/** Puce argentée avec symbole sans contact, comme sur une carte bancaire. */
+const ContactlessChip: React.FC = () => (
+  <div className="relative w-12 h-9 rounded-lg border border-white/30 bg-gradient-to-br from-[#e6e6ec] via-[#a9a9b4] to-[#6f6f7a] flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+    <span className="absolute inset-x-2 top-1/2 h-px bg-black/20" />
+    <span className="absolute inset-y-2 left-1/2 w-px bg-black/20" />
+    <Wifi className="relative w-5 h-5 rotate-90 text-[#0a0a0c]" strokeWidth={2.4} />
+  </div>
+);
 
-    <div className="relative">
-      <p className="text-[13px] tracking-[0.28em] text-white/70 font-semibold">•••• •••• •••• {year}</p>
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <span className="block text-[9px] uppercase tracking-widest text-white/45">Titulaire</span>
-          <span className="block text-xs font-bold truncate uppercase">{holder || 'Mon épargne'}</span>
-        </div>
-        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/10 border border-white/15 whitespace-nowrap">
-          {item.count} versement{item.count > 1 ? 's' : ''}
-        </span>
-      </div>
+const TotalFace: React.FC = () => (
+  <div className="relative h-full rounded-[26px] overflow-hidden text-white bg-gradient-to-br from-[#262d3b] via-[#121724] to-[#070a12] border border-white/10">
+    <div className="absolute -top-20 -right-14 w-56 h-56 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+    {/* Filigrane vertical : seul élément de texte, comme sur la carte de référence */}
+    <span
+      className="absolute left-3.5 top-1/2 text-[30px] font-black tracking-[0.1em] select-none pointer-events-none"
+      style={{
+        writingMode: 'vertical-rl',
+        transform: 'translateY(-50%) rotate(180deg)',
+        color: 'transparent',
+        WebkitTextStroke: '1.2px rgba(255,255,255,0.2)',
+      }}
+    >
+      ÉPARGNE
+    </span>
+    <div className="absolute right-5 top-1/2 -translate-y-1/2">
+      <ContactlessChip />
     </div>
+    <span className="absolute right-5 bottom-4 text-[26px] font-black italic tracking-tight leading-none">GesFin</span>
   </div>
 );
 
@@ -174,19 +170,18 @@ export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
               initial={false}
               animate={{
                 x: `${offset * 84}%`,
-                scale: 1 - Math.min(abs, 2) * 0.13,
-                rotateY: offset === 0 ? 0 : offset > 0 ? -32 : 32,
-                opacity: hidden ? 0 : 1 - abs * 0.32,
-                filter: abs === 0 ? 'brightness(1)' : 'brightness(0.72)',
+                scale: 1 - Math.min(abs, 2) * 0.12,
+                rotateY: offset === 0 ? 0 : offset > 0 ? -8 : 8,
+                opacity: hidden ? 0 : 1 - Math.max(0, abs - 1) * 0.5,
               }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               onClick={() => offset !== 0 && go(i)}
               className="absolute top-0 left-1/2 -ml-[39%] w-[78%] h-full"
               style={{ zIndex: 10 - abs, pointerEvents: hidden ? 'none' : 'auto', transformStyle: 'preserve-3d' }}
             >
-              <div className="h-full shadow-[0_24px_50px_rgba(0,0,0,0.35)] rounded-[26px]">
+              <div className="relative h-full shadow-[0_24px_50px_rgba(0,0,0,0.35)] rounded-[26px]">
                 {item.kind === 'total' ? (
-                  <TotalFace item={item} holder={holder} year={year} />
+                  <TotalFace />
                 ) : (
                   <ProjectFace
                     project={item.project}
@@ -194,14 +189,28 @@ export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
                     onClose={() => onCloseProject(item.project.id)}
                   />
                 )}
+                {/* Voile : les cartes voisines apparaissent estompées */}
+                <motion.div
+                  initial={false}
+                  animate={{ opacity: abs === 0 ? 0 : 0.72 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 rounded-[26px] bg-[#0b0d12] pointer-events-none"
+                />
               </div>
             </motion.div>
           );
         })}
       </motion.div>
 
+      {/* Numéro masqué sous la carte, comme sur la carte de référence */}
+      <p className={`mt-4 text-center text-[13px] text-fg-2 font-semibold tabular-nums ${items[index]?.kind === 'project' ? 'tracking-normal' : 'tracking-[0.3em]'}`}>
+        {items[index]?.kind === 'project'
+          ? `Créé le ${formatDateFr((items[index] as Extract<CarouselItem, { kind: 'project' }>).project.createdAt)}`
+          : `•••• •••• •••• ${year}`}
+      </p>
+
       {/* Indicateurs de position */}
-      <div className="flex items-center justify-center gap-1.5 mt-4">
+      <div className="flex items-center justify-center gap-1.5 mt-3">
         {items.map((item, i) => (
           <button
             key={item.id}
