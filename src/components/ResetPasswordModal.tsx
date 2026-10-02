@@ -119,7 +119,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                   Email vérifié du compte
                 </span>
                 <span className="text-sm font-black text-white truncate block">
-                  {user.email || 'davypapet@gmail.com'}
+                  {user.email || 'votre adresse e-mail'}
                 </span>
               </div>
             </div>

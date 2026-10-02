@@ -45,6 +45,9 @@ export interface MonthlyBudget {
 }
 
 export interface UserProfile {
+  firstName?: string;
+  lastName?: string;
+  username?: string;
   fullName: string;
   phone: string;
   email: string;

@@ -60,7 +60,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   onContributeToSavingsProject,
 }) => {
   const currency = data.user.currency || 'FCFA';
-  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 750000;
+  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
 
   // Onglet actif : 'treasury' (Trésorerie générale) ou 'projects' (Projets & Objectifs)
   const [savingsTab, setSavingsTab] = useState<'treasury' | 'projects'>('treasury');

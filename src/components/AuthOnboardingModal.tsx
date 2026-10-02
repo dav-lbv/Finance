@@ -28,18 +28,19 @@ import { ANIMAL_AVATARS, DEFAULT_AVATAR } from '../utils/avatars';
 
 interface AuthOnboardingModalProps {
   isOpen: boolean;
+  /** Si true, l'assistant ne peut pas être fermé (première configuration) */
+  required?: boolean;
   onClose: () => void;
   currentUser: UserProfile;
   currentSecurity: SecuritySettings;
   onComplete: (user: UserProfile, security: SecuritySettings) => void;
 }
 
-type OnboardingStep = 'login' | 'verify_email' | 'user_info' | 'salary' | 'theme' | 'security' | 'success';
-
-const PRESET_AVATARS = ANIMAL_AVATARS.map(a => a.url);
+type OnboardingStep = 'user_info' | 'salary' | 'theme' | 'security' | 'success';
 
 export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   isOpen,
+  required = false,
   onClose,
   currentUser,
   currentSecurity,
@@ -47,24 +48,19 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
 }) => {
   const { themeMode, setThemeMode } = useTheme();
 
-  const [step, setStep] = useState<OnboardingStep>('login');
-  
-  // Login & Email verification state
-  const [authProvider, setAuthProvider] = useState<'google' | 'apple' | 'email'>(currentUser.authProvider || 'google');
-  const [emailInput, setEmailInput] = useState(currentUser.email || '');
-  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
-  const [generatedCode, setGeneratedCode] = useState('749210');
-  const [emailSentToast, setEmailSentToast] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [verifyError, setVerifyError] = useState('');
+  const [step, setStep] = useState<OnboardingStep>('user_info');
 
   // User Profile configuration state
-  const [fullName, setFullName] = useState(currentUser.fullName || 'Davy Papet');
-  const [phone, setPhone] = useState(currentUser.phone || '+225 07 42 78 91');
-  const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl || PRESET_AVATARS[0]);
+  const [firstName, setFirstName] = useState(currentUser.firstName || '');
+  const [lastName, setLastName] = useState(currentUser.lastName || '');
+  const [username, setUsername] = useState(currentUser.username || '');
+  const [phone, setPhone] = useState(currentUser.phone || '');
+  const [emailInput, setEmailInput] = useState(currentUser.email || '');
+  const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl || DEFAULT_AVATAR);
+  const [infoError, setInfoError] = useState('');
 
   // Salary & Currency state
-  const [defaultSalary, setDefaultSalary] = useState(currentUser.defaultSalary?.toString() || '750000');
+  const [defaultSalary, setDefaultSalary] = useState(currentUser.defaultSalary ? currentUser.defaultSalary.toString() : '');
   const [currency, setCurrency] = useState(currentUser.currency || 'FCFA');
 
   // Theme selection state
@@ -81,77 +77,6 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   const [securityError, setSecurityError] = useState('');
 
   if (!isOpen) return null;
-
-  // Handle Social Login
-  const handleSocialLogin = (provider: 'google' | 'apple') => {
-    setAuthProvider(provider);
-    if (provider === 'google') {
-      setEmailInput(currentUser.email || 'davypapet@gmail.com');
-    } else {
-      setEmailInput('davypapet@icloud.com');
-    }
-    // Proceed directly to user configuration
-    setStep('user_info');
-  };
-
-  // Handle Send Verification Email
-  const handleSendVerificationEmail = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput || !emailInput.includes('@')) return;
-    
-    // Generate 6 digit code
-    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(randomCode);
-    setAuthProvider('email');
-    setEmailSentToast(true);
-    setVerifyError('');
-    setStep('verify_email');
-
-    setTimeout(() => {
-      setEmailSentToast(false);
-    }, 8000);
-  };
-
-  // Handle verification code change
-  const handleDigitChange = (index: number, val: string) => {
-    if (val.length > 1) {
-      val = val.slice(-1);
-    }
-    const newCode = [...verificationCode];
-    newCode[index] = val;
-    setVerificationCode(newCode);
-
-    // Auto move to next input
-    if (val && index < 5) {
-      const nextInput = document.getElementById(`code-digit-${index + 1}`);
-      nextInput?.focus();
-    }
-
-    // Check if complete
-    const fullCode = newCode.join('');
-    if (fullCode.length === 6) {
-      validateCode(fullCode);
-    }
-  };
-
-  const validateCode = (enteredCode: string) => {
-    setIsVerifying(true);
-    setVerifyError('');
-    setTimeout(() => {
-      setIsVerifying(false);
-      if (enteredCode === generatedCode || enteredCode === '123456') {
-        setStep('user_info');
-      } else {
-        setVerifyError('Code de confirmation incorrect. Veuillez réessayer.');
-      }
-    }, 600);
-  };
-
-  const handleAutoFillCode = () => {
-    const digits = generatedCode.split('');
-    setVerificationCode(digits);
-    validateCode(generatedCode);
-  };
 
   // Handle File Upload for profile picture
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,18 +108,35 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
     setStep('success');
   };
 
+  const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
+  // Valide l'étape d'identité avant de passer à la suite
+  const handleInfoNext = () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      setInfoError('Le prénom et le nom sont obligatoires.');
+      return;
+    }
+    if (emailInput.trim() && !/^\S+@\S+\.\S+$/.test(emailInput.trim())) {
+      setInfoError("L'adresse e-mail n'est pas valide.");
+      return;
+    }
+    setInfoError('');
+    setStep('salary');
+  };
+
   // Final Complete
   const handleFinalSubmit = () => {
     const updatedUser: UserProfile = {
       ...currentUser,
-      fullName: fullName.trim() || 'Utilisateur GesFin',
-      email: emailInput.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      username: username.trim(),
+      fullName: fullName,
+      email: emailInput.trim().toLowerCase(),
       phone: phone.trim(),
-      defaultSalary: parseFloat(defaultSalary) || 750000,
+      defaultSalary: parseFloat(defaultSalary) || 0,
       currency,
       avatarUrl,
-      authProvider,
-      isEmailVerified: true,
       isOnboarded: true,
       themePreference: selectedTheme,
     };
@@ -214,29 +156,6 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      {/* Toast notification de simulation d'email */}
-      {emailSentToast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-60 w-11/12 max-w-md bg-[#131b14] border-2 border-[#ccff00] text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-3 animate-bounce">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#ccff00] text-black flex items-center justify-center font-black">
-              <Mail className="w-4 h-4 text-black" />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-white">E-mail de confirmation reçu !</p>
-              <p className="text-xs text-slate-300">
-                Code de vérification : <span className="font-mono font-black text-[#ccff00] tracking-widest text-sm">{generatedCode}</span>
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleAutoFillCode}
-            className="px-2.5 py-1 rounded-full bg-[#ccff00] text-black font-extrabold text-[11px] hover:bg-[#d9ff33] active:scale-95 transition-all shadow-sm"
-          >
-            Remplir
-          </button>
-        </div>
-      )}
-
       <div 
         className="w-full max-w-xl bg-[#0e120f] border border-[#232f26] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
@@ -257,17 +176,19 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-[#1f2821] transition-colors"
-            title="Fermer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {!required && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-[#1f2821] transition-colors"
+              title="Fermer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Progress bar (hidden on success or login) */}
-        {step !== 'login' && step !== 'verify_email' && step !== 'success' && (
+        {step !== 'success' && (
           <div className="w-full bg-[#161d17] h-1.5 flex">
             <div 
               className="bg-gradient-to-r from-[#ccff00] to-[#10b981] h-full transition-all duration-300"
@@ -283,159 +204,6 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
 
         {/* MODAL CONTENT PER STEP */}
         <div className="p-5 sm:p-7 overflow-y-auto max-h-[78vh]">
-
-          {/* ======================================================== */}
-          {/* STEP 0: PAGE DE CONNEXION (Google, Apple, Email)         */}
-          {/* ======================================================== */}
-          {step === 'login' && (
-            <div className="space-y-6 text-center animate-fadeIn">
-              <div className="max-w-sm mx-auto">
-                <div className="w-16 h-16 rounded-3xl bg-[#172219] border border-[#2b3b2e] flex items-center justify-center mx-auto mb-4 shadow-[0_0_25px_rgba(204,255,0,0.2)]">
-                  <Sparkles className="w-8 h-8 text-[#ccff00]" />
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  Bienvenue sur GesFin
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
-                  Connectez-vous pour configurer et synchroniser votre espace financier personnel.
-                </p>
-              </div>
-
-              {/* Social Login Options */}
-              <div className="space-y-3 max-w-sm mx-auto">
-                {/* Google Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('google')}
-                  className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md cursor-pointer"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                  </svg>
-                  <span>Continuer avec Google</span>
-                </button>
-
-                {/* Apple Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('apple')}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#1b221d] hover:bg-[#232c25] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 border border-[#2e3b30] transition-all active:scale-95 shadow-md cursor-pointer"
-                >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 170 170">
-                    <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.69-7.85-12-14.43-5.64-8.52-10.22-18.72-13.73-30.6-3.52-11.88-5.28-23.07-5.28-33.56 0-14.59 3.69-26.68 11.08-36.27 7.38-9.59 16.59-14.48 27.62-14.67 4.13 0 9.07 1.05 14.81 3.17 5.75 2.12 9.47 3.24 11.17 3.35 1.52-.11 5.37-1.29 11.54-3.53 6.18-2.24 11.03-3.24 14.56-3 10.88.54 19.8 4.67 26.76 12.39-9.57 5.76-14.24 13.92-14 24.47.24 8.27 3.37 15.28 9.39 21.03 6.03 5.75 13.26 9.03 21.71 9.83-2.18 6.42-4.8 12.63-7.86 18.63zM119.22 33.15c0-6.75 2.45-13.28 7.35-19.59 4.9-6.31 11.13-10.56 18.69-12.76.65 1.52.98 3.15.98 4.9 0 6.64-2.55 13.23-7.66 19.78-5.11 6.54-11.41 10.74-18.89 12.61-.1-.66-.47-2.31-.47-4.94z"/>
-                  </svg>
-                  <span>Continuer avec Apple</span>
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 max-w-sm mx-auto">
-                <div className="flex-1 h-px bg-[#232f26]"></div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  ou avec votre e-mail
-                </span>
-                <div className="flex-1 h-px bg-[#232f26]"></div>
-              </div>
-
-              {/* Email Entry Form */}
-              <form onSubmit={handleSendVerificationEmail} className="space-y-3 max-w-sm mx-auto text-left">
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                    Adresse e-mail
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="email"
-                      required
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="exemple@domaine.com"
-                      className="w-full bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-2xl bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Envoyer un code de confirmation</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-
-              <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
-                Un code à 6 chiffres sera envoyé à votre adresse pour valider votre identité en toute sécurité.
-              </p>
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* STEP 0.5: VÉRIFICATION E-MAIL DU CODE À 6 CHIFFRES       */}
-          {/* ======================================================== */}
-          {step === 'verify_email' && (
-            <div className="space-y-6 text-center animate-fadeIn max-w-sm mx-auto">
-              <div>
-                <button
-                  onClick={() => setStep('login')}
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-3 transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Changer d'e-mail</span>
-                </button>
-                <h2 className="text-xl font-black text-white">Vérification de l'e-mail</h2>
-                <p className="text-xs text-slate-300 mt-1">
-                  Saisissez le code à 6 chiffres envoyé à <span className="text-[#ccff00] font-bold">{emailInput}</span>
-                </p>
-              </div>
-
-              {/* 6 Digit Input Boxes */}
-              <div className="flex justify-between gap-1.5 sm:gap-2">
-                {verificationCode.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`code-digit-${index}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleDigitChange(index, e.target.value)}
-                    className="w-10 sm:w-12 h-12 sm:h-14 rounded-2xl bg-[#141b15] border-2 border-[#243327] focus:border-[#ccff00] text-center text-lg sm:text-xl font-black text-white focus:outline-none transition-all shadow-inner"
-                  />
-                ))}
-              </div>
-
-              {verifyError && (
-                <p className="text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl">
-                  {verifyError}
-                </p>
-              )}
-
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={handleAutoFillCode}
-                  className="py-2.5 px-4 rounded-xl bg-[#172219] hover:bg-[#1e2d21] border border-[#2b3d2e] text-[#ccff00] text-xs font-bold transition-all"
-                >
-                  Remplir automatiquement le code : {generatedCode}
-                </button>
-
-                <p className="text-[11px] text-slate-400">
-                  Vous n'avez pas reçu le code ?{' '}
-                  <button 
-                    onClick={handleSendVerificationEmail}
-                    className="text-[#ccff00] hover:underline font-bold"
-                  >
-                    Renvoyer
-                  </button>
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* ======================================================== */}
           {/* STEP 1: INFORMATIONS UTILISATEUR & PHOTO DE PROFIL       */}
@@ -513,69 +281,98 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
 
               {/* Formulaire Textuel */}
               <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1">
-                    Nom complet
+                    Prénom <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Davy Papet"
-                      className="w-full bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Prénom"
+                      className="bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
                     />
                   </div>
                 </div>
-
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Nom <span className="text-rose-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Nom"
+                      className="bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Pseudo
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Pseudo (optionnel)"
+                      className="bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Numéro de téléphone
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+225 07 42 78 91"
-                        className="w-full bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
-                      />
-                    </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Numéro de téléphone
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Téléphone (optionnel)"
+                      className="bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    />
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Adresse e-mail
-                    </label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="email"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder="davypapet@gmail.com"
-                        className="w-full bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
-                      />
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    Adresse e-mail
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="E-mail (optionnel)"
+                      className="bg-[#141b15] border border-[#263529] focus:border-[#ccff00] rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+                    />
                   </div>
+                </div>
                 </div>
               </div>
 
+              {infoError && (
+                <p className="text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl">
+                  {infoError}
+                </p>
+              )}
+
               {/* Navigation buttons */}
-              <div className="flex items-center justify-between pt-3">
+              <div className="flex items-center justify-end pt-3">
                 <button
                   type="button"
-                  onClick={() => setStep('login')}
-                  className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white"
-                >
-                  Retour
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep('salary')}
+                  onClick={handleInfoNext}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#d9ff33] text-black font-extrabold text-xs sm:text-sm shadow-md active:scale-95 transition-all"
                 >
                   <span>Suivant : Salaire & Devise</span>
@@ -614,7 +411,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       required
                       value={defaultSalary}
                       onChange={(e) => setDefaultSalary(e.target.value)}
-                      placeholder="750000"
+                      placeholder="Ex : 500000"
                       className="w-full bg-[#18211a] border border-[#2b3d2e] focus:border-[#ccff00] rounded-2xl pl-11 pr-16 py-3 text-base sm:text-lg font-black text-white focus:outline-none"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-[#ccff00]">
@@ -737,7 +534,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       <div className="h-2 w-16 bg-[#253227] rounded-full"></div>
                       <div className="h-2 w-8 bg-[#ccff00] rounded-full"></div>
                     </div>
-                    <div className="text-sm font-black text-white">750 000 FCFA</div>
+                    <div className="h-3 w-24 bg-[#ccff00]/30 rounded-full"></div>
                     <div className="flex gap-1.5 pt-1">
                       <div className="h-4 w-12 bg-[#ccff00]/20 rounded-md"></div>
                       <div className="h-4 w-12 bg-[#1b251d] rounded-md"></div>
@@ -777,7 +574,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       <div className="h-2 w-16 bg-slate-200 rounded-full"></div>
                       <div className="h-2 w-8 bg-emerald-500 rounded-full"></div>
                     </div>
-                    <div className="text-sm font-black text-slate-900">750 000 FCFA</div>
+                    <div className="h-3 w-24 bg-emerald-300 rounded-full"></div>
                     <div className="flex gap-1.5 pt-1">
                       <div className="h-4 w-12 bg-emerald-100 rounded-md"></div>
                       <div className="h-4 w-12 bg-slate-100 rounded-md"></div>
@@ -1004,7 +801,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                 <div className="flex items-center justify-between text-xs pb-2 border-b border-[#1f2821]">
                   <span className="text-slate-400">Salaire mensuel</span>
                   <span className="font-extrabold text-[#ccff00]">
-                    {formatCurrency(parseFloat(defaultSalary) || 750000, currency)}
+                    {formatCurrency(parseFloat(defaultSalary) || 0, currency)}
                   </span>
                 </div>
 

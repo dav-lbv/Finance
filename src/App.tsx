@@ -48,6 +48,9 @@ export default function App() {
   const [isSavingsModalOpen, setIsSavingsModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
+  // Première utilisation : l'assistant de configuration est obligatoire
+  const needsOnboarding = !data.user.isOnboarded;
+
   // Navigation fluide avec support des sous-sections de paramètres
   const handleNavigateToTab = (tab: 'expenses' | 'savings' | 'settings', section?: SettingsSection) => {
     if (tab === 'settings' && section) {
@@ -393,7 +396,7 @@ export default function App() {
     saveAppData(updated);
   };
 
-  // Réinitialisation aux données d'exemple
+  // Réinitialisation complète : base vierge, l'assistant de configuration se relance
   const handleResetData = () => {
     const initial = getDefaultData();
     setData(initial);
@@ -508,13 +511,15 @@ export default function App() {
 
       {/* Modal Assistant de Connexion & Onboarding Setup */}
       <AuthOnboardingModal
-        isOpen={isOnboardingOpen}
+        isOpen={isOnboardingOpen || needsOnboarding}
+        required={needsOnboarding}
         onClose={() => setIsOnboardingOpen(false)}
         currentUser={data.user}
         currentSecurity={data.security}
         onComplete={(updatedUser, updatedSecurity) => {
-          handleUpdateUser(updatedUser);
-          handleUpdateSecurity(updatedSecurity);
+          const updated: AppData = { ...data, user: updatedUser, security: updatedSecurity };
+          setData(updated);
+          saveAppData(updated);
           setIsOnboardingOpen(false);
         }}
       />
