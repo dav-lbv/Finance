@@ -48,6 +48,7 @@ export default function App() {
   // Modales
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isSavingsModalOpen, setIsSavingsModalOpen] = useState(false);
+  const [savingsModalProjectId, setSavingsModalProjectId] = useState<string | undefined>(undefined);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Première utilisation : l'assistant de configuration est obligatoire
@@ -486,7 +487,10 @@ export default function App() {
             setSelectedMonth={setSelectedMonth}
             onNavigateToTab={handleNavigateToTab}
             onOpenAddExpense={() => setIsExpenseModalOpen(true)}
-            onOpenAddSavings={() => setIsSavingsModalOpen(true)}
+            onOpenAddSavings={() => {
+              setSavingsModalProjectId(undefined);
+              setIsSavingsModalOpen(true);
+            }}
             onOpenOnboarding={() => setIsOnboardingOpen(true)}
           />
         )}
@@ -513,7 +517,10 @@ export default function App() {
             setSelectedMonth={setSelectedMonth}
             onAddSavings={handleAddSavings}
             onDeleteSavings={handleDeleteSavings}
-            onOpenAddModal={() => setIsSavingsModalOpen(true)}
+            onOpenAddModal={(projectId) => {
+              setSavingsModalProjectId(projectId);
+              setIsSavingsModalOpen(true);
+            }}
             onAddSavingsProject={handleAddSavingsProject}
             onUpdateSavingsProject={handleUpdateSavingsProject}
             onDeleteSavingsProject={handleDeleteSavingsProject}
@@ -586,6 +593,7 @@ export default function App() {
         selectedMonth={selectedMonth}
         currency={appCurrency}
         projects={data.savingsProjects || []}
+        initialProjectId={savingsModalProjectId}
         onContributeToProject={handleContributeToSavingsProject}
         onOpenCreateProject={() => {
           setCurrentTab('savings');

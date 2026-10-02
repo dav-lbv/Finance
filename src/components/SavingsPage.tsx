@@ -1,30 +1,14 @@
-import React, { useState } from 'react';
-import { 
-  PiggyBank, 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Trash2, 
-  TrendingUp, 
-  Wallet,
-  ChevronLeft,
-  ChevronRight,
-  Target,
-  ArrowRight
-} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { ArrowLeft, History, PiggyBank, Plus, Target, Trash2 } from 'lucide-react';
 import { AppData, SavingsDeposit, SavingsProject } from '../types';
-import { 
-  formatCurrency, 
-  formatDateFr, 
-  formatMonthKey, 
-  getCalendarGrid, 
-  FRENCH_DAYS_SHORT,
-  getPreviousMonthKey,
-  getNextMonthKey
-} from '../utils/date';
-import { SavingsFintechCard } from './SavingsFintechCard';
+import { formatCurrency, formatDateFr, formatMonthKey } from '../utils/date';
+import { useCountUp } from '../hooks/useCountUp';
 import { SavingsModal } from './SavingsModal';
 import { SavingsDayTimeline } from './SavingsDayTimeline';
 import { SavingsProjectsSection } from './SavingsProjectsSection';
+import { SavingsCardCarousel, CarouselItem } from './SavingsCardCarousel';
+import { SavingsHistoryView } from './SavingsHistoryView';
 
 interface SavingsPageProps {
   data: AppData;
@@ -33,7 +17,8 @@ interface SavingsPageProps {
   setSelectedMonth: (month: string) => void;
   onAddSavings: (deposit: Omit<SavingsDeposit, 'id'>) => void;
   onDeleteSavings: (depositId: string) => void;
-  onOpenAddModal?: () => void;
+  /** Ouvre la fenêtre de versement ; `projectId` présélectionne un projet */
+  onOpenAddModal?: (projectId?: string) => void;
   onAddSavingsProject?: (project: Omit<SavingsProject, 'id' | 'createdAt' | 'isClosed'>) => void;
   onUpdateSavingsProject?: (project: SavingsProject) => void;
   onDeleteSavingsProject?: (projectId: string) => void;
@@ -48,14 +33,37 @@ interface SavingsPageProps {
   ) => void;
 }
 
+type View = 'home' | 'projects' | 'history';
+
+const DEPOSITS_STEP = 5;
+
+/** Bouton d'action rond sous le carrousel */
+const RoundAction: React.FC<{
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  badge?: number;
+}> = ({ label, onClick, children, badge }) => (
+  <button type="button" onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer group">
+    <span className="relative w-14 h-14 rounded-full bg-brand text-brand-fg flex items-center justify-center shadow-[0_10px_26px_rgba(var(--brand-rgb),0.25)] group-hover:scale-105 transition-transform">
+      {children}
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-surface-solid text-fg border border-line-strong text-[10px] font-black flex items-center justify-center">
+          {badge}
+        </span>
+      )}
+    </span>
+    <span className="text-[11px] font-semibold text-fg-2">{label}</span>
+  </button>
+);
+
 export const SavingsPage: React.FC<SavingsPageProps> = ({
   data,
   selectedMonth,
   selectedDate,
-  setSelectedMonth,
-  onAddSavings,
   onDeleteSavings,
   onOpenAddModal,
+  onAddSavings,
   onAddSavingsProject,
   onUpdateSavingsProject,
   onDeleteSavingsProject,
@@ -65,430 +73,200 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   const currency = data.user.currency || 'FCFA';
   const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
 
-  // Onglet actif : 'treasury' (Trésorerie générale) ou 'projects' (Projets & Objectifs)
-  const [savingsTab, setSavingsTab] = useState<'treasury' | 'projects'>('treasury');
-
-  // État modal local si onOpenAddModal n'est pas fourni par le parent
+  const [view, setView] = useState<View>('home');
+  const [cardIndex, setCardIndex] = useState(0);
+  const [visibleDeposits, setVisibleDeposits] = useState(DEPOSITS_STEP);
+  const [toast, setToast] = useState<string | null>(null);
   const [isLocalModalOpen, setIsLocalModalOpen] = useState(false);
+  const [localModalProject, setLocalModalProject] = useState<string | undefined>(undefined);
 
-  const handleOpenAddModal = () => {
-    if (onOpenAddModal) {
-      onOpenAddModal();
-    } else {
+  const allProjects = data.savingsProjects || [];
+  const activeProjects = allProjects.filter((p) => !p.isClosed);
+  const closedCount = allProjects.length - activeProjects.length;
+
+  // Calculs d'épargne
+  const totalSavings = data.savings.reduce((acc, d) => acc + d.amount, 0);
+  const monthTotalSavings = data.savings
+    .filter((d) => d.date.startsWith(selectedMonth))
+    .reduce((acc, d) => acc + d.amount, 0);
+  const savingsRate = salaryReceived > 0 ? Math.round((monthTotalSavings / salaryReceived) * 100) : 0;
+
+  // Cartes du carrousel : 1re = total ; ensuite un projet en cours = une carte
+  const items: CarouselItem[] = [
+    { kind: 'total', id: 'total', total: totalSavings, monthTotal: monthTotalSavings, count: data.savings.length },
+    ...activeProjects.map((project) => ({ kind: 'project' as const, id: project.id, project })),
+  ];
+  const safeIndex = Math.min(cardIndex, items.length - 1);
+  const focused = items[safeIndex];
+  const focusedProject = focused.kind === 'project' ? focused.project : null;
+
+  // Carte affichée : montant animé au changement de carte
+  const focusedAmount = focused.kind === 'total' ? totalSavings : focused.project.currentAmount;
+  const animatedAmount = useCountUp(focusedAmount, 700);
+  const focusedLabel = focused.kind === 'total' ? 'Total épargné' : focused.project.title;
+
+  // Revenir sur la nouvelle carte quand un projet vient d'être créé
+  const projectCountOnLeave = useRef(activeProjects.length);
+  useEffect(() => {
+    if (view === 'projects') projectCountOnLeave.current = activeProjects.length;
+  }, [view, activeProjects.length]);
+  useEffect(() => {
+    if (view === 'home' && activeProjects.length > projectCountOnLeave.current) {
+      setCardIndex(1); // les nouveaux projets sont ajoutés en tête de liste
+      projectCountOnLeave.current = activeProjects.length;
+    }
+  }, [view, activeProjects.length]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const openDeposit = (projectId?: string) => {
+    if (onOpenAddModal) onOpenAddModal(projectId);
+    else {
+      setLocalModalProject(projectId);
       setIsLocalModalOpen(true);
     }
   };
 
-  // Calculs Épargne
-  const totalSavings = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
-  const monthDeposits = data.savings.filter(s => s.date.startsWith(selectedMonth));
-  const monthTotalSavings = monthDeposits.reduce((acc, curr) => acc + curr.amount, 0);
-  const savingsRate = salaryReceived > 0 ? Math.round((monthTotalSavings / salaryReceived) * 100) : 0;
+  const handleCloseProject = (projectId: string) => {
+    const title = allProjects.find((p) => p.id === projectId)?.title || 'Projet';
+    onCloseSavingsProject?.(projectId, true);
+    setCardIndex(0);
+    setToast(`🎉 « ${title} » est clôturé : objectif atteint, projet archivé dans l'historique.`);
+  };
 
-  // Projets actifs
-  const activeProjects = (data.savingsProjects || []).filter((p) => !p.isClosed);
+  // Liste affichée sous les actions : tous les versements ou ceux du projet
+  const listSource = (focusedProject ? data.savings.filter((d) => d.projectId === focusedProject.id) : data.savings)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const shownDeposits = listSource.slice(0, visibleDeposits);
 
-  const sortedDeposits = [...data.savings].sort((a, b) => b.date.localeCompare(a.date));
+  useEffect(() => {
+    setVisibleDeposits(DEPOSITS_STEP);
+  }, [focused.id]);
 
-  // Pagination des versements d'épargne (strictement 5 lignes maxi, avec flèches de navigation quand > 5)
-  const [depositsPage, setDepositsPage] = useState(1);
-  const DEPOSITS_PER_PAGE = 5;
-  const totalDepositPages = Math.ceil(sortedDeposits.length / DEPOSITS_PER_PAGE) || 1;
-  const paginatedDeposits = sortedDeposits.slice(
-    (depositsPage - 1) * DEPOSITS_PER_PAGE,
-    depositsPage * DEPOSITS_PER_PAGE
-  );
-
-  return (
-    <div className="space-y-6 pb-28 stagger relative">
-      {/* ============================================================== */}
-      {/* EN-TÊTE ÉPURÉ DE LA PAGE (SANS COMMUTATEUR MANUEL)             */}
-      {/* ============================================================== */}
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-line">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
-            Gestion de l'Épargne
-          </h1>
-          <p className="text-fg-muted text-xs sm:text-sm mt-0.5">
-            Suivi du capital épargné en <span className="font-bold text-brand">{formatMonthKey(selectedMonth)}</span>
-          </p>
-        </div>
-
-        {/* Bouton Desktop unique pour ajouter une épargne (1 seul symbole +, pas de ++ !) */}
-        <div className="hidden sm:flex items-center gap-2">
-          <button
-            onClick={handleOpenAddModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand hover:bg-brand-hover text-brand-fg text-xs font-black shadow-[0_0_15px_rgba(var(--brand-rgb),0.35)] active:scale-95 transition-all"
-            title="Ajouter un versement d'épargne"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>Épargner</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Sélecteur d'onglets : Trésorerie vs Projets d'Épargne */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+  // ============================ SOUS-VUES ============================
+  if (view === 'projects') {
+    return (
+      <div className="space-y-4 pb-28">
         <button
           type="button"
-          onClick={() => setSavingsTab('treasury')}
-          className={`px-4 py-2 rounded-full text-xs font-black transition-all cursor-pointer ${
-            savingsTab === 'treasury'
-              ? 'bg-brand text-brand-fg shadow-md'
-              : 'bg-surface text-fg-2 hover:text-fg border border-line-strong'
-          }`}
+          onClick={() => setView('home')}
+          className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 bg-surface px-4 py-2 rounded-full border border-line cursor-pointer"
         >
-          Versement
+          <ArrowLeft className="w-4 h-4" />
+          <span>Retour à l'épargne</span>
         </button>
-
-        <button
-          type="button"
-          onClick={() => setSavingsTab('projects')}
-          className={`px-4 py-2 rounded-full text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-            savingsTab === 'projects'
-              ? 'bg-brand text-brand-fg shadow-md'
-              : 'bg-surface text-fg-2 hover:text-fg border border-line-strong'
-          }`}
-        >
-          <Target className="w-3.5 h-3.5" />
-          <span>Projets</span>
-          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-            savingsTab === 'projects' ? 'bg-brand text-brand-fg' : 'bg-brand/15 text-brand'
-          }`}>
-            {(data.savingsProjects || []).filter(p => !p.isClosed).length}
-          </span>
-        </button>
-      </div>
-
-      {/* ============================================================== */}
-      {/* VUE 0 : SECTION PROJETS D'ÉPARGNE                              */}
-      {/* ============================================================== */}
-      {savingsTab === 'projects' && (
         <SavingsProjectsSection
-          projects={data.savingsProjects || []}
+          projects={allProjects}
           currency={currency}
           selectedMonth={selectedMonth}
-          onAddProject={(newProj) => onAddSavingsProject && onAddSavingsProject(newProj)}
-          onUpdateProject={(upProj) => onUpdateSavingsProject && onUpdateSavingsProject(upProj)}
-          onDeleteProject={(pId) => onDeleteSavingsProject && onDeleteSavingsProject(pId)}
-          onCloseProject={(pId, close) => onCloseSavingsProject && onCloseSavingsProject(pId, close)}
-          onContributeToProject={(pId, amt, alsoRec) => onContributeToSavingsProject && onContributeToSavingsProject(pId, amt, alsoRec)}
+          onAddProject={(p) => onAddSavingsProject?.(p)}
+          onUpdateProject={(p) => onUpdateSavingsProject?.(p)}
+          onDeleteProject={(id) => onDeleteSavingsProject?.(id)}
+          onCloseProject={(id, close) => onCloseSavingsProject?.(id, close)}
+          onContributeToProject={(id, amt, alsoRec) => onContributeToSavingsProject?.(id, amt, alsoRec)}
         />
-      )}
+      </div>
+    );
+  }
 
-      {/* ============================================================== */}
-      {/* VUE 1 : SMARTPHONE AUTOMATIQUE (< md)                           */}
-      {/* S'adapte nativement à l'écran du smartphone sans cadre factice  */}
-      {/* ============================================================== */}
-      {savingsTab === 'treasury' && (
-      <>
-      <div className="block md:hidden space-y-4">
-        {/* CARTE FINTECH HÉROS EN PLEINE LARGEUR */}
-        <SavingsFintechCard
-          totalSavings={totalSavings}
-          monthTotalSavings={monthTotalSavings}
+  if (view === 'history') {
+    return (
+      <div className="pb-28">
+        <SavingsHistoryView
+          projects={allProjects}
+          deposits={data.savings}
           currency={currency}
-          selectedMonth={selectedMonth}
-          userName={data.user.fullName}
-          savingsCount={data.savings.length}
-          onOpenAddModal={handleOpenAddModal}
+          onBack={() => setView('home')}
+          onReopen={(id) => {
+            onCloseSavingsProject?.(id, false);
+            setView('home');
+          }}
         />
+      </div>
+    );
+  }
 
-        {/* STATS DU MOIS & NAVIGATION RAPIDE MOBILE */}
-        <div className="grid grid-cols-1 gap-2.5">
-          {/* Épargné ce mois */}
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-surface border border-line">
-            <span className="text-[10px] font-bold uppercase text-fg-muted block">
-              Épargné ce mois
-            </span>
-            <span className="text-base font-black text-brand tracking-tight block mt-0.5 break-words">
-              +{formatCurrency(monthTotalSavings, currency)}
-            </span>
-            <div className="text-[10px] text-fg-muted mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-brand shrink-0" />
-              <span>{savingsRate}% du salaire</span>
-            </div>
+  // ============================== ACCUEIL ==============================
+  return (
+    <div className="pb-28 max-w-md mx-auto stagger">
+      {/* Solde de la carte au premier plan */}
+      <div className="text-center pt-1">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={focused.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <p className="text-4xl font-black tracking-tight text-fg tabular-nums">
+              {formatCurrency(animatedAmount, currency)}
+            </p>
+            <p className="text-xs text-fg-muted mt-0.5 truncate px-6">{focusedLabel}</p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-4">
+        <SavingsCardCarousel
+          items={items}
+          index={safeIndex}
+          onIndexChange={setCardIndex}
+          currency={currency}
+          holder={data.user.fullName}
+          year={selectedMonth.slice(0, 4)}
+          onCloseProject={handleCloseProject}
+        />
+      </div>
+
+      {/* Boutons d'action ronds */}
+      <div className="mt-6 flex items-start justify-center gap-8">
+        <RoundAction label="Versement" onClick={() => openDeposit(focusedProject?.id)}>
+          <Plus className="w-6 h-6 stroke-[2.6]" />
+        </RoundAction>
+        <RoundAction label="Projets" onClick={() => setView('projects')} badge={activeProjects.length}>
+          <Target className="w-6 h-6" />
+        </RoundAction>
+        <RoundAction label="Historique" onClick={() => setView('history')} badge={closedCount}>
+          <History className="w-6 h-6" />
+        </RoundAction>
+      </div>
+
+      {/* Contenu de la carte active */}
+      <div className="mt-8 space-y-4">
+        {focusedProject ? (
+          <div className="rounded-3xl bg-surface border border-line p-4 grid grid-cols-3 gap-2 text-center">
+            {[
+              ['Épargné', formatCurrency(focusedProject.currentAmount, currency)],
+              ['Reste', formatCurrency(Math.max(0, focusedProject.targetAmount - focusedProject.currentAmount), currency)],
+              ['Objectif', formatCurrency(focusedProject.targetAmount, currency)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">{label}</span>
+                <p className="text-xs font-black text-fg tabular-nums mt-0.5 break-words">{value}</p>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* CALENDRIER D'ÉPARGNE (bandeau semaine + timeline du jour) */}
-        <SavingsDayTimeline
-            deposits={data.savings}
-            selectedDate={selectedDate}
-          currency={currency}
-          savingsRate={savingsRate}
-          onDelete={onDeleteSavings}
-        />
-
-        {/* BANNIÈRE PROJETS D'ÉPARGNE SUR SMARTPHONE */}
-        {activeProjects.length > 0 && (
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-surface-2 to-surface border border-line-strong shadow-md flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[9px] font-black uppercase px-2 py-0.2 rounded-full bg-brand/15 text-brand border border-brand/30 tracking-wider">
-                  {activeProjects.length} Projet{activeProjects.length > 1 ? 's' : ''} en cours
-                </span>
-                {activeProjects.some((p) => p.currentAmount >= p.targetAmount) && (
-                  <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-full bg-brand text-brand-fg animate-pulse">
-                    Objectif atteint
-                  </span>
-                )}
-              </div>
-              <p className="text-xs font-black text-fg truncate">
-                {activeProjects[0].title}
-              </p>
-              <div className="flex items-center gap-2 text-[10px] text-fg-muted mt-0.5">
-                <span>{formatCurrency(activeProjects[0].currentAmount, currency)} / {formatCurrency(activeProjects[0].targetAmount, currency)}</span>
-                <span className="text-brand font-bold">• {Math.min(100, Math.round((activeProjects[0].currentAmount / activeProjects[0].targetAmount) * 100))}%</span>
-              </div>
+        ) : (
+          <div className="rounded-3xl bg-surface border border-line p-4 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">
+                Épargné en {formatMonthKey(selectedMonth)}
+              </span>
+              <p className="text-lg font-black text-fg tabular-nums">+{formatCurrency(monthTotalSavings, currency)}</p>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setSavingsTab('projects')}
-              className="px-3 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-line-strong text-xs font-black whitespace-nowrap active:scale-95 shrink-0"
-            >
-              Gérer
-            </button>
+            <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-surface-2 border border-line text-fg-2">
+              {savingsRate}% du salaire
+            </span>
           </div>
         )}
 
-        {/* HISTORIQUE MOBILE DES VERSEMENTS */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between px-1 mb-2">
-            <span className="text-xs font-extrabold text-fg uppercase tracking-wider">
-              Derniers versements
-            </span>
-            <span className="text-[10px] font-bold text-brand bg-surface-2 px-2 py-0.5 rounded-full border border-line-strong">
-              {data.savings.length} au total
-            </span>
-          </div>
-
-          {sortedDeposits.length === 0 ? (
-            <div className="py-8 text-center bg-surface rounded-2xl border border-line px-4">
-              <PiggyBank className="w-8 h-8 text-fg-muted mx-auto mb-2" />
-              <p className="text-xs text-fg-2 font-semibold">Aucun versement d'épargne.</p>
-              <p className="text-[11px] text-fg-muted mt-1">
-                Appuyez sur le bouton <span className="text-brand font-black">+</span> sur la carte ci-dessus pour rajouter votre premier versement.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {paginatedDeposits.map((dep) => {
-                const isCurrentMonth = dep.date.startsWith(selectedMonth);
-
-                return (
-                  <div
-                    key={dep.id}
-                    className={`p-3 rounded-2xl flex items-center justify-between border transition-all ${
-                      isCurrentMonth
-                        ? 'bg-surface-2 border-line-strong'
-                        : 'bg-surface border-line opacity-85'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-surface-3 text-brand flex items-center justify-center shrink-0 border border-line-strong">
-                        <PiggyBank className="w-4 h-4 stroke-[2.2]" />
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-black text-fg">
-                            +{formatCurrency(dep.amount, currency)}
-                          </span>
-                          {isCurrentMonth && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
-                          )}
-                        </div>
-                        <div className="text-[10px] text-fg-muted mt-0.5 flex items-center gap-1.5 truncate">
-                          <span>{formatDateFr(dep.date)}</span>
-                          {dep.projectName && (
-                            <>
-                              <span>•</span>
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-surface-3 text-brand border border-line-strong shrink-0">
-                                {dep.projectName}
-                              </span>
-                            </>
-                          )}
-                          {dep.note && !dep.projectName && (
-                            <>
-                              <span>•</span>
-                              <span className="text-fg-2 italic truncate">
-                                {dep.note}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onDeleteSavings(dep.id)}
-                      className="p-1.5 rounded-lg text-fg-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors ml-2 shrink-0"
-                      title="Supprimer ce versement"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
-
-              {/* Navigation flèches gauche/droite si plus de 5 versements */}
-              {sortedDeposits.length > DEPOSITS_PER_PAGE && (
-                <div className="flex items-center justify-between pt-2.5 px-1 text-xs">
-                  <span className="text-fg-muted text-[11px] font-medium">
-                    Page {depositsPage} sur {totalDepositPages} (5 maxi par vue)
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={depositsPage === 1}
-                      onClick={() => setDepositsPage((p) => Math.max(1, p - 1))}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all text-xs font-bold"
-                      title="Versements précédents"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      <span>Préc.</span>
-                    </button>
-                    <button
-                      type="button"
-                      disabled={depositsPage === totalDepositPages}
-                      onClick={() => setDepositsPage((p) => Math.min(totalDepositPages, p + 1))}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all text-xs font-bold"
-                      title="Versements suivants"
-                    >
-                      <span>Suiv.</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* VUE 2 : ORDINATEUR / TABLETTE AUTOMATIQUE (>= md)              */}
-      {/* Organisation en grille complète avec carte FinTech & calendrier */}
-      {/* ============================================================== */}
-      <div className="hidden md:block space-y-6">
-        {/* RANGÉE SUPÉRIEURE : CARTE FINTECH (GAUCHE) & CALENDRIER (DROITE) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          
-          {/* COLONNE GAUCHE (5 colonnes) : CARTE FINTECH + STATS */}
-          <div className="lg:col-span-5 space-y-4">
-            {/* CARTE FINTECH HÉROS AVEC TOTAL DÉJÀ ÉPARGNÉ & BOUTON (+) */}
-            <SavingsFintechCard
-              totalSavings={totalSavings}
-              monthTotalSavings={monthTotalSavings}
-              currency={currency}
-              selectedMonth={selectedMonth}
-              userName={data.user.fullName}
-              savingsCount={data.savings.length}
-              onOpenAddModal={handleOpenAddModal}
-            />
-
-            {/* CARTES STATISTIQUES MENSUELLES */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* ÉPARGNÉ CE MOIS */}
-              <div className="bg-surface rounded-2xl p-4 border border-line">
-                <div className="flex items-center justify-between text-[10px] font-bold text-fg-muted uppercase">
-                  <span>Épargné ce mois</span>
-                  <TrendingUp className="w-3.5 h-3.5 text-brand" />
-                </div>
-                <div className="mt-1.5">
-                  <span className="text-xl font-black text-brand tracking-tight">
-                    +{formatCurrency(monthTotalSavings, currency)}
-                  </span>
-                </div>
-                <div className="text-[10px] text-fg-muted mt-1 flex items-center gap-1">
-                  <span className="font-bold text-fg">{monthDeposits.length}</span>
-                  <span>versements en {formatMonthKey(selectedMonth)}</span>
-                </div>
-              </div>
-
-              {/* PART DU SALAIRE */}
-              <div className="bg-surface rounded-2xl p-4 border border-line">
-                <div className="flex items-center justify-between text-[10px] font-bold text-fg-muted uppercase">
-                  <span>Part du salaire</span>
-                  <Wallet className="w-3.5 h-3.5 text-fg-muted" />
-                </div>
-                <div className="mt-1.5">
-                  <span className="text-xl font-black text-fg tracking-tight">
-                    {savingsRate}%
-                  </span>
-                </div>
-                <div className="text-[10px] text-fg-muted mt-1 truncate">
-                  <span>Sur {formatCurrency(salaryReceived, currency)} perçus</span>
-                </div>
-              </div>
-            </div>
-
-            {/* CARTE RAPIDE PROJETS D'ÉPARGNE LIÉS (DESKTOP) */}
-            <div className="bg-surface rounded-2xl p-4 border border-line">
-              <div className="flex items-center justify-between text-[10px] font-bold text-fg-muted uppercase pb-2 border-b border-line">
-                <div className="flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-brand" />
-                  <span>Projets d'Épargne • {activeProjects.length} en cours</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSavingsTab('projects')}
-                  className="text-brand hover:underline font-bold text-[10px] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Gérer les projets</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {activeProjects.length === 0 ? (
-                <div className="py-3 text-center">
-                  <p className="text-xs text-fg-muted">Aucun projet actif en cours.</p>
-                  <button
-                    type="button"
-                    onClick={() => setSavingsTab('projects')}
-                    className="mt-2 text-xs font-bold text-brand hover:underline"
-                  >
-                    + Créer un premier projet
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2 mt-2.5">
-                  {activeProjects.slice(0, 2).map((proj) => {
-                    const isDone = proj.currentAmount >= proj.targetAmount;
-                    const pct = Math.min(100, Math.round((proj.currentAmount / proj.targetAmount) * 100));
-                    return (
-                      <div key={proj.id} className="p-2.5 rounded-xl bg-surface-2 border border-line">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-bold text-fg truncate max-w-[180px]">{proj.title}</span>
-                          {isDone ? (
-                            <span className="text-[9px] font-black text-brand-fg bg-brand px-1.5 py-0.2 rounded-full">
-                              Prêt à fermer
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-black text-brand">{pct}%</span>
-                          )}
-                        </div>
-                        <div className="w-full bg-surface h-1.5 rounded-full overflow-hidden my-1">
-                          <div
-                            className="h-full bg-gradient-to-r from-fg-muted to-brand"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] text-fg-muted">
-                          <span>{formatCurrency(proj.currentAmount, currency)}</span>
-                          <span>visé : {formatCurrency(proj.targetAmount, currency)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* COLONNE DROITE (7 colonnes) : CALENDRIER SEMAINE / MOIS + TIMELINE DU JOUR */}
+        {!focusedProject && (
           <SavingsDayTimeline
             deposits={data.savings}
             selectedDate={selectedDate}
@@ -496,126 +274,91 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
             savingsRate={savingsRate}
             onDelete={onDeleteSavings}
           />
-        </div>
+        )}
 
-        {/* RANGÉE INFÉRIEURE : HISTORIQUE COMPLET DES VERSEMENTS */}
-        <div className="bg-surface rounded-3xl border border-line overflow-hidden shadow-sm">
-          <div className="px-5 py-4 border-b border-line flex items-center justify-between">
-            <h2 className="text-sm sm:text-base font-extrabold text-fg">
-              Historique complet des versements d'épargne
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-surface-2 text-brand border border-brand/25">
-              {data.savings.length} versement{data.savings.length > 1 ? 's' : ''}
+        <div>
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-fg">
+              {focusedProject ? 'Versements du projet' : 'Derniers versements'}
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-surface-2 border border-line text-fg-2">
+              {listSource.length} au total
             </span>
           </div>
 
-          {sortedDeposits.length === 0 ? (
-            <div className="py-10 text-center text-sm text-fg-muted">
-              Aucun versement d'épargne enregistré pour l'instant.
+          {listSource.length === 0 ? (
+            <div className="rounded-2xl bg-surface border border-dashed border-line-strong p-6 text-center">
+              <PiggyBank className="w-7 h-7 mx-auto text-fg-muted mb-1.5" />
+              <p className="text-xs font-bold text-fg">Aucun versement</p>
+              <p className="text-[11px] text-fg-muted mt-0.5">Appuyez sur « Versement » pour commencer.</p>
             </div>
           ) : (
-            <div>
-              <div className="divide-y divide-line">
-                {paginatedDeposits.map((dep) => (
-                  <div
-                    key={dep.id}
-                    className="p-3.5 sm:p-4 flex items-center justify-between hover:bg-surface transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-surface-2 text-brand flex items-center justify-center shrink-0 border border-line-strong">
-                        <PiggyBank className="w-4 h-4 stroke-[2.2]" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-fg">
-                            +{formatCurrency(dep.amount, currency)}
-                          </span>
-                          {dep.date.startsWith(selectedMonth) && (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-surface-3 text-brand border border-line-strong">
-                              Ce mois
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-fg-muted mt-0.5 flex items-center gap-2">
-                          <span>{formatDateFr(dep.date)}</span>
-                          {dep.projectName && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-surface-3 text-brand border border-line-strong">
-                              Projet : {dep.projectName}
-                            </span>
-                          )}
-                          {dep.note && !dep.projectName && (
-                            <>
-                              <span>•</span>
-                              <span className="text-fg-2 italic">{dep.note}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+            <div className="space-y-2">
+              {shownDeposits.map((dep) => (
+                <div
+                  key={dep.id}
+                  className="rounded-2xl bg-surface border border-line p-3 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-9 h-9 rounded-xl bg-surface-2 border border-line-strong text-fg flex items-center justify-center shrink-0">
+                      <PiggyBank className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-fg tabular-nums">+{formatCurrency(dep.amount, currency)}</p>
+                      <p className="text-[10px] text-fg-muted truncate">
+                        {formatDateFr(dep.date)}
+                        {dep.projectName ? ` • ${dep.projectName}` : dep.note ? ` • ${dep.note}` : ''}
+                      </p>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onDeleteSavings(dep.id)}
-                      className="p-2 rounded-full text-fg-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                      title="Supprimer ce versement"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
-                ))}
-              </div>
-
-              {/* Navigation flèches gauche/droite si plus de 5 versements */}
-              {sortedDeposits.length > DEPOSITS_PER_PAGE && (
-                <div className="px-5 py-3 border-t border-line flex items-center justify-between text-xs bg-surface">
-                  <span className="text-fg-muted font-medium">
-                    Affichage de {paginatedDeposits.length} sur {sortedDeposits.length} versements • Page {depositsPage} sur {totalDepositPages}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={depositsPage === 1}
-                      onClick={() => setDepositsPage((p) => Math.max(1, p - 1))}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                      title="Page précédente"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      <span>Précédent</span>
-                    </button>
-                    <button
-                      type="button"
-                      disabled={depositsPage === totalDepositPages}
-                      onClick={() => setDepositsPage((p) => Math.min(totalDepositPages, p + 1))}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                      title="Page suivante"
-                    >
-                      <span>Suivant</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onDeleteSavings(dep.id)}
+                    className="p-1.5 text-fg-muted hover:text-rose-400 cursor-pointer shrink-0"
+                    title="Supprimer ce versement"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
+              ))}
+              {listSource.length > visibleDeposits && (
+                <button
+                  type="button"
+                  onClick={() => setVisibleDeposits((n) => n + DEPOSITS_STEP)}
+                  className="w-full py-2.5 rounded-full bg-surface border border-line text-xs font-bold text-fg-2 cursor-pointer"
+                >
+                  Afficher plus
+                </button>
               )}
             </div>
           )}
         </div>
       </div>
-      </>
-      )}
 
-      {/* MODAL AJOUT ÉPARGNE AVEC CHOIX VERSEMENT MENSUEL OU PROJET NON CLÔTURÉ */}
+      {/* Message de félicitations après clôture */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed left-4 right-4 bottom-28 z-50 max-w-md mx-auto rounded-2xl bg-brand text-brand-fg p-4 text-xs font-bold shadow-2xl"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fenêtre de versement locale si le parent n'en fournit pas */}
       <SavingsModal
         isOpen={isLocalModalOpen}
         onClose={() => setIsLocalModalOpen(false)}
         onSave={onAddSavings}
         selectedMonth={selectedMonth}
         currency={currency}
-        projects={data.savingsProjects || []}
-        onContributeToProject={(pId, amt, alsoRec, closeIfReached, cDate, cNote) => {
-          if (onContributeToSavingsProject) {
-            onContributeToSavingsProject(pId, amt, alsoRec, closeIfReached, cDate, cNote);
-          }
-        }}
-        onOpenCreateProject={() => setSavingsTab('projects')}
+        projects={allProjects}
+        initialProjectId={localModalProject}
+        onContributeToProject={onContributeToSavingsProject}
       />
     </div>
   );

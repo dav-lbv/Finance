@@ -20,6 +20,8 @@ interface SavingsModalProps {
   selectedMonth: string;
   currency: string;
   projects?: SavingsProject[];
+  /** Projet présélectionné à l'ouverture (mode « Projets ») */
+  initialProjectId?: string;
   onContributeToProject?: (
     projectId: string,
     amount: number,
@@ -38,6 +40,7 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
   selectedMonth,
   currency,
   projects = [],
+  initialProjectId,
   onContributeToProject,
   onOpenCreateProject,
 }) => {
@@ -69,8 +72,14 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
       setDate(`${selectedMonth}-05`);
       setAmount('');
       setError('');
+      if (initialProjectId && projects.some((p) => p.id === initialProjectId && !p.isClosed)) {
+        setSavingsMode('project');
+        setSelectedProjectId(initialProjectId);
+      } else {
+        setSavingsMode('monthly');
+      }
     }
-  }, [isOpen, selectedMonth]);
+  }, [isOpen, selectedMonth, initialProjectId]);
 
   if (!isOpen) return null;
 
