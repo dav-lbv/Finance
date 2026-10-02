@@ -30,7 +30,8 @@ import {
   getDefaultData, 
   ensureMonthInitialized 
 } from './utils/storage';
-import { getCurrentMonthKey } from './utils/date';
+import { getCurrentMonthKey, getTodayDateString } from './utils/date';
+import { WeekCalendarBar } from './components/WeekCalendarBar';
 
 export default function App() {
   const [data, setData] = useState<AppData>(() => {
@@ -39,6 +40,7 @@ export default function App() {
   });
 
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthKey());
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'expenses' | 'savings' | 'settings'>('dashboard');
   const [initialSettingsSection, setInitialSettingsSection] = useState<SettingsSection>('menu');
   const [isLocked, setIsLocked] = useState<boolean>(false);
@@ -59,6 +61,21 @@ export default function App() {
       setInitialSettingsSection('menu');
     }
     setCurrentTab(tab);
+  };
+
+  // Garder le jour sélectionné dans le mois affiché (changement de mois depuis un autre écran)
+  useEffect(() => {
+    setSelectedDate((prev) => {
+      if (prev.startsWith(selectedMonth)) return prev;
+      const today = getTodayDateString();
+      return today.startsWith(selectedMonth) ? today : `${selectedMonth}-01`;
+    });
+  }, [selectedMonth]);
+
+  // Sélection d'un jour dans le calendrier permanent : met aussi à jour le mois
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date);
+    if (!date.startsWith(selectedMonth)) setSelectedMonth(date.slice(0, 7));
   };
 
   // Assurer l'initialisation du mois lorsque l'utilisateur change de mois
@@ -405,9 +422,19 @@ export default function App() {
 
   const appCurrency = data.user.currency || 'FCFA';
 
+  // Repères du calendrier : jours avec dépenses (rouge) et versements d'épargne (vert)
+  const expenseDates = new Set<string>();
+  Object.values(data.expenses).forEach((list) => list.forEach((e) => expenseDates.add(e.date)));
+  const savingsDates = new Set<string>(data.savings.map((d) => d.date));
+
   const currentExpenses = data.expenses[selectedMonth] || [];
   const currentTotalExpenses = currentExpenses.reduce((sum, item) => sum + item.amount, 0);
   const currentTotalSavings = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
+  const monthSalary = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
+  const monthSavings = data.savings.filter((d) => d.date.startsWith(selectedMonth)).reduce((a, d) => a + d.amount, 0);
+  const availableRatio = monthSalary > 0
+    ? Math.max(0, Math.round((1 - (currentTotalExpenses + monthSavings) / monthSalary) * 100))
+    : 0;
 
   return (
     <div className="min-h-screen bg-app text-fg flex flex-col selection:bg-brand selection:text-brand-fg">
@@ -421,7 +448,8 @@ export default function App() {
         />
       )}
 
-      {/* Barre de navigation principale GesFin avec forme connectée (Bell + Période + Avatar) */}
+      {/* En-tête (logo, cloche, période, avatar) : uniquement sur le tableau de bord en mobile ; toujours présent sur ordinateur pour la navigation */}
+      <div className={currentTab === 'dashboard' ? '' : 'hidden md:block'}>
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -434,6 +462,20 @@ export default function App() {
         totalExpenses={currentTotalExpenses}
         totalSavings={currentTotalSavings}
       />
+      </div>
+
+      {/* Calendrier permanent : remplace l'en-tête sur tous les autres écrans */}
+      {currentTab !== 'dashboard' && (
+        <div className="sticky top-0 z-30 px-3 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+10px)] pb-1 max-w-7xl w-full mx-auto">
+          <WeekCalendarBar
+            selectedDate={selectedDate}
+            onSelectDate={handleSelectDate}
+            expenseDates={expenseDates}
+            savingsDates={savingsDates}
+            ringValue={availableRatio}
+          />
+        </div>
+      )}
 
       {/* Contenu principal (avec padding inférieur optimisé pour la barre mobile) */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8">
@@ -467,6 +509,7 @@ export default function App() {
           <SavingsPage
             data={data}
             selectedMonth={selectedMonth}
+            selectedDate={selectedDate}
             setSelectedMonth={setSelectedMonth}
             onAddSavings={handleAddSavings}
             onDeleteSavings={handleDeleteSavings}

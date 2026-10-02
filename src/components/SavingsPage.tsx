@@ -23,12 +23,13 @@ import {
 } from '../utils/date';
 import { SavingsFintechCard } from './SavingsFintechCard';
 import { SavingsModal } from './SavingsModal';
-import { SavingsCalendar } from './SavingsCalendar';
+import { SavingsDayTimeline } from './SavingsDayTimeline';
 import { SavingsProjectsSection } from './SavingsProjectsSection';
 
 interface SavingsPageProps {
   data: AppData;
   selectedMonth: string;
+  selectedDate: string;
   setSelectedMonth: (month: string) => void;
   onAddSavings: (deposit: Omit<SavingsDeposit, 'id'>) => void;
   onDeleteSavings: (depositId: string) => void;
@@ -50,6 +51,7 @@ interface SavingsPageProps {
 export const SavingsPage: React.FC<SavingsPageProps> = ({
   data,
   selectedMonth,
+  selectedDate,
   setSelectedMonth,
   onAddSavings,
   onDeleteSavings,
@@ -210,10 +212,9 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
         </div>
 
         {/* CALENDRIER D'ÉPARGNE (bandeau semaine + timeline du jour) */}
-        <SavingsCalendar
-          deposits={data.savings}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
+        <SavingsDayTimeline
+            deposits={data.savings}
+            selectedDate={selectedDate}
           currency={currency}
           savingsRate={savingsRate}
           onDelete={onDeleteSavings}
@@ -488,10 +489,9 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
           </div>
 
           {/* COLONNE DROITE (7 colonnes) : CALENDRIER SEMAINE / MOIS + TIMELINE DU JOUR */}
-          <SavingsCalendar
+          <SavingsDayTimeline
             deposits={data.savings}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
+            selectedDate={selectedDate}
             currency={currency}
             savingsRate={savingsRate}
             onDelete={onDeleteSavings}

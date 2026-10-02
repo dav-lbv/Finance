@@ -392,13 +392,13 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
             <div className="flex items-end justify-between h-44 gap-2 sm:gap-4 px-2 sm:px-4">
               {monthData.map((item, idx) => {
                 const ratio = maxTotal > 0 ? item.total / maxTotal : 0;
-                const heightPercent = Math.max(14, Math.round(ratio * 100));
+                const heightPercent = item.total > 0 ? Math.max(8, Math.round(ratio * 100)) : 0;
                 const isCurrent = item.monthKey === selectedMonth;
 
                 return (
                   <div 
                     key={item.monthKey} 
-                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer"
+                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer min-w-0"
                     onClick={() => {
                       setHoveredIndex(idx);
                       onSelectMonth?.(item.monthKey);
@@ -411,15 +411,18 @@ export const ExpenseTrendChart: React.FC<ExpenseTrendChartProps> = ({
                       {formatScaleValue(item.total)}
                     </span>
 
-                    {/* Barre néon */}
-                    <div className="w-full max-w-[42px] bg-surface-2 rounded-2xl h-full flex items-end p-1 border border-line">
-                      <div 
-                        className={`w-full rounded-xl transition-all duration-300 ${
-                          isCurrent
-                            ? 'bg-brand shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)]'
-                            : 'bg-surface-3 hover:bg-brand'
+                    {/* Jauge : le remplissage est fusionné à la capsule (même largeur, découpé par ses bords) */}
+                    <div className="relative w-full max-w-[42px] flex-1 rounded-full overflow-hidden bg-surface-2 border border-line-strong flex items-end">
+                      <div
+                        className={`grow-up w-full transition-[height] duration-500 ${
+                          isCurrent ? 'bg-brand' : 'hatch bg-surface-3'
                         }`}
-                        style={{ height: `${heightPercent}%` }}
+                        style={{
+                          height: `${heightPercent}%`,
+                          animationDelay: `${idx * 70}ms`,
+                          borderTopLeftRadius: '9999px',
+                          borderTopRightRadius: '9999px',
+                        }}
                       />
                     </div>
 

@@ -624,7 +624,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     Nom & Prénom
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="text"
                       required
@@ -641,7 +641,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     Pseudo
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="text"
                       value={username}
@@ -657,7 +657,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     Numéro de téléphone
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="tel"
                       value={phone}
@@ -673,7 +673,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     Adresse e-mail
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="email"
                       required

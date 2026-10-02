@@ -155,13 +155,10 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      <div 
-        className="w-full max-w-xl bg-surface border border-line rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-50 flex flex-col bg-app animate-fadeIn">
+      <div className="w-full max-w-xl mx-auto flex-1 flex flex-col min-h-0">
         {/* Top Header bar with GesFin Logo & Close */}
-        <div className="px-5 py-4 border-b border-line bg-surface flex items-center justify-between">
+        <div className="px-5 pb-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-fg-muted to-brand flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)]">
               <Sparkles className="w-4 h-4 text-brand-fg stroke-[2.8]" />
@@ -203,13 +200,13 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
         )}
 
         {/* MODAL CONTENT PER STEP */}
-        <div className="p-5 sm:p-7 overflow-y-auto max-h-[78vh]">
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 pt-6">
 
           {/* ======================================================== */}
           {/* STEP 1: INFORMATIONS UTILISATEUR & PHOTO DE PROFIL       */}
           {/* ======================================================== */}
           {step === 'user_info' && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="flex flex-col gap-5 min-h-full animate-fadeIn">
               <div>
                 <span className="text-[10px] font-black text-brand uppercase tracking-wider">
                   Étape 1 sur 4
@@ -287,7 +284,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Prénom <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="text"
                       value={firstName}
@@ -302,7 +299,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Nom <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="text"
                       value={lastName}
@@ -318,7 +315,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Pseudo
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="text"
                       value={username}
@@ -334,7 +331,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Numéro de téléphone
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="tel"
                       value={phone}
@@ -349,7 +346,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Adresse e-mail
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="email"
                       value={emailInput}
@@ -369,7 +366,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
               )}
 
               {/* Navigation buttons */}
-              <div className="flex items-center justify-end pt-3">
+              <div className="sticky bottom-0 z-10 -mx-5 sm:-mx-7 px-5 sm:px-7 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] mt-auto bg-app/85 backdrop-blur-xl border-t border-line flex items-center justify-end">
                 <button
                   type="button"
                   onClick={handleInfoNext}
@@ -386,7 +383,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
           {/* STEP 2: SAISIE DU SALAIRE & DEVISE                       */}
           {/* ======================================================== */}
           {step === 'salary' && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="flex flex-col gap-5 min-h-full animate-fadeIn">
               <div>
                 <span className="text-[10px] font-black text-brand uppercase tracking-wider">
                   Étape 2 sur 4
@@ -405,7 +402,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                     Salaire mensuel perçu de base
                   </label>
                   <div className="relative">
-                    <Wallet className="w-5 h-5 text-brand absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Wallet className="w-5 h-5 text-brand absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
                       type="number"
                       required
@@ -466,7 +463,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex items-center justify-between pt-3">
+              <div className="sticky bottom-0 z-10 -mx-5 sm:-mx-7 px-5 sm:px-7 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] mt-auto bg-app/85 backdrop-blur-xl border-t border-line flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setStep('user_info')}
@@ -490,7 +487,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
           {/* STEP 3: CHOIX DU THÈME (Inspiré de l'Image 2)           */}
           {/* ======================================================== */}
           {step === 'theme' && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="flex flex-col gap-5 min-h-full animate-fadeIn">
               <div>
                 <span className="text-[10px] font-black text-brand uppercase tracking-wider">
                   Étape 3 sur 4
@@ -610,7 +607,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex items-center justify-between pt-3">
+              <div className="sticky bottom-0 z-10 -mx-5 sm:-mx-7 px-5 sm:px-7 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] mt-auto bg-app/85 backdrop-blur-xl border-t border-line flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setStep('salary')}
@@ -634,7 +631,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
           {/* STEP 4: SÉCURITÉ & VERROUILLAGE (Mot de passe, Face ID)   */}
           {/* ======================================================== */}
           {step === 'security' && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="flex flex-col gap-5 min-h-full animate-fadeIn">
               <div>
                 <span className="text-[10px] font-black text-brand uppercase tracking-wider">
                   Étape 4 sur 4
@@ -683,7 +680,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                         Définir un mot de passe ou code PIN
                       </label>
                       <div className="relative">
-                        <KeyRound className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <KeyRound className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                         <input
                           type="password"
                           value={password}
@@ -699,7 +696,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                         Confirmer le mot de passe
                       </label>
                       <div className="relative">
-                        <KeyRound className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <KeyRound className="w-4 h-4 text-fg-muted absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                         <input
                           type="password"
                           value={confirmPassword}
@@ -747,7 +744,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex items-center justify-between pt-3">
+              <div className="sticky bottom-0 z-10 -mx-5 sm:-mx-7 px-5 sm:px-7 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] mt-auto bg-app/85 backdrop-blur-xl border-t border-line flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setStep('theme')}
@@ -771,7 +768,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
           {/* STEP 5: ÉCRAN DE CONFIRMATION MINIMALISTE (Image 4)       */}
           {/* ======================================================== */}
           {step === 'success' && (
-            <div className="space-y-6 text-center animate-fadeIn max-w-sm mx-auto py-2">
+            <div className="space-y-6 text-center animate-fadeIn max-w-sm mx-auto py-2 pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
               {/* Checkmark Circle Icon style Image 4 */}
               <div className="relative mx-auto w-20 h-20">
                 <div className="w-20 h-20 rounded-full bg-brand/15 text-brand border-2 border-brand flex items-center justify-center shadow-[0_0_35px_rgba(var(--brand-rgb),0.35)] animate-pulse">

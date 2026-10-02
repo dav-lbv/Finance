@@ -110,6 +110,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
   // PAGINATION 3 : Historique des dépenses des mois (5 lignes maximum par vue)
   // =========================================================================
   const [monthsHistoryPage, setMonthsHistoryPage] = useState(1);
+  const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null);
   const allRecordedMonths = Object.keys(data.expenses).sort().reverse();
   const totalMonthsPages = Math.ceil(allRecordedMonths.length / ITEMS_PER_PAGE) || 1;
   const paginatedRecordedMonths = allRecordedMonths.slice(
@@ -712,9 +713,6 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
               <h2 className="text-sm sm:text-base font-extrabold text-fg">
                 Historique des dépenses des mois
               </h2>
-              <p className="text-[11px] text-fg-muted">
-                Consultez le bilan de chaque mois enregistré (5 mois maxi par vue)
-              </p>
             </div>
           </div>
 
@@ -725,52 +723,77 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
 
         <div className="divide-y divide-line">
           {paginatedRecordedMonths.map((mKey) => {
-            const mExpenses = data.expenses[mKey] || [];
-            const mTotal = mExpenses.reduce((s, e) => s + e.amount, 0);
-            const mRecurring = mExpenses.filter(e => e.isRecurring).reduce((s, e) => s + e.amount, 0);
+            const mPaid = (data.expenses[mKey] || [])
+              .filter((e) => e.isPaid)
+              .sort((x, y) => y.date.localeCompare(x.date));
+            const mTotal = mPaid.reduce((s, e) => s + e.amount, 0);
             const isSelected = mKey === selectedMonth;
+            const isOpen = expandedHistoryMonth === mKey;
 
             return (
-              <div 
-                key={mKey}
-                onClick={() => setSelectedMonth && setSelectedMonth(mKey)}
-                className={`p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors cursor-pointer ${
-                  isSelected ? 'bg-surface-2' : 'hover:bg-surface'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs border shrink-0 ${
-                    isSelected 
-                      ? 'bg-brand text-brand-fg border-brand' 
-                      : 'bg-surface-2 text-fg-2 border-line'
-                  }`}>
-                    <Clock className="w-4 h-4" />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-extrabold text-fg">
-                        {formatMonthKey(mKey)}
-                      </span>
-                      {isSelected && (
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-brand/15 text-brand border border-brand/30">
-                          Mois actif
-                        </span>
-                      )}
+              <div key={mKey} className={isSelected ? 'bg-surface-2' : ''}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMonth && setSelectedMonth(mKey);
+                    setExpandedHistoryMonth(isOpen ? null : mKey);
+                  }}
+                  className="w-full p-3.5 sm:p-4 flex items-center justify-between gap-3 text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 ${
+                      isSelected ? 'bg-brand text-brand-fg border-brand' : 'bg-surface-2 text-fg-2 border-line'
+                    }`}>
+                      <Clock className="w-4 h-4" />
                     </div>
-                    <div className="text-[11px] text-fg-muted mt-0.5 flex flex-wrap items-center gap-2">
-                      <span>{mExpenses.length} dépense{mExpenses.length > 1 ? 's' : ''}</span>
-                      <span>•</span>
-                      <span>Dont {formatCurrency(mRecurring, currency)} fixes récurrentes</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-extrabold text-fg">{formatMonthKey(mKey)}</span>
+                        {isSelected && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-brand/15 text-brand border border-brand/30">
+                            Mois actif
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-fg-muted mt-0.5">
+                        {mPaid.length === 0
+                          ? 'Aucune dépense validée'
+                          : `${mPaid.length} dépense${mPaid.length > 1 ? 's' : ''} validée${mPaid.length > 1 ? 's' : ''}`}
+                      </div>
                     </div>
                   </div>
-                </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm font-black text-fg tabular-nums">{formatCurrency(mTotal, currency)}</span>
+                    <ChevronRight className={`w-4 h-4 text-fg-muted transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`} />
+                  </div>
+                </button>
 
-                <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-line">
-                  <span className="text-sm font-black text-brand">
-                    {formatCurrency(mTotal, currency)}
-                  </span>
-                </div>
+                {isOpen && (
+                  <div className="px-3.5 sm:px-4 pb-3.5 animate-fadeIn">
+                    {mPaid.length === 0 ? (
+                      <p className="text-xs text-fg-muted py-2 pl-12">
+                        Validez les dépenses du mois pour les retrouver ici.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1.5">
+                        {mPaid.map((e) => (
+                          <li
+                            key={e.id}
+                            className="flex items-center justify-between gap-3 rounded-xl bg-surface border border-line px-3 py-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-fg truncate">{e.title}</p>
+                              <p className="text-[10px] text-fg-muted">{formatDateFr(e.date)} • {e.category}</p>
+                            </div>
+                            <span className="text-xs font-black text-rose-400 tabular-nums whitespace-nowrap">
+                              -{formatCurrency(e.amount, currency)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
