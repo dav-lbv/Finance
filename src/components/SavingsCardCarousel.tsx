@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, PanInfo } from 'motion/react';
-import { Check, Lock, Target, Wifi } from 'lucide-react';
+import { Check, Lock, Target } from 'lucide-react';
 import { SavingsProject } from '../types';
 import { formatCurrency, formatDateFr } from '../utils/date';
 
@@ -19,47 +19,110 @@ interface SavingsCardCarouselProps {
   onCloseProject: (projectId: string) => void;
 }
 
-/** Puce de carte bancaire stylisée */
-const Chip: React.FC<{ light?: boolean }> = ({ light }) => (
-  <div
-    className={`w-11 h-8 rounded-lg border ${light ? 'border-black/25' : 'border-white/30'}`}
-    style={{
-      backgroundImage: light
-        ? 'linear-gradient(135deg, rgba(0,0,0,0.14), rgba(0,0,0,0.04)), repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,0.22) 7px 8px)'
-        : 'linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06)), repeating-linear-gradient(0deg, transparent 0 7px, rgba(255,255,255,0.3) 7px 8px)',
-    }}
-  />
+/** Format d'une vraie carte bancaire (ISO/IEC 7810 ID-1 : 85,6 × 54 mm) */
+const CARD_RATIO = 1.586;
+
+/**
+ * Contour de la carte, avec l'encoche arrondie sur le bord gauche de la carte de
+ * référence. Coordonnées relatives (0 → 1) : la forme suit la taille de la carte.
+ */
+const CARD_PATH =
+  'M0.05,0 H0.95 Q1,0 1,0.0795 V0.9205 Q1,1 0.95,1 H0.05 Q0,1 0,0.9205 V0.46 Q0.04,0.46 0.04,0.41 V0.23 Q0.04,0.18 0,0.18 V0.0795 Q0,0 0.05,0 Z';
+
+const CardOutline: React.FC = () => (
+  <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <clipPath id="bank-card-shape" clipPathUnits="objectBoundingBox">
+        <path d={CARD_PATH} />
+      </clipPath>
+    </defs>
+  </svg>
 );
 
-/** Puce argentée avec symbole sans contact, comme sur une carte bancaire. */
-const ContactlessChip: React.FC = () => (
-  <div className="relative w-12 h-9 rounded-lg border border-white/30 bg-gradient-to-br from-[#e6e6ec] via-[#a9a9b4] to-[#6f6f7a] flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
-    <span className="absolute inset-x-2 top-1/2 h-px bg-black/20" />
-    <span className="absolute inset-y-2 left-1/2 w-px bg-black/20" />
-    <Wifi className="relative w-5 h-5 rotate-90 text-[#0a0a0c]" strokeWidth={2.4} />
+/** Puce EMV : plaque métallique segmentée. */
+const EmvChip: React.FC<{ light?: boolean }> = ({ light }) => (
+  <svg viewBox="0 0 48 36" className="w-full h-full" aria-hidden="true">
+    <defs>
+      <linearGradient id={light ? 'chip-l' : 'chip-d'} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor={light ? '#c9c9d1' : '#efece4'} />
+        <stop offset="1" stopColor={light ? '#8d8d97' : '#a9a698'} />
+      </linearGradient>
+    </defs>
+    <rect x="1" y="1" width="46" height="34" rx="7" fill={`url(#${light ? 'chip-l' : 'chip-d'})`} />
+    <g fill="none" stroke="rgba(0,0,0,0.38)" strokeWidth="1">
+      <rect x="16" y="9" width="16" height="18" rx="3.5" />
+      <path d="M1 13h15M1 23h15M32 13h15M32 23h15M24 1v8M24 27v8" />
+    </g>
+  </svg>
+);
+
+/**
+ * Carte bancaire : format ISO, contour à encoche, dégradé mat.
+ * Les tailles de texte internes suivent la hauteur de la carte (unités cqh).
+ */
+const BankCard: React.FC<{ tone: 'dark' | 'silver'; children: React.ReactNode }> = ({ tone, children }) => (
+  <div className="relative h-full" style={{ filter: 'drop-shadow(0 22px 26px rgba(0,0,0,0.38))' }}>
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{
+        clipPath: 'url(#bank-card-shape)',
+        containerType: 'size',
+        background:
+          tone === 'dark'
+            ? 'linear-gradient(135deg,#343d4f 0%,#1b2231 46%,#0c111b 100%)'
+            : 'linear-gradient(135deg,#fdfdff 0%,#e5e5eb 52%,#c2c2cb 100%)',
+        color: tone === 'dark' ? '#fff' : '#0a0a0c',
+      }}
+    >
+      {/* Reflet doux en haut à droite */}
+      <div
+        className="absolute -top-1/3 -right-1/4 w-3/4 h-full rounded-full pointer-events-none"
+        style={{
+          background:
+            tone === 'dark'
+              ? 'radial-gradient(closest-side, rgba(255,255,255,0.12), transparent)'
+              : 'radial-gradient(closest-side, rgba(255,255,255,0.9), transparent)',
+        }}
+      />
+      {children}
+    </div>
   </div>
 );
 
+/** Carte « total » : exactement la composition de la carte de référence. */
 const TotalFace: React.FC = () => (
-  <div className="relative h-full rounded-[26px] overflow-hidden text-white bg-gradient-to-br from-[#262d3b] via-[#121724] to-[#070a12] border border-white/10">
-    <div className="absolute -top-20 -right-14 w-56 h-56 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-    {/* Filigrane vertical : seul élément de texte, comme sur la carte de référence */}
+  <BankCard tone="dark">
+    {/* Mot vertical contouré, très discret */}
     <span
-      className="absolute left-3.5 top-1/2 text-[30px] font-black tracking-[0.1em] select-none pointer-events-none"
+      className="absolute select-none pointer-events-none"
       style={{
+        left: '9%',
+        top: '50%',
         writingMode: 'vertical-rl',
         transform: 'translateY(-50%) rotate(180deg)',
+        fontSize: '12.5cqh',
+        fontWeight: 300,
+        letterSpacing: '0.2em',
         color: 'transparent',
-        WebkitTextStroke: '1.2px rgba(255,255,255,0.2)',
+        WebkitTextStroke: '0.7px rgba(255,255,255,0.34)',
       }}
     >
       ÉPARGNE
     </span>
-    <div className="absolute right-5 top-1/2 -translate-y-1/2">
-      <ContactlessChip />
+
+    {/* Puce, à droite au milieu */}
+    <div className="absolute" style={{ right: '9%', top: '50%', width: '26cqh', height: '19.5cqh', transform: 'translateY(-50%)' }}>
+      <EmvChip />
     </div>
-    <span className="absolute right-5 bottom-4 text-[26px] font-black italic tracking-tight leading-none">GesFin</span>
-  </div>
+
+    {/* Marque en bas à droite (équivalent du logo VISA) */}
+    <span
+      className="absolute font-black italic leading-none"
+      style={{ right: '7%', bottom: '10%', fontSize: '13cqh', letterSpacing: '-0.02em' }}
+    >
+      GesFin
+    </span>
+  </BankCard>
 );
 
 const ProjectFace: React.FC<{
@@ -72,74 +135,70 @@ const ProjectFace: React.FC<{
   const remaining = Math.max(0, project.targetAmount - project.currentAmount);
 
   return (
-    <div className="relative h-full rounded-[26px] p-5 overflow-hidden text-[#0a0a0c] bg-gradient-to-br from-[#fbfbfd] via-[#e6e6eb] to-[#c6c6ce] border border-black/10 flex flex-col justify-between">
-      <div className="absolute -top-14 -left-10 w-44 h-44 rounded-full bg-white/70 blur-3xl pointer-events-none" />
-
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/8 border border-black/10">
-            <Target className="w-3 h-3" />
-            {project.category || 'Projet'}
-          </span>
-          <h3 className="mt-1.5 text-base font-black leading-tight truncate">{project.title}</h3>
-        </div>
-        <Chip light />
-      </div>
-
-      <div className="relative">
-        <div className="flex items-end justify-between text-[11px] font-semibold mb-1.5">
-          <span>{pct}% atteint</span>
-          <span className="text-black/55">
-            {reached ? 'Objectif atteint' : `Reste ${formatCurrency(remaining, currency)}`}
-          </span>
-        </div>
-        <div className="h-2.5 rounded-full bg-black/10 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full rounded-full bg-[#0a0a0c]"
-          />
-        </div>
-
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="min-w-0 text-[10px] text-black/55 leading-tight">
-            <span className="block truncate">Objectif {formatCurrency(project.targetAmount, currency)}</span>
-            {project.targetDate && <span className="block truncate">Avant le {formatDateFr(project.targetDate)}</span>}
+    <BankCard tone="silver">
+      <div className="absolute inset-0 flex flex-col justify-between" style={{ padding: '6% 6% 5% 8%' }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/8 border border-black/10">
+              <Target className="w-3 h-3" />
+              {project.category || 'Projet'}
+            </span>
+            <h3 className="mt-1 text-[15px] font-black leading-tight truncate">{project.title}</h3>
           </div>
-          <button
-            type="button"
-            disabled={!reached}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-            className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-black ${
-              reached
-                ? 'bg-[#0a0a0c] text-white shadow-lg cursor-pointer'
-                : 'bg-black/10 text-black/40 cursor-not-allowed'
-            }`}
-            title={reached ? 'Clôturer : objectif atteint, le projet sera archivé' : 'Disponible quand l\'objectif est atteint'}
-          >
-            {reached ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Lock className="w-3 h-3" />}
-            Clôturer
-          </button>
+          <div className="w-10 h-[30px] shrink-0">
+            <EmvChip light />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-end justify-between text-[11px] font-semibold mb-1">
+            <span>{pct}% atteint</span>
+            <span className="text-black/55">{reached ? 'Objectif atteint' : `Reste ${formatCurrency(remaining, currency)}`}</span>
+          </div>
+          <div className="h-2 rounded-full bg-black/10 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="h-full rounded-full bg-[#0a0a0c]"
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="min-w-0 text-[10px] text-black/55 leading-tight">
+              <span className="block truncate">Objectif {formatCurrency(project.targetAmount, currency)}</span>
+              {project.targetDate && <span className="block truncate">Avant le {formatDateFr(project.targetDate)}</span>}
+            </div>
+            <button
+              type="button"
+              disabled={!reached}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-black ${
+                reached ? 'bg-[#0a0a0c] text-white shadow-lg cursor-pointer' : 'bg-black/10 text-black/40 cursor-not-allowed'
+              }`}
+              title={reached ? 'Clôturer : objectif atteint, le projet sera archivé' : "Disponible quand l'objectif est atteint"}
+            >
+              {reached ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Lock className="w-3 h-3" />}
+              Clôturer
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </BankCard>
   );
 };
 
 /**
  * Carrousel « coverflow » : la carte centrale est au premier plan, les voisines
- * sont inclinées et réduites sur les côtés. Glisser à gauche / droite pour changer.
+ * (plus petites, estompées) dépassent sur les côtés. Glisser pour changer de carte.
  */
 export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
   items,
   index,
   onIndexChange,
   currency,
-  holder,
   year,
   onCloseProject,
 }) => {
@@ -150,16 +209,22 @@ export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
     else if (info.offset.x > 45 || info.velocity.x > 450) go(index - 1);
   };
 
+  const current = items[index];
+
   return (
     <div className="relative">
+      <CardOutline />
       <motion.div
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.12}
         onDragEnd={handleDragEnd}
-        className="relative h-[216px] touch-pan-y select-none"
+        className="relative touch-pan-y select-none"
         style={{ perspective: 1100 }}
       >
+        {/* Réserve la hauteur exacte d'une carte (le contenu est en position absolue) */}
+        <div className="mx-auto w-[78%] invisible" style={{ aspectRatio: String(CARD_RATIO) }} />
+
         {items.map((item, i) => {
           const offset = i - index;
           const abs = Math.abs(offset);
@@ -171,30 +236,26 @@ export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
               animate={{
                 x: `${offset * 84}%`,
                 scale: 1 - Math.min(abs, 2) * 0.12,
-                rotateY: offset === 0 ? 0 : offset > 0 ? -8 : 8,
                 opacity: hidden ? 0 : 1 - Math.max(0, abs - 1) * 0.5,
               }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               onClick={() => offset !== 0 && go(i)}
               className="absolute top-0 left-1/2 -ml-[39%] w-[78%] h-full"
-              style={{ zIndex: 10 - abs, pointerEvents: hidden ? 'none' : 'auto', transformStyle: 'preserve-3d' }}
+              style={{ zIndex: 10 - abs, pointerEvents: hidden ? 'none' : 'auto' }}
             >
-              <div className="relative h-full shadow-[0_24px_50px_rgba(0,0,0,0.35)] rounded-[26px]">
+              <div className="relative h-full">
                 {item.kind === 'total' ? (
                   <TotalFace />
                 ) : (
-                  <ProjectFace
-                    project={item.project}
-                    currency={currency}
-                    onClose={() => onCloseProject(item.project.id)}
-                  />
+                  <ProjectFace project={item.project} currency={currency} onClose={() => onCloseProject(item.project.id)} />
                 )}
                 {/* Voile : les cartes voisines apparaissent estompées */}
                 <motion.div
                   initial={false}
-                  animate={{ opacity: abs === 0 ? 0 : 0.72 }}
+                  animate={{ opacity: abs === 0 ? 0 : 0.6 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0 rounded-[26px] bg-[#0b0d12] pointer-events-none"
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: '#0b0d12', clipPath: 'url(#bank-card-shape)' }}
                 />
               </div>
             </motion.div>
@@ -203,10 +264,12 @@ export const SavingsCardCarousel: React.FC<SavingsCardCarouselProps> = ({
       </motion.div>
 
       {/* Numéro masqué sous la carte, comme sur la carte de référence */}
-      <p className={`mt-4 text-center text-[13px] text-fg-2 font-semibold tabular-nums ${items[index]?.kind === 'project' ? 'tracking-normal' : 'tracking-[0.3em]'}`}>
-        {items[index]?.kind === 'project'
-          ? `Créé le ${formatDateFr((items[index] as Extract<CarouselItem, { kind: 'project' }>).project.createdAt)}`
-          : `•••• •••• •••• ${year}`}
+      <p
+        className={`mt-4 text-center text-[13px] text-fg-2 font-semibold tabular-nums ${
+          current?.kind === 'project' ? 'tracking-normal' : 'tracking-[0.3em]'
+        }`}
+      >
+        {current?.kind === 'project' ? `Créé le ${formatDateFr(current.project.createdAt)}` : `•••• •••• •••• ${year}`}
       </p>
 
       {/* Indicateurs de position */}

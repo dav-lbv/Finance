@@ -507,7 +507,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     Objectif visé ({currency})
                   </label>
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     required
                     value={targetAmount}
                     onChange={(e) => setTargetAmount(e.target.value)}
@@ -521,7 +521,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                     Apport déjà versé ({currency})
                   </label>
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     value={initialAmount}
                     onChange={(e) => setInitialAmount(e.target.value)}
                     placeholder="0"
@@ -616,7 +616,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     required
                     min="1"
                     value={contributeAmount}

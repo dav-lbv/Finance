@@ -302,9 +302,9 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
               Montant du versement ({currency})
             </label>
             <input
-              type="number"
-              step={currency === 'FCFA' || currency === 'CFA' ? '500' : '0.01'}
-              min={currency === 'FCFA' || currency === 'CFA' ? '500' : '0.01'}
+              type="number" inputMode="decimal"
+              step="any"
+              min="1"
               required
               placeholder={currency === 'FCFA' || currency === 'CFA' ? 'Ex: 50000' : 'Ex: 400'}
               value={amount}
@@ -378,18 +378,18 @@ export const SavingsModal: React.FC<SavingsModalProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+          <div className="sheet-footer flex items-center justify-end gap-2 pt-3 border-t border-line">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 text-xs font-semibold"
+              className="px-5 py-3 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 text-sm font-semibold whitespace-nowrap"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={savingsMode === 'project' && activeProjects.length === 0}
-              className="px-5 py-2.5 rounded-full bg-brand hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-brand-fg font-extrabold text-xs shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] flex items-center gap-1.5 transition-all"
+              className="flex-1 sm:flex-none px-5 py-3 rounded-full bg-brand hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-brand-fg font-extrabold text-sm whitespace-nowrap shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] flex items-center justify-center gap-2 transition-all"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>

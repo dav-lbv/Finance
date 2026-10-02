@@ -404,7 +404,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   <div className="relative">
                     <Wallet className="w-5 h-5 text-brand absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
                     <input
-                      type="number"
+                      type="number" inputMode="decimal"
                       required
                       value={defaultSalary}
                       onChange={(e) => setDefaultSalary(e.target.value)}

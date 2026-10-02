@@ -43,8 +43,8 @@ const ProgressRing: React.FC<{ value: number }> = ({ value }) => {
   const circumference = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, value));
   return (
-    <div className="relative w-12 h-12 shrink-0" title="Part du salaire disponible">
-      <svg viewBox="0 0 48 48" className="w-12 h-12 -rotate-90">
+    <div className="relative w-10 h-10 shrink-0" title="Part du salaire disponible">
+      <svg viewBox="0 0 48 48" className="w-10 h-10 -rotate-90">
         <circle cx="24" cy="24" r={r} fill="none" stroke="var(--line-strong)" strokeWidth="4" />
         <circle
           cx="24"
@@ -60,7 +60,7 @@ const ProgressRing: React.FC<{ value: number }> = ({ value }) => {
           style={{ ['--ring-len' as string]: circumference }}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-black text-fg tabular-nums">
+      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-fg tabular-nums">
         {Math.round(clamped)}
       </span>
     </div>
@@ -92,12 +92,12 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
   };
 
   return (
-    <div className="rounded-[28px] bg-surface border border-line p-2.5 sm:p-3">
+    <div className="rounded-[26px] bg-surface border border-line p-2">
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-11 h-11 shrink-0 rounded-full bg-surface-3 border border-line-strong flex items-center justify-center text-fg cursor-pointer"
+          className="w-10 h-10 shrink-0 rounded-full bg-surface-3 border border-line-strong flex items-center justify-center text-fg cursor-pointer"
           title={expanded ? 'Replier le calendrier' : 'Afficher le mois'}
         >
           <Equal className="w-5 h-5 stroke-[2.6]" />
@@ -125,7 +125,7 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
                 key={key}
                 type="button"
                 onClick={() => onSelectDate(key)}
-                className="relative flex flex-col items-center py-1.5 rounded-2xl cursor-pointer"
+                className="relative flex flex-col items-center py-1 rounded-2xl cursor-pointer"
               >
                 {isSelected && (
                   <motion.span
@@ -135,7 +135,7 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
                   />
                 )}
                 <span className="relative text-[11px] font-semibold text-fg-muted">{DAY_INITIALS[i]}</span>
-                <span className={`relative text-[15px] font-bold tabular-nums ${isSelected || isToday ? 'text-fg' : 'text-fg-2'}`}>
+                <span className={`relative text-[14px] font-bold tabular-nums ${isSelected || isToday ? 'text-fg' : 'text-fg-2'}`}>
                   {parseInt(key.slice(8, 10), 10)}
                 </span>
                 {expenseDates.has(key) && <span className="absolute top-1 left-1.5 w-1.5 h-1.5 rounded-full bg-danger" />}
@@ -152,7 +152,7 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="block mx-auto mt-2 w-10 h-1.5 rounded-full bg-line-strong cursor-pointer"
+        className="block mx-auto mt-1 w-10 h-1.5 rounded-full bg-line-strong cursor-pointer"
         aria-label="Déplier le calendrier"
       />
 

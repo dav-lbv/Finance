@@ -224,7 +224,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedMonth(getPreviousMonthKey(selectedMonth))}
-                className="p-1 rounded-full text-fg-muted hover:text-fg cursor-pointer"
+                className="p-2.5 rounded-full text-fg-muted hover:text-fg cursor-pointer"
                 aria-label="Mois précédent"
               >
                 <ChevronRight className="w-3.5 h-3.5 rotate-180" />
@@ -233,7 +233,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedMonth(getNextMonthKey(selectedMonth))}
-                className="p-1 rounded-full text-fg-muted hover:text-fg cursor-pointer"
+                className="p-2.5 rounded-full text-fg-muted hover:text-fg cursor-pointer"
                 aria-label="Mois suivant"
               >
                 <ChevronRight className="w-3.5 h-3.5" />

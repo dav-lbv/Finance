@@ -204,7 +204,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
           >
-            <p className="text-4xl font-black tracking-tight text-fg tabular-nums">
+            <p className="text-[34px] leading-tight font-black tracking-tight text-fg tabular-nums">
               {formatCurrency(animatedAmount, currency)}
             </p>
             <p className="text-xs text-fg-muted mt-0.5 truncate px-6">{focusedLabel}</p>
@@ -212,7 +212,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
         </AnimatePresence>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-3">
         <SavingsCardCarousel
           items={items}
           index={safeIndex}
@@ -225,7 +225,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
       </div>
 
       {/* Boutons d'action ronds */}
-      <div className="mt-6 flex items-start justify-center gap-8">
+      <div className="mt-5 flex items-start justify-center gap-8">
         <RoundAction label="Versement" onClick={() => openDeposit(focusedProject?.id)}>
           <Plus className="w-6 h-6 stroke-[2.6]" />
         </RoundAction>
@@ -238,7 +238,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
       </div>
 
       {/* Contenu de la carte active */}
-      <div className="mt-8 space-y-4">
+      <div className="mt-6 space-y-4">
         {focusedProject ? (
           <div className="rounded-3xl bg-surface border border-line p-4 grid grid-cols-3 gap-2 text-center">
             {[
@@ -314,7 +314,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
                   <button
                     type="button"
                     onClick={() => onDeleteSavings(dep.id)}
-                    className="p-1.5 text-fg-muted hover:text-rose-400 cursor-pointer shrink-0"
+                    className="p-2.5 -mr-1 text-fg-muted hover:text-rose-400 cursor-pointer shrink-0"
                     title="Supprimer ce versement"
                   >
                     <Trash2 className="w-4 h-4" />

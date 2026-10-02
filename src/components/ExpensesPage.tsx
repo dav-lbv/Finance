@@ -516,7 +516,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                       {isEditingThis ? (
                         <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-full border border-line-strong">
                           <input
-                            type="number"
+                            type="number" inputMode="decimal"
                             step="100"
                             min="0"
                             value={tempAmount}

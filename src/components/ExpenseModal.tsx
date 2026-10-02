@@ -145,13 +145,13 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
+        <div className="flex items-center gap-3 mb-5 pr-10">
+          <div className="w-10 h-10 shrink-0 rounded-2xl bg-surface-2 text-brand flex items-center justify-center border border-line-strong">
             <Receipt className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-fg">
-              Ajouter une dépense
+            <h2 className="text-lg font-black text-fg leading-tight">
+              Nouvelle dépense
             </h2>
             <p className="text-xs text-fg-muted">
               Puisera dans le solde de base du mois
@@ -248,9 +248,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                   Montant en {currency}
                 </label>
                 <input
-                  type="number"
-                  step={currency === 'FCFA' || currency === 'CFA' ? '100' : '0.01'}
-                  min={currency === 'FCFA' || currency === 'CFA' ? '100' : '0.01'}
+                  type="number" inputMode="decimal"
+                  step="any"
+                  min="1"
                   required
                   placeholder={currency === 'FCFA' || currency === 'CFA' ? '25000' : '45.00'}
                   value={amount}
@@ -318,23 +318,23 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="sheet-footer flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   resetForm();
                   onClose();
                 }}
-                className="px-4 py-2 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 text-xs font-semibold"
+                className="px-5 py-3 rounded-full bg-surface-2 hover:bg-surface-3 text-fg-2 text-sm font-semibold whitespace-nowrap"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] flex items-center gap-1.5"
+                className="flex-1 sm:flex-none px-5 py-3 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-sm whitespace-nowrap shadow-[0_0_15px_rgba(var(--brand-rgb),0.3)] flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4 stroke-[3]" />
-                <span>Enregistrer la dépense</span>
+                <span>Enregistrer</span>
               </button>
             </div>
           </form>

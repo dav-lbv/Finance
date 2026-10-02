@@ -752,7 +752,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-1 w-full">
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     value={defaultSalary}
                     onChange={(e) => setDefaultSalary(e.target.value)}
                     className="w-full bg-surface border border-line-strong focus:border-brand rounded-2xl pl-4 pr-16 py-2.5 text-sm font-black text-fg focus:outline-none"
@@ -784,7 +784,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <form onSubmit={handleSaveMonthSalary} className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-1 w-full">
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     value={currentMonthSalary}
                     onChange={(e) => setCurrentMonthSalary(e.target.value)}
                     className="w-full bg-surface border border-line-strong focus:border-brand rounded-2xl pl-4 pr-16 py-2.5 text-sm font-black text-fg focus:outline-none"
@@ -854,7 +854,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
                 <div>
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     value={newPresetAmount}
                     onChange={(e) => setNewPresetAmount(e.target.value)}
                     placeholder="Montant habituel (optionnel)"
@@ -900,7 +900,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           />
                         </div>
                         <input
-                          type="number"
+                          type="number" inputMode="decimal"
                           value={editAmount}
                           onChange={(e) => setEditAmount(e.target.value)}
                           placeholder="Montant"
