@@ -4,6 +4,7 @@ import { ArrowLeft, History, PiggyBank, Plus, Target, Trash2 } from 'lucide-reac
 import { AppData, SavingsDeposit, SavingsProject } from '../types';
 import { formatCurrency, formatDateFr, formatMonthKey } from '../utils/date';
 import { useCountUp } from '../hooks/useCountUp';
+import { Amount } from './Amount';
 import { SavingsModal } from './SavingsModal';
 import { SavingsDayTimeline } from './SavingsDayTimeline';
 import { SavingsProjectsSection } from './SavingsProjectsSection';
@@ -211,8 +212,8 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
           >
-            <p className="text-[34px] leading-tight font-black tracking-tight text-fg tabular-nums">
-              {formatCurrency(animatedAmount, currency)}
+            <p className="text-[44px] leading-tight text-fg">
+              <Amount value={animatedAmount} currency={currency} />
             </p>
             <p className="text-xs text-fg-muted mt-0.5 truncate px-6">{focusedLabel}</p>
           </motion.div>

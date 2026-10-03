@@ -31,6 +31,10 @@ import { DEFAULT_AVATAR } from '../utils/avatars';
 import { NotificationsModal } from './NotificationsModal';
 import { CATEGORY_CONFIG } from './CategorySelect';
 import { useCountUp } from '../hooks/useCountUp';
+import { Amount } from './Amount';
+import { DotMeter } from './DotMeter';
+import { TransactionsPanel } from './TransactionsPanel';
+import { TransactionItem, TransactionSheet } from './TransactionSheet';
 import { CategoryDonutCard, SalaryDonutCard, TrendBarsCard, TrendPoint } from './DashboardCharts';
 
 const SHORT_MONTHS = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
@@ -66,6 +70,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const [balanceView, setBalanceView] = useState<'balance' | 'wallet'>('balance');
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
 
   // Dépenses du mois sélectionné
   const currentExpenses = data.expenses[selectedMonth] || [];
@@ -158,6 +163,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }));
   })();
 
+  // Toutes les opérations du mois (dépenses + versements d'épargne)
+  const monthTransactions: TransactionItem[] = [
+    ...currentExpenses.map((exp) => ({
+      id: exp.id,
+      type: 'expense' as const,
+      title: exp.title,
+      category: exp.category,
+      amount: exp.amount,
+      date: exp.date,
+      isRecurring: exp.isRecurring,
+      isPaid: exp.isPaid,
+      note: exp.note,
+    })),
+    ...data.savings
+      .filter((d) => d.date.startsWith(selectedMonth))
+      .map((d) => ({
+        id: d.id,
+        type: 'savings' as const,
+        title: d.note || d.projectName || 'Versement épargne',
+        category: 'Épargne',
+        amount: d.amount,
+        date: d.date,
+        note: d.note && d.projectName ? d.note : undefined,
+        projectName: d.projectName,
+      })),
+  ];
+
   const heroValue = balanceView === 'balance' ? currentTotalExpenses : totalSavingsAccrued;
   const animatedHero = useCountUp(heroValue);
 
@@ -180,8 +212,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
       {/* ======================================================== */}
-      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-7 rounded-b-[36px] border-b border-line-strong overflow-hidden bg-gradient-to-b from-success/25 via-surface-2 to-surface">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[120%] h-64 rounded-full bg-success/20 blur-3xl pointer-events-none" />
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-14 border-b border-line-strong overflow-hidden bg-gradient-to-b from-success/25 via-surface-2 to-surface">
+        {/* Aurore : deux halos qui dérivent lentement */}
+        <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-success/25 blur-3xl pointer-events-none" />
+        <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/10 blur-3xl pointer-events-none" />
 
         {/* Ligne du haut : avatar + bienvenue, cloche */}
         <div className="relative flex items-center justify-between gap-3">
@@ -234,8 +268,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             ))}
           </div>
 
-          <h1 className="mt-3 text-[40px] sm:text-5xl leading-none font-black text-fg tracking-tight tabular-nums break-words">
-            {formatCurrency(animatedHero, currency)}
+          <h1 className="mt-3 text-[46px] sm:text-6xl leading-none text-fg break-words">
+            <Amount value={animatedHero} currency={currency} />
           </h1>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -279,86 +313,72 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      <div className="space-y-5 pt-5">
-        {/* Carte promo : projet d'épargne en cours */}
-        {featuredProject ? (
-          <div className="relative rounded-3xl bg-surface border border-line p-4 overflow-hidden">
-            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-success/15 blur-2xl pointer-events-none" />
-            <div className="relative">
-              <p className="text-sm font-extrabold text-fg">Projet en cours</p>
-              <p className="text-[11px] text-fg-muted truncate">{featuredProject.title}</p>
-              <div className="mt-3 h-2 rounded-full bg-surface-3 overflow-hidden">
-                <div className="h-full rounded-full bg-success transition-all duration-700" style={{ width: `${featuredPct}%` }} />
-              </div>
-              <div className="mt-2.5 flex items-center justify-between">
-                <span className="text-[11px] text-fg-muted tabular-nums">
-                  {formatCurrency(featuredProject.currentAmount, currency)} / {formatCurrency(featuredProject.targetAmount, currency)} • {featuredPct}%
-                </span>
+      {/* Feuille qui recouvre le bas du héros (poignée en haut) */}
+      <div className="relative -mt-8 rounded-t-[34px] bg-app border-t border-line-strong shadow-[0_-18px_40px_rgba(0,0,0,0.25)] px-3 sm:px-6 pt-3 pb-1 -mx-3 sm:-mx-6 lg:-mx-8">
+        <div className="w-10 h-1.5 rounded-full bg-line-strong mx-auto mb-4" />
+
+        <div className="space-y-4">
+          {/* Tuiles bento : épargne du mois + projet en cours */}
+          <div className={`grid gap-3 ${featuredProject ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="relative rounded-[28px] bg-surface border border-line p-4 min-h-[148px] flex flex-col justify-between">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-[11px] font-semibold text-fg-muted leading-tight">Épargné ce mois</span>
                 <button
                   type="button"
                   onClick={() => onNavigateToTab('savings')}
-                  className="px-4 py-1.5 rounded-full bg-brand text-brand-fg text-[11px] font-black cursor-pointer"
+                  className="w-9 h-9 -mt-1 -mr-1 rounded-full bg-brand text-brand-fg flex items-center justify-center cursor-pointer"
+                  aria-label="Ouvrir l'épargne"
                 >
-                  Voir
+                  <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
+              <div>
+                <p className="text-[34px] leading-none text-fg">
+                  <Amount value={currentMonthSavings} currency={currency} />
+                </p>
+                <p className="mt-2 text-[11px] text-fg-muted">
+                  {savingsRate}% du salaire • {data.savings.filter((d) => d.date.startsWith(selectedMonth)).length} versement
+                  {data.savings.filter((d) => d.date.startsWith(selectedMonth)).length > 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-          </div>
-        ) : null}
 
-        {/* Transactions */}
-        <div className="rounded-3xl bg-surface border border-line overflow-hidden">
-          <div className="flex items-center justify-between px-4 pt-4 pb-3">
-            <h3 className="text-base font-extrabold text-fg tracking-tight">Transactions</h3>
-            <button
-              type="button"
-              onClick={() => onNavigateToTab('expenses')}
-              className="text-[11px] font-semibold text-fg-muted hover:text-fg cursor-pointer"
-            >
-              Voir tout
-            </button>
+            {featuredProject && (
+              <div className="relative rounded-[28px] border border-success/30 bg-gradient-to-br from-success/25 via-success/10 to-surface p-4 min-h-[148px] flex flex-col justify-between overflow-hidden">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-[11px] font-semibold text-fg-2 leading-tight min-w-0 truncate">{featuredProject.title}</span>
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToTab('savings')}
+                    className="w-9 h-9 -mt-1 -mr-1 shrink-0 rounded-full bg-brand text-brand-fg flex items-center justify-center cursor-pointer"
+                    aria-label="Ouvrir le projet"
+                  >
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-end justify-between gap-2">
+                  <DotMeter percent={featuredPct} size={14} />
+                  <span className="text-[34px] leading-none num-light text-fg">
+                    {featuredPct}
+                    <span className="text-base text-fg-muted">%</span>
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-          {recentTransactions.length === 0 ? (
-            <div className="text-center px-4 pb-8 pt-2 text-fg-muted text-xs">
-              <Receipt className="w-8 h-8 mx-auto mb-2 opacity-40" />
-              <p>Aucune transaction pour {formatMonthKey(selectedMonth)}.</p>
-              <button
-                onClick={onOpenAddExpense}
-                className="mt-3 px-4 py-1.5 rounded-full bg-brand text-brand-fg text-xs font-extrabold cursor-pointer"
-              >
-                + Ajouter une première dépense
-              </button>
-            </div>
-          ) : (
-            <ul className="divide-y divide-line">
-              {recentTransactions.map((tx) => {
-                const isExpense = tx.type === 'expense';
-                const config = CATEGORY_CONFIG[tx.category];
-                const IconComponent = isExpense ? (config?.icon || Receipt) : PiggyBank;
-                return (
-                  <li key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-10 h-10 rounded-full bg-surface-2 border border-line-strong flex items-center justify-center shrink-0 text-fg-2">
-                        <IconComponent className="w-[18px] h-[18px]" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-fg truncate">{tx.title}</p>
-                        <p className="text-[11px] text-fg-muted truncate">
-                          {isExpense ? tx.category : 'Épargne'} • {formatDateFr(tx.date)}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`text-sm font-black whitespace-nowrap tabular-nums ${isExpense ? 'text-fg' : 'text-success'}`}>
-                      {isExpense ? '-' : '+'}{formatCurrency(tx.amount, currency)}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <TransactionsPanel
+            items={monthTransactions}
+            currency={currency}
+            monthLabel={formatMonthKey(selectedMonth)}
+            onSelect={setSelectedTx}
+            onSeeAll={() => onNavigateToTab('expenses')}
+            onAddFirst={onOpenAddExpense}
+          />
         </div>
+      </div>
 
+      <div className="space-y-5 pt-5">
       {/* ======================================================== */}
       {/* DIAGRAMMES : répartition du salaire, catégories, évolution */}
       {/* ======================================================== */}
@@ -439,6 +459,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       </div>
+
+      <TransactionSheet
+        item={selectedTx}
+        currency={currency}
+        onClose={() => setSelectedTx(null)}
+        onOpenSection={(tab) => onNavigateToTab(tab)}
+      />
 
       {/* Modal des notifications */}
       <NotificationsModal

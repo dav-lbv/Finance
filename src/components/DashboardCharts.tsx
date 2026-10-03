@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { formatCurrency } from '../utils/date';
+import { Amount } from './Amount';
 
 // ------------------------------------------------------------------
 // Anneau (donut) animé : segments en SVG, sans dépendance
@@ -121,7 +122,7 @@ export const SalaryDonutCard: React.FC<{
             segments={segments}
             center={
               <>
-                <span className={`text-3xl font-black tabular-nums leading-none ${over ? 'text-danger' : 'text-fg'}`}>{pct}%</span>
+                <span className={`text-4xl num-light tabular-nums leading-none ${over ? 'text-danger' : 'text-fg'}`}>{pct}%</span>
                 <span className="text-[10px] font-semibold text-fg-muted mt-1">{over ? 'du salaire (dépassé)' : 'du salaire utilisé'}</span>
               </>
             }
@@ -168,8 +169,8 @@ export const CategoryDonutCard: React.FC<{
             center={
               <>
                 <span className="text-[10px] font-semibold text-fg-muted">Total</span>
-                <span className="text-lg font-black text-fg tabular-nums leading-tight break-words">
-                  {formatCurrency(total, currency)}
+                <span className="text-xl text-fg leading-tight break-words">
+                  <Amount value={total} currency={currency} />
                 </span>
               </>
             }

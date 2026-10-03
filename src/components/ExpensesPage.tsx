@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { AppData, Expense, ExpenseCategory } from '../types';
 import { formatCurrency, formatDateFr, formatMonthKey } from '../utils/date';
+import { Amount } from './Amount';
 import { ExpenseTrendChart } from './ExpenseTrendChart';
 import { FintechSelect } from './FintechSelect';
 
@@ -247,8 +248,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
-                {formatCurrency(totalExpenses, currency)}
+              <span className="text-3xl sm:text-4xl text-fg break-words">
+                <Amount value={totalExpenses} currency={currency} />
               </span>
             </div>
             
@@ -289,8 +290,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
-                {formatCurrency(totalRecurring, currency)}
+              <span className="text-3xl sm:text-4xl text-fg break-words">
+                <Amount value={totalRecurring} currency={currency} />
               </span>
             </div>
 
@@ -334,8 +335,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
             </div>
 
             <div className="mt-4">
-              <span className="text-2xl sm:text-3xl font-black text-fg tracking-tight break-words">
-                {formatCurrency(totalOneOff, currency)}
+              <span className="text-3xl sm:text-4xl text-fg break-words">
+                <Amount value={totalOneOff} currency={currency} />
               </span>
             </div>
 

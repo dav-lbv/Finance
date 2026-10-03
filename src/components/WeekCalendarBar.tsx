@@ -189,11 +189,13 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
                       type="button"
                       disabled={!cell.isCurrentMonth}
                       onClick={() => onSelectDate(cell.dateString)}
-                      className={`relative h-9 rounded-xl text-xs font-bold tabular-nums cursor-pointer border ${
+                      className={`relative h-10 w-10 mx-auto rounded-full text-xs font-bold tabular-nums cursor-pointer border ${
                         isSelected
                           ? 'bg-brand text-brand-fg border-brand'
+                          : cell.dateString === today
+                          ? 'border-dashed border-fg-muted text-fg'
                           : cell.isCurrentMonth
-                          ? 'bg-surface-2 border-line text-fg-2 hover:border-line-strong'
+                          ? 'border-transparent text-fg-2 hover:bg-surface-2'
                           : 'border-transparent text-fg-muted opacity-25'
                       }`}
                     >
