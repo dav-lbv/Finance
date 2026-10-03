@@ -120,7 +120,7 @@ const TotalFace: React.FC = () => (
       className="absolute font-black italic leading-none"
       style={{ right: '7%', bottom: '10%', fontSize: '10.5cqh', letterSpacing: '-0.01em' }}
     >
-      Mon_Kanda
+      Mon Kanda
     </span>
   </BankCard>
 );

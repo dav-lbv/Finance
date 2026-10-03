@@ -1,4 +1,4 @@
-# Mon_Kanda — application native (iOS / Android)
+# Mon Kanda — application native (iOS / Android)
 
 L'application web est enveloppée par [Capacitor](https://capacitorjs.com). Le code est le même partout.
 

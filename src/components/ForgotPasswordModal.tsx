@@ -10,7 +10,7 @@ interface ForgotPasswordModalProps {
 }
 
 /**
- * Mon_Kanda fonctionne sans serveur : aucun e-mail ne peut être envoyé et le mot de passe
+ * Mon Kanda fonctionne sans serveur : aucun e-mail ne peut être envoyé et le mot de passe
  * n'est pas récupérable (il n'est stocké que haché). La seule issue est de tout effacer.
  */
 export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({

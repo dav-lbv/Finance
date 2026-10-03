@@ -77,17 +77,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             
-            {/* 1. Brand Logo Mon_Kanda : Logo à gauche */}
+            {/* 1. Brand Logo Mon Kanda : Logo à gauche */}
             <div 
               onClick={() => setCurrentTab('dashboard')} 
               className="flex items-center gap-2 shrink-0 cursor-pointer group"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-fg-muted to-brand flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.35)] shrink-0 transition-transform group-hover:scale-105">
-                <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-brand-fg stroke-[2.6]" />
-              </div>
+              <img src="/icon.svg" alt="" className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 transition-transform group-hover:scale-105 drop-shadow-[0_4px_10px_rgba(37,99,235,0.35)]" />
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-base sm:text-lg tracking-tight text-fg">
-                  Mon_Kanda
+                  Mon Kanda
                 </span>
                 <span className="text-[9px] font-black tracking-widest uppercase px-1.5 py-0.2 rounded-full bg-brand/15 text-brand border border-brand/30 hidden xs:inline-block">
                   PRO
@@ -262,7 +260,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {security.isLockEnabled && (
                   <button
                     onClick={onLockApp}
-                    title="Verrouiller Mon_Kanda"
+                    title="Verrouiller Mon Kanda"
                     className="p-2 rounded-full bg-surface hover:bg-surface-2 text-brand border border-brand/30 transition-all active:scale-95"
                   >
                     <Lock className="w-3.5 h-3.5" />

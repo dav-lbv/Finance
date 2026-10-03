@@ -12,7 +12,7 @@ function StorageError({ message }: { message: string }) {
       <div className="max-w-sm space-y-3">
         <h1 className="text-xl font-black">Base de données inaccessible</h1>
         <p className="text-sm text-fg-muted">
-          Mon_Kanda n'a pas pu ouvrir le stockage de l'appareil. Vos données ne sont pas perdues : fermez puis rouvrez
+          Mon Kanda n'a pas pu ouvrir le stockage de l'appareil. Vos données ne sont pas perdues : fermez puis rouvrez
           l'application.
         </p>
         <p className="text-[11px] text-fg-muted break-words">{message}</p>

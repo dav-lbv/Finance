@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.monkanda.finance',
-  appName: 'Mon_Kanda',
+  appName: 'Mon Kanda',
   webDir: 'dist',
   ios: {
     contentInset: 'always',

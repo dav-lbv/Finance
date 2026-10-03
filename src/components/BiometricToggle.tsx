@@ -59,7 +59,7 @@ export const BiometricToggle: React.FC<BiometricToggleProps> = ({ enabled, lockE
   const test = async () => {
     setBusy(true);
     setMessage(null);
-    const result = await authenticateBiometric('Tester le déverrouillage de Mon_Kanda');
+    const result = await authenticateBiometric('Tester le déverrouillage de Mon Kanda');
     setBusy(false);
     setMessage(
       result.ok
@@ -84,7 +84,7 @@ export const BiometricToggle: React.FC<BiometricToggleProps> = ({ enabled, lockE
                 ? status.reason
                 : !lockEnabled
                 ? 'Activez d\'abord le verrouillage par mot de passe.'
-                : `Ouvrir Mon_Kanda avec ${label}`}
+                : `Ouvrir Mon Kanda avec ${label}`}
             </span>
           </div>
         </div>

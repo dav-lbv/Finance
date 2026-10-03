@@ -663,7 +663,7 @@ export default function App() {
 
       {/* Footer épuré (masqué sur smartphone pour privilégier la bottom nav) */}
       <footer className="hidden md:block border-t border-line bg-app py-4 text-center text-xs text-fg-muted">
-        <p>Mon_Kanda • Gestion financière, dépenses & épargne</p>
+        <p>Mon Kanda • Gestion financière, dépenses & épargne</p>
       </footer>
     </div>
   );

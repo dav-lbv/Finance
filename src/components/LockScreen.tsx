@@ -63,7 +63,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
   const handleBiometricUnlock = async () => {
     setIsBiometricScanning(true);
     setError('');
-    const result = await authenticateBiometric('Déverrouiller Mon_Kanda', security.biometricCredentialId);
+    const result = await authenticateBiometric('Déverrouiller Mon Kanda', security.biometricCredentialId);
     setIsBiometricScanning(false);
     if (result.ok) onUnlock();
     else if (!result.cancelled) setError(result.error || 'Authentification biométrique échouée.');
@@ -90,7 +90,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
         </div>
 
         <h1 className="text-2xl font-black text-fg tracking-tight">
-          Mon_Kanda Sécurisé
+          Mon Kanda Sécurisé
         </h1>
         <p className="text-fg-muted text-xs sm:text-sm mt-1 mb-5">
           Authentification requise pour accéder à votre espace financier.

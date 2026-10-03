@@ -161,15 +161,13 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-app animate-fadeIn">
       <div className="w-full max-w-xl mx-auto flex-1 flex flex-col min-h-0">
-        {/* Top Header bar with Mon_Kanda Logo & Close */}
+        {/* Top Header bar with Mon Kanda Logo & Close */}
         <div className="px-5 pb-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-fg-muted to-brand flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)]">
-              <Sparkles className="w-4 h-4 text-brand-fg stroke-[2.8]" />
-            </div>
+            <img src="/icon.svg" alt="" className="w-9 h-9 shrink-0" />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-base tracking-tight text-fg">Mon_Kanda</span>
+                <span className="font-black text-base tracking-tight text-fg">Mon Kanda</span>
                 <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full bg-brand/15 text-brand border border-brand/30">
                   Setup
                 </span>
@@ -294,7 +292,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="Prénom"
-                      className="bg-surface border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
+                      className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-3 text-sm text-fg focus:outline-none"
                     />
                   </div>
                 </div>
@@ -309,7 +307,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="Nom"
-                      className="bg-surface border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
+                      className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-3 text-sm text-fg focus:outline-none"
                     />
                   </div>
                 </div>
@@ -325,7 +323,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="Pseudo (optionnel)"
-                      className="bg-surface border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
+                      className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-3 text-sm text-fg focus:outline-none"
                     />
                   </div>
                 </div>
@@ -341,7 +339,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Téléphone (optionnel)"
-                      className="bg-surface border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
+                      className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-3 text-sm text-fg focus:outline-none"
                     />
                   </div>
                 </div>
@@ -356,7 +354,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       placeholder="E-mail (optionnel)"
-                      className="bg-surface border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-fg focus:outline-none"
+                      className="w-full bg-surface-2 border border-line-strong focus:border-brand rounded-2xl pl-10 pr-4 py-3 text-sm text-fg focus:outline-none"
                     />
                   </div>
                 </div>
@@ -641,7 +639,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   Étape 4 sur 4
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-fg">
-                  Sécurité & Verrouillage de Mon_Kanda
+                  Sécurité & Verrouillage de Mon Kanda
                 </h2>
                 <p className="text-xs text-fg-2">
                   Protégez vos données financières avec un mot de passe et vos données biométriques.
@@ -768,7 +766,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                   Configuration terminée avec succès !
                 </h2>
                 <p className="text-xs text-fg-2 mt-1.5 leading-relaxed">
-                  Votre espace <span className="text-brand font-black">Mon_Kanda</span> est maintenant configuré et prêt pour la gestion de vos finances.
+                  Votre espace <span className="text-brand font-black">Mon Kanda</span> est maintenant configuré et prêt pour la gestion de vos finances.
                 </p>
               </div>
 
@@ -809,7 +807,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
                 onClick={handleFinalSubmit}
                 className="w-full py-3.5 rounded-2xl bg-brand hover:bg-brand-hover text-brand-fg font-black text-sm tracking-tight shadow-[0_0_25px_rgba(var(--brand-rgb),0.35)] transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Accéder à Mon_Kanda</span>
+                <span>Accéder à Mon Kanda</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Mon_Kanda</string>
+        <string>Mon Kanda</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Mon_Kanda utilise Face ID pour déverrouiller l'application et protéger vos données financières.</string>
+	<string>Mon Kanda utilise Face ID pour déverrouiller l'application et protéger vos données financières.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

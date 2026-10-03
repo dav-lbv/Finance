@@ -318,7 +318,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
-                Paramètres de Mon_Kanda
+                Paramètres de Mon Kanda
               </h1>
               <p className="text-xs sm:text-sm text-fg-2 mt-0.5">
                 Organisation en grille Bento pour une gestion claire et intuitive de votre application.
@@ -554,7 +554,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   <Database className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-sm text-fg">Sauvegarde & Données Mon_Kanda</h3>
+                  <h3 className="font-black text-sm text-fg">Sauvegarde & Données Mon Kanda</h3>
                   <p className="text-xs text-fg-muted mt-0.5">
                     Exportez l'ensemble de vos transactions, salaires et projets d'épargne en fichier JSON sécurisé.
                   </p>
@@ -1171,7 +1171,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div>
               <h2 className="text-xl font-black text-fg">Sécurité & Verrouillage</h2>
               <p className="text-xs text-fg-muted mt-1">
-                Gérez la protection par mot de passe et l'accès biométrique à Mon_Kanda.
+                Gérez la protection par mot de passe et l'accès biométrique à Mon Kanda.
               </p>
             </div>
 
@@ -1273,7 +1273,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     onClick={onLockAppNow}
                     className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-brand/30 font-extrabold text-xs transition-all active:scale-95"
                   >
-                    Verrouiller immédiatement Mon_Kanda
+                    Verrouiller immédiatement Mon Kanda
                   </button>
                 ) : <div />}
 
@@ -1306,7 +1306,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>
-              <h2 className="text-xl font-black text-fg">Sauvegarde & Données Mon_Kanda</h2>
+              <h2 className="text-xl font-black text-fg">Sauvegarde & Données Mon Kanda</h2>
               <p className="text-xs text-fg-muted mt-1">
                 Exportez vos données financières locales ou réinitialisez l'application.
               </p>

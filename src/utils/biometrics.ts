@@ -112,15 +112,15 @@ export async function enrollBiometrics(): Promise<BiometricResult> {
   if (!status.available) return { ok: false, error: status.reason };
 
   if (status.mode === 'native') {
-    return authenticateBiometric('Activer le déverrouillage biométrique de Mon_Kanda');
+    return authenticateBiometric('Activer le déverrouillage biométrique de Mon Kanda');
   }
 
   try {
     const credential = (await navigator.credentials.create({
       publicKey: {
         challenge: crypto.getRandomValues(new Uint8Array(32)),
-        rp: { name: 'Mon_Kanda' },
-        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'mon-kanda', displayName: 'Mon_Kanda' },
+        rp: { name: 'Mon Kanda' },
+        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'mon-kanda', displayName: 'Mon Kanda' },
         pubKeyCredParams: [
           { type: 'public-key', alg: -7 },
           { type: 'public-key', alg: -257 },
@@ -144,7 +144,7 @@ export async function enrollBiometrics(): Promise<BiometricResult> {
 
 /** Demande à l'utilisateur de s'authentifier (Face ID, Touch ID, empreinte). */
 export async function authenticateBiometric(
-  reason = 'Déverrouiller Mon_Kanda',
+  reason = 'Déverrouiller Mon Kanda',
   credentialId?: string
 ): Promise<BiometricResult> {
   if (isNative()) {
@@ -154,7 +154,7 @@ export async function authenticateBiometric(
         cancelTitle: 'Annuler',
         allowDeviceCredential: false,
         iosFallbackTitle: '',
-        androidTitle: 'Mon_Kanda',
+        androidTitle: 'Mon Kanda',
         androidSubtitle: reason,
       });
       return { ok: true };

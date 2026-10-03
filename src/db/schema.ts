@@ -1,5 +1,5 @@
 /**
- * Schéma SQLite de Mon_Kanda (stockage natif iOS / Android).
+ * Schéma SQLite de Mon Kanda (stockage natif iOS / Android).
  * `MIGRATIONS[n]` fait passer la base de la version n à n+1 ; ne jamais modifier une
  * migration déjà publiée : en ajouter une nouvelle.
  */

@@ -59,7 +59,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   </span>
                 )}
               </h3>
-              <p className="text-[11px] text-fg-muted">Alertes & rappels budgétaires Mon_Kanda</p>
+              <p className="text-[11px] text-fg-muted">Alertes & rappels budgétaires Mon Kanda</p>
             </div>
           </div>
           <button
