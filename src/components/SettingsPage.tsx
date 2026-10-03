@@ -41,6 +41,8 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { useTheme } from '../hooks/useTheme';
 import { CategorySelect } from './CategorySelect';
 import { getMonthSalary } from '../utils/finance';
+import { SettingsMenu } from './SettingsMenu';
+import { SettingsSubHeader } from './SettingsSubHeader';
 import { BiometricToggle } from './BiometricToggle';
 import { hashPassword } from '../utils/crypto';
 import { ProjectCategoriesSettings } from './ProjectCategoriesSettings';
@@ -52,7 +54,6 @@ export type SettingsSection =
   | 'budget_salary' 
   | 'categories' 
   | 'project_categories' 
-  | 'appearance' 
   | 'security' 
   | 'backup';
 
@@ -285,7 +286,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `gesfin_export_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute('download', `mon-kanda_export_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -310,281 +311,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* SECTION PRINCIPALE (MENU) : STYLE BENTO GRID MODERNE     */}
+      {/* MENU PRINCIPAL : listes groupées façon iOS               */}
       {/* ======================================================== */}
       {activeSection === 'menu' && (
-        <div className="space-y-6 stagger">
-          
-          {/* Header de la page */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
-                Paramètres de Mon Kanda
-              </h1>
-              <p className="text-xs sm:text-sm text-fg-2 mt-0.5">
-                Organisation en grille Bento pour une gestion claire et intuitive de votre application.
-              </p>
-            </div>
-          </div>
-
-          {/* ======================================================== */}
-          {/* GRILLE BENTO ADAPTÉE AUX PARAMÈTRES (INSPIRATION DAYBASE) */}
-          {/* ======================================================== */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
-            
-            {/* TUILE BENTO 1 (HERO PROFIL - SPAN 2) */}
-            <div 
-              onClick={() => setActiveSection('user_info')}
-              className="md:col-span-2 group bg-gradient-to-br from-surface-2 via-surface to-surface hover:from-surface-2 hover:to-surface p-5 sm:p-6 rounded-3xl border border-line-strong hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-xl flex flex-col justify-between relative overflow-hidden"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative shrink-0">
-                    <img
-                      src={avatarUrl}
-                      alt={fullName}
-                      className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-brand shadow-[0_0_20px_rgba(var(--brand-rgb),0.3)]"
-                    />
-                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-line"></span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg sm:text-xl font-black text-fg truncate">{fullName}</h2>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-brand/15 text-brand border border-brand/30 shrink-0">
-                        {currency}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-fg-muted">
-                      <span className="truncate">{email}</span>
-                      {phone && (
-                        <>
-                          <span>•</span>
-                          <span className="whitespace-nowrap font-medium text-fg-2">{phone}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveSection('user_info');
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-brand text-brand-fg font-extrabold text-xs shadow-md hover:bg-brand-hover active:scale-95 transition-all shrink-0 cursor-pointer"
-                >
-                  <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Modifier le profil</span>
-                </button>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs text-fg-muted">
-                <span>Informations personnelles & Devise monétaire</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE BENTO 2 (THÈME) */}
-            <div
-              onClick={() => setActiveSection('appearance')}
-              className="group p-5 rounded-3xl border border-line transition-all duration-300 cursor-pointer bg-surface lift flex flex-col justify-between relative overflow-hidden hover:border-line-strong"
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Palette className="w-4 h-4 text-brand" />
-                  <span className="text-[11px] font-black uppercase tracking-wider text-fg-muted">
-                    Ambiance Visuelle
-                  </span>
-                </div>
-                <h3 className="font-black text-base text-fg tracking-tight">Thème d'affichage</h3>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  Basculez entre le mode sombre, le mode clair ou le réglage automatique.
-                </p>
-                <div className="grid grid-cols-2 gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    onClick={() => setThemeMode('dark')}
-                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 border cursor-pointer ${
-                      themeMode === 'dark' ? 'bg-brand text-brand-fg border-brand' : 'bg-surface-2 text-fg-2 border-line-strong hover:text-fg'
-                    }`}
-                  >
-                    <Moon className="w-3.5 h-3.5" />
-                    <span>Sombre</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setThemeMode('light')}
-                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 border cursor-pointer ${
-                      themeMode === 'light' ? 'bg-brand text-brand-fg border-brand' : 'bg-surface-2 text-fg-2 border-line-strong hover:text-fg'
-                    }`}
-                  >
-                    <Sun className="w-3.5 h-3.5" />
-                    <span>Clair</span>
-                  </button>
-                </div>
-              </div>
-              <div className="mt-3 pt-2.5 border-t border-line flex items-center justify-between text-[11px] text-fg-muted">
-                <span>Personnaliser l'affichage</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE BENTO 3 (BUDGET & SALAIRE) */}
-            <div
-              onClick={() => setActiveSection('budget_salary')}
-              className="group bg-surface hover:bg-surface-2 p-5 rounded-3xl border border-line hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted">
-                    Alimentation Mensuelle
-                  </span>
-                  <Wallet className="w-4 h-4 text-brand" />
-                </div>
-                <h3 className="font-black text-base text-fg tracking-tight">
-                  Budget & Salaire
-                </h3>
-                <div className="mt-2 text-xl font-black text-brand">
-                  {formatCurrency(Number(defaultSalary) || 0, currency)}
-                </div>
-                <p className="text-[11px] text-fg-muted mt-0.5">
-                  Salaire mensuel de référence par défaut.
-                </p>
-              </div>
-
-              <div className="mt-4 pt-2.5 border-t border-line flex items-center justify-between text-xs text-fg-muted">
-                <span>Ajuster les salaires</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE BENTO 4 (MODÈLES DE DÉPENSES RÉCURRENTES) */}
-            <div
-              onClick={() => setActiveSection('categories')}
-              className="group bg-surface hover:bg-surface-2 p-5 rounded-3xl border border-line hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted">
-                    Modèles Automatiques
-                  </span>
-                  <Tag className="w-4 h-4 text-amber-400" />
-                </div>
-                <h3 className="font-black text-base text-fg tracking-tight">
-                  Dépenses Récurrentes
-                </h3>
-                <div className="mt-2 text-xl font-black text-fg">
-                  {data.expensePresets?.length || 0} modèles
-                </div>
-                <p className="text-[11px] text-fg-muted mt-0.5">
-                  Loyer, abonnements, courses et charges fixes.
-                </p>
-              </div>
-
-              <div className="mt-4 pt-2.5 border-t border-line flex items-center justify-between text-xs text-fg-muted">
-                <span>Gérer les modèles</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE : CATÉGORIES DE PROJETS D'ÉPARGNE */}
-            <div
-              onClick={() => setActiveSection('project_categories')}
-              className="group bg-surface hover:bg-surface-2 p-5 rounded-3xl border border-line hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted">
-                    Projets d'épargne
-                  </span>
-                  <Target className="w-4 h-4 text-fg-2" />
-                </div>
-                <h3 className="font-black text-base text-fg tracking-tight">Catégories de projets</h3>
-                <div className="mt-2 text-xl font-black text-fg">
-                  {(data.projectCategories || []).length} catégorie{(data.projectCategories || []).length > 1 ? 's' : ''}
-                </div>
-                <p className="text-[11px] text-fg-muted mt-0.5">Définissez vos propres catégories.</p>
-              </div>
-              <div className="mt-4 pt-2.5 border-t border-line flex items-center justify-between text-xs text-fg-muted">
-                <span>Gérer les catégories</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE BENTO 5 (SÉCURITÉ & VERROUILLAGE) */}
-            <div
-              onClick={() => setActiveSection('security')}
-              className="group bg-surface hover:bg-surface-2 p-5 rounded-3xl border border-line hover:border-brand/50 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-fg-muted">
-                    Confidentialité
-                  </span>
-                  <Lock className="w-4 h-4 text-rose-400" />
-                </div>
-                <h3 className="font-black text-base text-fg tracking-tight">
-                  Sécurité & Verrouillage
-                </h3>
-                <div className="mt-2">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black ${
-                    data.security.isLockEnabled
-                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-surface-3 text-fg-muted border border-line-strong'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${data.security.isLockEnabled ? 'bg-emerald-400' : 'bg-fg-muted'}`} />
-                    <span>{data.security.isLockEnabled ? 'Verrouillage Actif' : 'Non protégé'}</span>
-                  </span>
-                </div>
-                <p className="text-[11px] text-fg-muted mt-1.5">
-                  Code PIN, empreinte et biométrie.
-                </p>
-              </div>
-
-              <div className="mt-4 pt-2.5 border-t border-line flex items-center justify-between text-xs text-fg-muted">
-                <span>Paramétrer le code</span>
-                <ChevronRight className="w-4 h-4 text-fg-muted group-hover:text-brand transition-colors" />
-              </div>
-            </div>
-
-            {/* TUILE BENTO 6 (SAUVEGARDE & DONNÉES - SPAN 3) */}
-            <div className="md:col-span-3 bg-gradient-to-r from-surface via-surface-2 to-surface p-5 rounded-3xl border border-line shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-surface-2 border border-line-strong text-brand flex items-center justify-center shrink-0">
-                  <Database className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm text-fg">Sauvegarde & Données Mon Kanda</h3>
-                  <p className="text-xs text-fg-muted mt-0.5">
-                    Exportez l'ensemble de vos transactions, salaires et projets d'épargne en fichier JSON sécurisé.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleExportJSON}
-                  className="px-4 py-2 rounded-full bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                >
-                  <Download className="w-3.5 h-3.5 text-brand" />
-                  <span>Exporter JSON</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveSection('backup')}
-                  className="px-4 py-2 rounded-full bg-brand hover:bg-brand-hover text-brand-fg text-xs font-extrabold transition-all cursor-pointer shadow-md active:scale-95"
-                >
-                  <span>Gérer les sauvegardes</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+        <SettingsMenu
+          data={data}
+          themeMode={themeMode}
+          setThemeMode={setThemeMode}
+          onNavigate={setActiveSection}
+          onLockNow={onLockAppNow}
+          onReset={() => setIsResetModalOpen(true)}
+        />
       )}
 
       {/* ======================================================== */}
@@ -593,15 +330,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {activeSection === 'user_info' && (
         <div className="space-y-6 animate-fadeIn">
           {/* Header de sous-page avec bouton retour */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
+          <SettingsSubHeader title="Profil" onBack={() => setActiveSection('menu')} />
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl">
             <div className="mb-6">
@@ -763,19 +492,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* ======================================================== */}
       {activeSection === 'budget_salary' && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
+          <SettingsSubHeader title="Salaire & budget" onBack={() => setActiveSection('menu')} />
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>
-              <h2 className="text-xl font-black text-fg">Alimentation Dépenses & Épargne</h2>
+              <h2 className="text-xl font-black text-fg">Salaires</h2>
               <p className="text-xs text-fg-muted mt-1">
                 Ajustez le salaire mensuel par défaut ainsi que le salaire spécifique perçu pour le mois actif en {formatMonthKey(selectedMonth)}.
               </p>
@@ -837,7 +558,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs active:scale-95 transition-all shadow-sm"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-brand hover:bg-brand-hover text-brand-fg font-extrabold text-xs active:scale-95 transition-all shadow-sm"
                 >
                   Valider pour {formatMonthKey(selectedMonth)}
                 </button>
@@ -852,15 +573,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* ======================================================== */}
       {activeSection === 'categories' && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
+          <SettingsSubHeader title="Dépenses récurrentes" onBack={() => setActiveSection('menu')} />
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>
@@ -1022,151 +735,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* SOUS-PAGE 4 : APPARENCE & THÈME D'AFFICHAGE              */}
-      {activeSection === 'project_categories' && (
-        <ProjectCategoriesSettings
-          categories={data.projectCategories || []}
-          usage={(data.savingsProjects || []).reduce<Record<string, number>>((acc, p) => {
-            if (p.category) acc[p.category] = (acc[p.category] || 0) + 1;
-            return acc;
-          }, {})}
-          onAdd={onAddProjectCategory}
-          onRename={onRenameProjectCategory}
-          onDelete={onDeleteProjectCategory}
-          onBack={() => setActiveSection('menu')}
-        />
-      )}
-
-      {/* ======================================================== */}
-      {activeSection === 'appearance' && (
-        <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
-
-          <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-8">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/15 text-brand text-[11px] font-black uppercase tracking-wider mb-2 border border-brand/30">
-                <Palette className="w-3.5 h-3.5" />
-                <span>Personnalisation Visuelle</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-fg">Apparence & Thème d'affichage</h2>
-              <p className="text-xs text-fg-muted mt-1">
-                Choisissez votre univers chromatique et le mode de luminosité adapté à vos préférences.
-              </p>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 2. MODE DE LUMINOSITÉ (SOMBRE, CLAIR, AUTOMATIQUE)       */}
-            {/* ======================================================== */}
-            <div className="space-y-4 pt-4 border-t border-line">
-              <div>
-                <h3 className="text-sm font-black text-fg uppercase tracking-wider">
-                  Mode de Luminosité
-                </h3>
-                <p className="text-xs text-fg-muted">
-                  Choisissez entre le Dark Mode permanent, le Light Mode ou l'adaptation automatique au système.
-                </p>
-              </div>
-
-              {/* Cartes Bento Luminosité */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                
-                {/* Carte Sombre */}
-                <div
-                  onClick={() => setThemeMode('dark')}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                    themeMode === 'dark'
-                      ? 'border-brand bg-surface-2 shadow-md'
-                      : 'border-line-strong bg-surface hover:bg-surface-2'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-xl bg-fg/10 text-fg flex items-center justify-center">
-                      <Moon className="w-4 h-4" />
-                    </div>
-                    {themeMode === 'dark' && (
-                      <span className="w-5 h-5 rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold text-xs">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-black text-sm text-fg block">Sombre</span>
-                  <span className="text-[11px] text-fg-muted">OLED Dark permanent</span>
-                </div>
-
-                {/* Carte Clair */}
-                <div
-                  onClick={() => setThemeMode('light')}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                    themeMode === 'light'
-                      ? 'border-brand bg-surface-2 shadow-md'
-                      : 'border-line-strong bg-surface hover:bg-surface-2'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center">
-                      <Sun className="w-4 h-4" />
-                    </div>
-                    {themeMode === 'light' && (
-                      <span className="w-5 h-5 rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold text-xs">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-black text-sm text-fg block">Clair</span>
-                  <span className="text-[11px] text-fg-muted">Fond lumineux épuré</span>
-                </div>
-
-                {/* Carte Système */}
-                <div
-                  onClick={() => setThemeMode('system')}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                    themeMode === 'system'
-                      ? 'border-brand bg-surface-2 shadow-md'
-                      : 'border-line-strong bg-surface hover:bg-surface-2'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-xl bg-sky-400/20 text-sky-300 flex items-center justify-center">
-                      <Laptop className="w-4 h-4" />
-                    </div>
-                    {themeMode === 'system' && (
-                      <span className="w-5 h-5 rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold text-xs">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-black text-sm text-fg block">Automatique</span>
-                  <span className="text-[11px] text-fg-muted">Selon l'appareil ({resolvedTheme === 'dark' ? 'Sombre' : 'Clair'})</span>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
       {/* SOUS-PAGE 5 : SÉCURITÉ & VERROUILLAGE                    */}
       {/* ======================================================== */}
       {activeSection === 'security' && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
+          <SettingsSubHeader title="Sécurité" onBack={() => setActiveSection('menu')} />
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>
@@ -1295,15 +868,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* ======================================================== */}
       {activeSection === 'backup' && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setActiveSection('menu')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface hover:bg-surface-2 px-4 py-2 rounded-full border border-line-strong transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4 text-brand" />
-              <span>Retour aux paramètres</span>
-            </button>
-          </div>
+          <SettingsSubHeader title="Données" onBack={() => setActiveSection('menu')} />
 
           <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line shadow-xl space-y-6">
             <div>

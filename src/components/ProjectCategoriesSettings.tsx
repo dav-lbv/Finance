@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, Pencil, Plus, Target, Trash2, X } from 'lucide-react';
+import { SettingsSubHeader } from './SettingsSubHeader';
+import { Check, Pencil, Plus, Target, Trash2, X } from 'lucide-react';
 
 interface ProjectCategoriesSettingsProps {
   categories: string[];
@@ -33,14 +34,7 @@ export const ProjectCategoriesSettings: React.FC<ProjectCategoriesSettingsProps>
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-bold text-fg-2 hover:text-fg bg-surface px-4 py-2.5 rounded-full border border-line cursor-pointer"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Retour aux paramètres</span>
-      </button>
+      <SettingsSubHeader title="Catégories de projets" onBack={onBack} />
 
       <div className="bg-surface p-5 sm:p-7 rounded-3xl border border-line space-y-5">
         <div>
