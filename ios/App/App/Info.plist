@@ -22,16 +22,6 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<!-- Remplacer par l'ID client iOS Google inversé : com.googleusercontent.apps.XXXX (voir NATIVE.md) -->
-				<string>com.googleusercontent.apps.REMPLACER_PAR_VOTRE_ID_CLIENT_IOS</string>
-			</array>
-		</dict>
-	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Mon Kanda utilise Face ID pour déverrouiller l'application et protéger vos données financières.</string>
 	<key>LSRequiresIPhoneOS</key>

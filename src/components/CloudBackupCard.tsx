@@ -1,31 +1,25 @@
 import React, { useRef, useState } from 'react';
-import { CloudUpload, CloudDownload, FileUp, Loader2 } from 'lucide-react';
-import { AppData, UserProfile } from '../types';
-import { CloudProviderId, downloadCloudBackup, providerStatus, signIn, uploadCloudBackup } from '../utils/cloud';
-import { parseBackup } from '../utils/storage';
+import { Cloud, FileUp, Loader2, Share2 } from 'lucide-react';
+import { AppData } from '../types';
+import { exportBackup, readBackupFile } from '../utils/backup';
 
 interface CloudBackupCardProps {
   data: AppData;
-  onUpdateUser: (user: UserProfile) => void;
   onRestoreData: (data: AppData) => void;
 }
 
-/** Compte lié (Google) pour sauvegarder la configuration et la retrouver sur un autre téléphone. */
-export const CloudBackupCard: React.FC<CloudBackupCardProps> = ({ data, onUpdateUser, onRestoreData }) => {
+/** Sauvegarde locale transférable vers le cloud personnel de l'utilisateur, et restauration. */
+export const CloudBackupCard: React.FC<CloudBackupCardProps> = ({ data, onRestoreData }) => {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const provider: CloudProviderId | null =
-    data.user.authProvider === 'google' || data.user.authProvider === 'apple' ? data.user.authProvider : null;
-  const label = provider === 'apple' ? 'iCloud' : 'Google';
-  const google = providerStatus('google');
-  const apple = providerStatus('apple');
 
-  const run = async (fn: () => Promise<string>) => {
+  const run = async (fn: () => Promise<string | null>) => {
     setBusy(true);
     setMsg(null);
     try {
-      setMsg({ ok: true, text: await fn() });
+      const text = await fn();
+      if (text) setMsg({ ok: true, text });
     } catch (e) {
       setMsg({ ok: false, text: e instanceof Error ? e.message : 'Opération impossible.' });
     } finally {
@@ -33,44 +27,17 @@ export const CloudBackupCard: React.FC<CloudBackupCardProps> = ({ data, onUpdate
     }
   };
 
-  const link = (target: CloudProviderId) =>
-    run(async () => {
-      const account = await signIn(target);
-      const user = { ...data.user, authProvider: target, email: data.user.email || account.email };
-      onUpdateUser(user);
-      await uploadCloudBackup(target, { ...data, user });
-      return `Compte ${target === 'apple' ? 'Apple (iCloud)' : account.email} lié et données sauvegardées.`;
-    });
-
-  const save = () =>
-    run(async () => {
-      await uploadCloudBackup(provider!, data);
-      return `Sauvegarde envoyée sur ${label}.`;
-    });
-
-  const restore = () =>
-    run(async () => {
-      if (!window.confirm('Remplacer les données de cet appareil par la sauvegarde du compte ?')) return 'Restauration annulée.';
-      const backup = await downloadCloudBackup(provider!);
-      if (!backup) throw new Error('Aucune sauvegarde trouvée sur ce compte.');
-      onRestoreData(backup);
-      return 'Données restaurées.';
-    });
+  const save = () => run(async () => ((await exportBackup(data)) ? 'Sauvegarde créée. Choisissez « Enregistrer dans Fichiers » (iCloud Drive, Google Drive…).' : null));
 
   const restoreFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
     await run(async () => {
-      let parsed: AppData;
-      try {
-        parsed = parseBackup(JSON.parse(await file.text()));
-      } catch (err) {
-        throw err instanceof SyntaxError ? new Error("Ce fichier n'est pas une sauvegarde valide.") : err;
-      }
-      if (!window.confirm('Remplacer les données de cet appareil par ce fichier ?')) return 'Restauration annulée.';
+      const parsed = await readBackupFile(file);
+      if (!window.confirm('Remplacer les données de cet appareil par cette sauvegarde ?')) return 'Restauration annulée.';
       onRestoreData(parsed);
-      return 'Données restaurées depuis le fichier.';
+      return 'Données restaurées.';
     });
   };
 
@@ -81,43 +48,26 @@ export const CloudBackupCard: React.FC<CloudBackupCardProps> = ({ data, onUpdate
     <div className="p-4 rounded-2xl bg-surface-2 border border-line-strong space-y-3">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-surface border border-line flex items-center justify-center shrink-0">
-          <CloudUpload className="w-5 h-5 text-fg-2" />
+          <Cloud className="w-5 h-5 text-fg-2" />
         </div>
         <div className="min-w-0">
-          <h3 className="font-bold text-xs sm:text-sm text-fg">Compte & changement de téléphone</h3>
+          <h3 className="font-bold text-xs sm:text-sm text-fg">Sauvegarde sur mon cloud</h3>
           <p className="text-[11px] text-fg-muted">
-            {provider ? `Lié à ${label}${data.user.email ? ` (${data.user.email})` : ''}` : 'Liez un compte pour retrouver vos données sur un nouvel appareil.'}
+            Vos données restent sur ce téléphone. Envoyez une copie vers iCloud Drive, Google Drive ou Fichiers pour la retrouver sur un autre appareil.
           </p>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {provider ? (
-          <>
-            <button type="button" onClick={save} disabled={busy} className={btn}>
-              {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CloudUpload className="w-3.5 h-3.5" />} Sauvegarder maintenant
-            </button>
-            <button type="button" onClick={restore} disabled={busy} className={btn}>
-              <CloudDownload className="w-3.5 h-3.5" /> Restaurer du cloud
-            </button>
-          </>
-        ) : (
-          <>
-            <button type="button" onClick={() => link('apple')} disabled={busy || !apple.available} className={btn}>
-              Lier Apple (iCloud)
-            </button>
-            <button type="button" onClick={() => link('google')} disabled={busy || !google.available} className={btn}>
-              Lier Google
-            </button>
-          </>
-        )}
+        <button type="button" onClick={save} disabled={busy} className={btn}>
+          {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />} Sauvegarder vers mon cloud
+        </button>
         <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className={btn}>
-          <FileUp className="w-3.5 h-3.5" /> Restaurer un fichier
+          <FileUp className="w-3.5 h-3.5" /> Restaurer une sauvegarde
         </button>
         <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={restoreFile} />
       </div>
 
-      {!provider && !google.available && !apple.available && <p className="text-[11px] text-fg-muted">{google.reason}</p>}
       {msg && (
         <p role="status" className={`text-[11px] font-semibold ${msg.ok ? 'text-success' : 'text-danger'}`}>
           {msg.text}

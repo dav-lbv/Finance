@@ -640,10 +640,7 @@ export default function App() {
       {/* Modal Assistant de Connexion & Onboarding Setup */}
       {needsOnboarding && !welcomeDone && (
         <WelcomeScreen
-          onStart={(prefill) => {
-            if (prefill) setData((d) => ({ ...d, user: { ...d.user, ...prefill } }));
-            setWelcomeDone(true);
-          }}
+          onStart={() => setWelcomeDone(true)}
           onRestore={handleRestoreData}
         />
       )}

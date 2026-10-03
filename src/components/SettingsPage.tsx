@@ -284,17 +284,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     setEditingPresetId(null);
   };
 
-  // JSON Export
-  const handleExportJSON = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `mon-kanda_export_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
   return (
     <div className="space-y-6 pb-28 max-w-4xl mx-auto">
       
@@ -891,33 +880,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div>
               <h2 className="text-xl font-black text-fg">Sauvegarde & Données Mon Kanda</h2>
               <p className="text-xs text-fg-muted mt-1">
-                Exportez vos données financières locales ou réinitialisez l'application.
+                Sauvegardez vos données sur votre cloud personnel, restaurez-les, ou réinitialisez l'application.
               </p>
             </div>
 
             <div className="space-y-4">
-              <CloudBackupCard data={data} onUpdateUser={onUpdateUser} onRestoreData={onRestoreData} />
-
-              {/* Export JSON */}
-              <div className="p-4 rounded-2xl bg-surface-2 border border-line-strong flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center justify-center shrink-0">
-                    <Download className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xs sm:text-sm text-fg">Exporter mes données (JSON)</h3>
-                    <p className="text-[11px] text-fg-muted">Téléchargez une copie complète de vos dépenses, épargnes et profils</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleExportJSON}
-                  className="px-4 py-2 rounded-full bg-surface-2 hover:bg-surface-3 text-brand border border-brand/30 font-bold text-xs shrink-0 transition-colors"
-                >
-                  Télécharger le fichier
-                </button>
-              </div>
-
-
+              <CloudBackupCard data={data} onRestoreData={onRestoreData} />
 
               {/* Réinitialisation */}
               <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
