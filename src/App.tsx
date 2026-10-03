@@ -523,12 +523,12 @@ export default function App() {
       </div>
 
       {/* Halo neutre derrière le calendrier */}
-      {currentTab !== 'dashboard' && (
+      {currentTab !== 'dashboard' && currentTab !== 'settings' && (
         <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-fg/[0.08] via-fg/[0.03] to-transparent" />
       )}
 
       {/* Calendrier permanent : remplace l'en-tête sur tous les autres écrans */}
-      {currentTab !== 'dashboard' && (
+      {currentTab !== 'dashboard' && currentTab !== 'settings' && (
         <div className="sticky top-0 z-30 px-3 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+10px)] pb-1 max-w-7xl w-full mx-auto">
           <WeekCalendarBar
             selectedDate={selectedDate}
@@ -541,7 +541,7 @@ export default function App() {
       )}
 
       {/* Contenu principal (avec padding inférieur optimisé pour la barre mobile) */}
-      <main className="relative flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8">
+      <main className={`relative flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8 ${currentTab === 'settings' ? 'pt-[calc(env(safe-area-inset-top,0px)+16px)]' : ''}`}>
         {currentTab === 'dashboard' && (
           <Dashboard
             data={data}

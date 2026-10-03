@@ -737,6 +737,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* ======================================================== */}
       {/* SOUS-PAGE 5 : SÉCURITÉ & VERROUILLAGE                    */}
       {/* ======================================================== */}
+      {activeSection === 'project_categories' && (
+        <ProjectCategoriesSettings
+          categories={data.projectCategories || []}
+          usage={(data.savingsProjects || []).reduce<Record<string, number>>((acc, p) => {
+            if (p.category) acc[p.category] = (acc[p.category] || 0) + 1;
+            return acc;
+          }, {})}
+          onAdd={onAddProjectCategory}
+          onRename={onRenameProjectCategory}
+          onDelete={onDeleteProjectCategory}
+          onBack={() => setActiveSection('menu')}
+        />
+      )}
+
       {activeSection === 'security' && (
         <div className="space-y-6 animate-fadeIn">
           <SettingsSubHeader title="Sécurité" onBack={() => setActiveSection('menu')} />

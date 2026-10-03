@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { Component, StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { initStorage } from './utils/storage';
@@ -28,12 +28,26 @@ function StorageError({ message }: { message: string }) {
   );
 }
 
+/** Évite l'écran noir : une erreur d'affichage propose de recharger l'app. */
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) return <StorageError message={this.state.error.message} />;
+    return this.props.children;
+  }
+}
+
 // L'application ne s'affiche qu'une fois la base ouverte et les données chargées
 initStorage()
   .then(() =>
     root.render(
       <StrictMode>
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </StrictMode>,
     ),
   )
