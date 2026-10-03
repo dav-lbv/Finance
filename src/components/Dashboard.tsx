@@ -212,16 +212,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="pb-28 max-w-4xl mx-auto stagger">
 
-      {/* ======================================================== */}
-      {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
-      {/* ======================================================== */}
-      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
-        {/* Aurore : deux halos qui dérivent lentement */}
-        <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-fg/15 blur-3xl pointer-events-none" />
-        <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/[0.08] blur-3xl pointer-events-none" />
-
-        {/* Barre du haut (même forme que le calendrier) : avatar + bienvenue, cloche */}
-        <div className="relative z-10 flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
+      {/* Barre du haut collante (comme le calendrier) : avatar + bienvenue, cloche */}
+      <div className="sticky top-0 z-30 -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8">
+        <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
           <button
             type="button"
             onClick={() => onNavigateToTab('settings')}
@@ -254,7 +247,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        <div className="relative px-5 sm:px-8 pb-14">
+      </div>
+
+      {/* ======================================================== */}
+      {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
+      {/* ======================================================== */}
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-9 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
+        {/* Aurore : deux halos qui dérivent lentement */}
+        <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-fg/15 blur-3xl pointer-events-none" />
+        <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/[0.08] blur-3xl pointer-events-none" />
+
+        <div className="relative px-5 sm:px-8 pt-9 pb-14">
         {/* Solde */}
         <div className="relative mt-7 text-center">
           <div className="inline-flex p-0.5 rounded-full bg-surface-2 border border-line">
