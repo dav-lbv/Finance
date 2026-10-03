@@ -12,6 +12,9 @@ const config: CapacitorConfig = {
     backgroundColor: '#050506',
   },
   plugins: {
+    SocialLogin: {
+      providers: { google: true, apple: true, facebook: false, twitter: false },
+    },
     CapacitorSQLite: {
       iosDatabaseLocation: 'Library/CapacitorDatabase',
       iosIsEncryption: false,

@@ -34,16 +34,26 @@ Après toute modification du code web : relancer `bun run ios` (ou `bun run cap:
 
 ## Compte Google / Apple (changement de téléphone)
 
-La première page (`WelcomeScreen`) propose Apple, Google, « sans compte » ou la restauration d'un fichier.
-La restauration depuis un **fichier** (Réglages → Données, ou première page) fonctionne partout, sans configuration.
+La première page propose Apple, Google, « sans compte » ou la restauration d'un fichier. Lier un compte sert à
+**retrouver sa configuration sur un nouveau téléphone** : Google → dossier privé *appDataFolder* de Google Drive ;
+Apple → iCloud (stockage clé-valeur, lié au compte iCloud de l'iPhone, 1 Mo max). La restauration par **fichier**
+(Réglages → Données) fonctionne partout sans rien configurer.
 
-**Google (web / PWA)** : sauvegarde dans le dossier privé `appDataFolder` de Google Drive.
-1. Google Cloud Console → créer un projet → *API et services* → activer **Google Drive API**.
-2. Écran de consentement OAuth, puis *Identifiants* → **ID client OAuth (Application Web)**, en ajoutant l'URL de l'app dans les origines JavaScript autorisées.
-3. Créer `.env` : `VITE_GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com`, puis rebuild.
+### Apple (iPhone) — nécessite un compte Apple Developer payant (99 €/an)
+Sign in with Apple et iCloud ne sont pas disponibles avec un compte gratuit.
+1. Dans Xcode, cible **App → Signing & Capabilities** : l'équipe payante est choisie ; les capacités *Sign in with Apple* et *iCloud (Key-value storage)* sont déjà déclarées dans `App/App.entitlements` (si Xcode les affiche en rouge, cliquez « + Capability » et ajoutez-les, il enregistrera l'identifiant sur le portail).
+2. Sur l'iPhone, être connecté à iCloud (Réglages → votre nom).
+3. Rien d'autre : le plugin natif `KandaICloudPlugin.swift` est déjà enregistré (`MainViewController`).
 
-**Dans l'app iOS native** : la fenêtre Google web n'est pas autorisée dans la WebView. Il faut un plugin natif
-(ex. `@capacitor-community/google-auth` / Google Sign-In iOS SDK) avec un ID client de type iOS ; non inclus pour l'instant.
+### Google (iPhone)
+1. [Google Cloud Console](https://console.cloud.google.com) → créer un projet → *API et services* → activer **Google Drive API**.
+2. *Écran de consentement OAuth* (type Externe) : ajouter votre compte dans « Utilisateurs test » et la portée `.../auth/drive.appdata`.
+3. *Identifiants* → **ID client OAuth → iOS**, avec l'ID de bundle `app.monkanda.finance`.
+4. Copier l'ID client dans `.env` : `VITE_GOOGLE_IOS_CLIENT_ID=XXXX.apps.googleusercontent.com`.
+5. Dans `ios/App/App/Info.plist`, remplacer `com.googleusercontent.apps.REMPLACER_PAR_VOTRE_ID_CLIENT_IOS` par l'ID client **inversé** (`com.googleusercontent.apps.XXXX`).
+6. `bun run ios`.
 
-**Apple / iCloud** : nécessite un compte Apple Developer payant, la capacité *Sign in with Apple* et *iCloud (CloudKit / Key-Value)*
-dans Xcode, plus un petit plugin natif de stockage iCloud ; non inclus pour l'instant (le bouton affiche l'indisponibilité).
+### Google (navigateur / PWA)
+Même projet : créer un ID client **Application Web** (origine JavaScript = l'URL de l'app), puis `.env` : `VITE_GOOGLE_CLIENT_ID=...`.
+
+Sans ces identifiants, le bouton affiche simplement un message d'explication.

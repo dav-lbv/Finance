@@ -1,4 +1,5 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { AppData } from '../types';
 import { parseBackup } from './storage';
 
@@ -21,6 +22,27 @@ export interface CloudBackupInfo {
 }
 
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || '';
+const GOOGLE_IOS_CLIENT_ID = (import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID as string | undefined) || '';
+const isIOS = Capacitor.getPlatform() === 'ios';
+const GOOGLE_SCOPES = ['email', 'profile', 'https://www.googleapis.com/auth/drive.appdata'];
+
+/** Plugin natif iOS (ios/App/App/KandaICloudPlugin.swift) : stockage iCloud clé-valeur. */
+interface KandaICloudPlugin {
+  isAvailable(): Promise<{ available: boolean }>;
+  get(): Promise<{ value?: string; modified?: number }>;
+  set(opts: { value: string }): Promise<{ ok: boolean }>;
+}
+const KandaICloud = registerPlugin<KandaICloudPlugin>('KandaICloud');
+
+let socialReady = false;
+async function initSocial(): Promise<void> {
+  if (socialReady) return;
+  await SocialLogin.initialize({
+    google: { iOSClientId: GOOGLE_IOS_CLIENT_ID, webClientId: GOOGLE_CLIENT_ID, mode: 'online' },
+    apple: {},
+  });
+  socialReady = true;
+}
 const BACKUP_NAME = 'mon-kanda-backup.json';
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/drive.appdata';
 
@@ -54,11 +76,18 @@ let googleToken: { value: string; expiresAt: number } | null = null;
 /** Disponibilité de chaque fournisseur, avec la raison quand il n'est pas utilisable. */
 export function providerStatus(provider: CloudProviderId): { available: boolean; reason?: string } {
   if (provider === 'google') {
-    if (!GOOGLE_CLIENT_ID) return { available: false, reason: "Connexion Google non configurée (VITE_GOOGLE_CLIENT_ID manquant, voir NATIVE.md)." };
-    if (Capacitor.isNativePlatform()) return { available: false, reason: 'Connexion Google native non encore configurée dans l’application iOS (voir NATIVE.md).' };
-    return { available: true };
+    if (isIOS) {
+      return GOOGLE_IOS_CLIENT_ID
+        ? { available: true }
+        : { available: false, reason: 'Connexion Google non configurée (VITE_GOOGLE_IOS_CLIENT_ID manquant, voir NATIVE.md).' };
+    }
+    return GOOGLE_CLIENT_ID
+      ? { available: true }
+      : { available: false, reason: 'Connexion Google non configurée (VITE_GOOGLE_CLIENT_ID manquant, voir NATIVE.md).' };
   }
-  return { available: false, reason: 'Connexion Apple / iCloud : nécessite un compte Apple Developer et la configuration native (voir NATIVE.md).' };
+  return isIOS
+    ? { available: true }
+    : { available: false, reason: "« Continuer avec Apple » est disponible dans l'application iPhone / iPad." };
 }
 
 export function isGoogleSessionActive(): boolean {
@@ -77,7 +106,18 @@ function loadGoogleScript(): Promise<void> {
   });
 }
 
+async function requestNativeGoogle() {
+  await initSocial();
+  const res = await SocialLogin.login({ provider: 'google', options: { scopes: GOOGLE_SCOPES } });
+  if (res.result.responseType !== 'online') throw new Error('Connexion Google incomplète.');
+  const token = res.result.accessToken?.token;
+  if (!token) throw new Error("Google n'a pas fourni d'accès à Drive.");
+  googleToken = { value: token, expiresAt: Date.now() + 55 * 60 * 1000 };
+  return { token, profile: res.result.profile };
+}
+
 async function requestGoogleToken(prompt: string): Promise<string> {
+  if (isIOS) return (await requestNativeGoogle()).token;
   await loadGoogleScript();
   return new Promise((resolve, reject) => {
     const client = window.google!.accounts.oauth2.initTokenClient({
@@ -115,6 +155,15 @@ async function findBackup(token: string): Promise<{ id: string; modifiedTime: st
 export async function signInWithGoogle(): Promise<CloudAccount> {
   const status = providerStatus('google');
   if (!status.available) throw new Error(status.reason);
+  if (isIOS) {
+    const { profile } = await requestNativeGoogle();
+    return {
+      provider: 'google',
+      name: profile.name || [profile.givenName, profile.familyName].filter(Boolean).join(' '),
+      email: profile.email || '',
+      avatarUrl: profile.imageUrl || undefined,
+    };
+  }
   const token = await requestGoogleToken('select_account');
   const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('Profil Google introuvable.');
@@ -126,12 +175,12 @@ async function googleTokenOrAsk(): Promise<string> {
   return isGoogleSessionActive() ? googleToken!.value : requestGoogleToken('');
 }
 
-export async function getCloudBackupInfo(): Promise<CloudBackupInfo | null> {
+async function googleBackupInfo(): Promise<CloudBackupInfo | null> {
   const f = await findBackup(await googleTokenOrAsk());
   return f ? { modifiedTime: f.modifiedTime } : null;
 }
 
-export async function downloadCloudBackup(): Promise<AppData | null> {
+async function googleDownload(): Promise<AppData | null> {
   const token = await googleTokenOrAsk();
   const f = await findBackup(token);
   if (!f) return null;
@@ -139,7 +188,7 @@ export async function downloadCloudBackup(): Promise<AppData | null> {
   return parseBackup(await res.json());
 }
 
-export async function uploadCloudBackup(data: AppData): Promise<void> {
+async function googleUpload(data: AppData): Promise<void> {
   const token = await googleTokenOrAsk();
   const existing = await findBackup(token);
   const body = JSON.stringify(data);
@@ -161,4 +210,63 @@ export async function uploadCloudBackup(data: AppData): Promise<void> {
     headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
     body: multipart,
   });
+}
+
+// ------------------------------------------------------------------
+// Apple : connexion native + stockage iCloud
+// ------------------------------------------------------------------
+const ICLOUD_LIMIT = 900_000; // le stockage clé-valeur iCloud est limité à 1 Mo
+
+export async function signInWithApple(): Promise<CloudAccount> {
+  if (!isIOS) throw new Error(providerStatus('apple').reason);
+  const { available } = await KandaICloud.isAvailable();
+  if (!available) throw new Error('iCloud est désactivé : activez-le dans Réglages → [votre nom] → iCloud.');
+  await initSocial();
+  const res = await SocialLogin.login({ provider: 'apple', options: { scopes: ['email', 'name'] } });
+  const p = res.result.profile;
+  return {
+    provider: 'apple',
+    name: [p.givenName, p.familyName].filter(Boolean).join(' '),
+    email: p.email || '',
+  };
+}
+
+async function appleBackupInfo(): Promise<CloudBackupInfo | null> {
+  const r = await KandaICloud.get();
+  return r.value ? { modifiedTime: new Date((r.modified || 0) * 1000).toISOString() } : null;
+}
+
+async function appleDownload(): Promise<AppData | null> {
+  const r = await KandaICloud.get();
+  return r.value ? parseBackup(JSON.parse(r.value)) : null;
+}
+
+async function appleUpload(data: AppData): Promise<void> {
+  let json = JSON.stringify(data);
+  if (json.length > ICLOUD_LIMIT) {
+    // Une grosse photo de profil ne doit pas empêcher la sauvegarde des finances
+    json = JSON.stringify({ ...data, user: { ...data.user, avatarUrl: undefined } });
+  }
+  if (json.length > ICLOUD_LIMIT) throw new Error('Sauvegarde trop volumineuse pour iCloud (1 Mo max).');
+  const { ok } = await KandaICloud.set({ value: json });
+  if (!ok) throw new Error('iCloud a refusé la sauvegarde.');
+}
+
+// ------------------------------------------------------------------
+// API commune
+// ------------------------------------------------------------------
+export function signIn(provider: CloudProviderId): Promise<CloudAccount> {
+  return provider === 'google' ? signInWithGoogle() : signInWithApple();
+}
+
+export function getCloudBackupInfo(provider: CloudProviderId): Promise<CloudBackupInfo | null> {
+  return provider === 'google' ? googleBackupInfo() : appleBackupInfo();
+}
+
+export function downloadCloudBackup(provider: CloudProviderId): Promise<AppData | null> {
+  return provider === 'google' ? googleDownload() : appleDownload();
+}
+
+export function uploadCloudBackup(provider: CloudProviderId, data: AppData): Promise<void> {
+  return provider === 'google' ? googleUpload(data) : appleUpload(data);
 }

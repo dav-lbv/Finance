@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, CloudDownload, FileUp, Loader2, Mail, Sparkles, X } from 'lucide-react';
 import { AppData, UserProfile } from '../types';
-import { CloudAccount, downloadCloudBackup, getCloudBackupInfo, providerStatus, signInWithGoogle } from '../utils/cloud';
+import { CloudAccount, CloudProviderId, downloadCloudBackup, getCloudBackupInfo, providerStatus, signIn } from '../utils/cloud';
 import { parseBackup } from '../utils/storage';
 
 interface WelcomeScreenProps {
@@ -41,7 +41,7 @@ function splitName(full: string): { firstName: string; lastName: string } {
 
 /** Première page de l'application : choisir comment commencer ou retrouver sa configuration. */
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onRestore }) => {
-  const [busy, setBusy] = useState<'google' | 'file' | null>(null);
+  const [busy, setBusy] = useState<CloudProviderId | 'file' | null>(null);
   const [error, setError] = useState('');
   const [found, setFound] = useState<{ account: CloudAccount; data: AppData; modifiedTime: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -55,30 +55,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onRestore
       email: account.email,
       avatarUrl: account.avatarUrl,
       authProvider: account.provider,
-      isEmailVerified: true,
+      isEmailVerified: !!account.email,
     });
   };
 
-  const handleGoogle = async () => {
+  const handleProvider = async (provider: CloudProviderId) => {
     setError('');
-    const status = providerStatus('google');
+    const status = providerStatus(provider);
     if (!status.available) return setError(status.reason || 'Indisponible.');
-    setBusy('google');
+    setBusy(provider);
     try {
-      const account = await signInWithGoogle();
-      const info = await getCloudBackupInfo();
-      if (!info) return startWithAccount(account);
-      const data = await downloadCloudBackup();
-      if (!data) return startWithAccount(account);
-      setFound({ account, data: { ...data, user: { ...data.user, authProvider: 'google' } }, modifiedTime: info.modifiedTime });
+      const account = await signIn(provider);
+      const info = await getCloudBackupInfo(provider);
+      const data = info ? await downloadCloudBackup(provider) : null;
+      if (!info || !data) return startWithAccount(account);
+      setFound({ account, data: { ...data, user: { ...data.user, authProvider: provider } }, modifiedTime: info.modifiedTime });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Connexion impossible.');
     } finally {
       setBusy(null);
     }
   };
-
-  const handleApple = () => setError(providerStatus('apple').reason || 'Indisponible.');
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,15 +133,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onRestore
         <motion.div className="mt-8 space-y-3" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <button
             type="button"
-            onClick={handleApple}
-            className="w-full h-14 rounded-full bg-fg text-app font-bold text-[15px] flex items-center justify-center gap-2.5 active:scale-[0.98] transition cursor-pointer"
+            onClick={() => handleProvider('apple')}
+            disabled={busy !== null}
+            className="w-full h-14 rounded-full bg-fg text-app font-bold text-[15px] flex items-center justify-center gap-2.5 active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
           >
-            <AppleLogo />
+            {busy === 'apple' ? <Loader2 className="w-5 h-5 animate-spin" /> : <AppleLogo />}
             Continuer avec Apple
           </button>
           <button
             type="button"
-            onClick={handleGoogle}
+            onClick={() => handleProvider('google')}
             disabled={busy !== null}
             className="w-full h-14 rounded-full bg-surface border border-line-strong text-fg font-bold text-[15px] flex items-center justify-center gap-2.5 active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
           >
@@ -210,7 +208,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onRestore
               </div>
               <h2 className="mt-4 text-2xl font-black tracking-tight">Configuration retrouvée</h2>
               <p className="mt-1 text-sm text-fg-muted">
-                {found.account.email} · dernière sauvegarde le{' '}
+                {found.account.email || (found.account.provider === 'apple' ? 'iCloud' : 'Google')} · dernière sauvegarde le{' '}
                 {new Date(found.modifiedTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.
               </p>
               <button
