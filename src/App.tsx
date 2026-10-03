@@ -490,7 +490,7 @@ export default function App() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-app text-fg flex flex-col selection:bg-brand selection:text-brand-fg">
+    <div className="relative min-h-screen bg-app text-fg flex flex-col selection:bg-brand selection:text-brand-fg">
       {/* Écran de verrouillage si activé */}
       {isLocked && data.security.isLockEnabled && (
         <LockScreen
@@ -521,6 +521,11 @@ export default function App() {
       />
       </div>
 
+      {/* Halo vert derrière le calendrier (ambiance de la maquette) */}
+      {currentTab !== 'dashboard' && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-success/20 via-success/[0.06] to-transparent" />
+      )}
+
       {/* Calendrier permanent : remplace l'en-tête sur tous les autres écrans */}
       {currentTab !== 'dashboard' && (
         <div className="sticky top-0 z-30 px-3 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+10px)] pb-1 max-w-7xl w-full mx-auto">
@@ -535,7 +540,7 @@ export default function App() {
       )}
 
       {/* Contenu principal (avec padding inférieur optimisé pour la barre mobile) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8">
+      <main className="relative flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8">
         {currentTab === 'dashboard' && (
           <Dashboard
             data={data}
