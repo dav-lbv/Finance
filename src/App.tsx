@@ -532,6 +532,13 @@ export default function App() {
       />
       </div>
 
+      {/* Liseré fixe tout en haut : Safari en tire la couleur de sa barre d'état */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[3px]"
+        style={{ background: currentTab === 'settings' ? 'var(--app)' : 'var(--cal-bar)' }}
+      />
+
       {/* Halo neutre derrière le calendrier */}
       {currentTab !== 'dashboard' && currentTab !== 'settings' && (
         <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-fg/[0.08] via-fg/[0.03] to-transparent" />
