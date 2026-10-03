@@ -215,13 +215,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
       {/* ======================================================== */}
-      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-14 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
         {/* Aurore : deux halos qui dérivent lentement */}
         <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-fg/15 blur-3xl pointer-events-none" />
         <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/[0.08] blur-3xl pointer-events-none" />
 
-        {/* Ligne du haut : avatar + bienvenue, cloche */}
-        <div className="relative flex items-center justify-between gap-3">
+        {/* Barre du haut (même forme que le calendrier) : avatar + bienvenue, cloche */}
+        <div className="relative z-10 flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
           <button
             type="button"
             onClick={() => onNavigateToTab('settings')}
@@ -232,9 +232,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <img
                 src={avatarImage}
                 alt={data.user.fullName || 'Profil'}
-                className="w-11 h-11 rounded-full object-cover border border-line-strong"
+                className="w-11 h-11 rounded-full object-cover"
               />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-app pulse-dot" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[color:var(--cal-bar)] pulse-dot" />
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block text-[11px] text-fg-muted">Bon retour</span>
@@ -247,15 +247,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             type="button"
             onClick={() => setIsNotificationsOpen(true)}
-            className="w-11 h-11 rounded-full bg-surface-2 border border-line-strong flex items-center justify-center text-fg-2 cursor-pointer"
+            className="w-11 h-11 rounded-full bg-fg/10 flex items-center justify-center text-fg cursor-pointer"
             title="Notifications"
           >
             <Bell className="w-[18px] h-[18px]" />
           </button>
         </div>
 
+        <div className="relative px-5 sm:px-8 pb-14">
         {/* Solde */}
-        <div className="relative mt-6 text-center">
+        <div className="relative mt-7 text-center">
           <div className="inline-flex p-0.5 rounded-full bg-surface-2 border border-line">
             {(['balance', 'wallet'] as const).map((v) => (
               <button
@@ -271,8 +272,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             ))}
           </div>
 
-          <h1 className="mt-3 text-[46px] sm:text-6xl leading-none text-fg break-words">
-            <Amount value={animatedHero} currency={currency} />
+          <h1 className="mt-3 leading-none text-fg">
+            <Amount value={animatedHero} currency={currency} fitMax={56} />
           </h1>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -314,6 +315,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           ))}
         </div>
+        </div>
       </div>
 
       {/* Feuille qui recouvre le bas du héros (poignée en haut) */}
@@ -336,8 +338,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </button>
               </div>
               <div>
-                <p className="text-[34px] leading-none text-fg">
-                  <Amount value={currentMonthSavings} currency={currency} />
+                <p className="leading-none text-fg">
+                  <Amount value={currentMonthSavings} currency={currency} fitMax={32} />
                 </p>
                 <p className="mt-2 text-[11px] text-fg-muted">
                   {savingsRate}% du salaire • {monthGeneralDeposits.length} versement{monthGeneralDeposits.length > 1 ? 's' : ''}
@@ -348,7 +350,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {featuredProject && (
               <div className="relative rounded-[28px] border border-line bg-surface p-4 min-h-[148px] flex flex-col justify-between overflow-hidden">
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-[11px] font-semibold text-fg-2 leading-tight min-w-0 truncate">{featuredProject.title}</span>
+                  <span className="text-[11px] font-semibold text-fg-2 leading-tight min-w-0 line-clamp-2 break-words">{featuredProject.title}</span>
                   <button
                     type="button"
                     onClick={() => onNavigateToTab('savings')}
@@ -358,12 +360,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <ArrowUpRight className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex items-end justify-between gap-2">
-                  <DotMeter percent={featuredPct} size={14} />
-                  <span className="text-[34px] leading-none num-light text-fg">
+                <div className="space-y-2.5">
+                  <span className="block text-[30px] leading-none num-light text-fg">
                     {featuredPct}
                     <span className="text-base text-fg-muted">%</span>
                   </span>
+                  <DotMeter percent={featuredPct} size={12} />
                 </div>
               </div>
             )}
