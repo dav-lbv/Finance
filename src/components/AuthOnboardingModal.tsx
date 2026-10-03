@@ -164,7 +164,7 @@ export const AuthOnboardingModal: React.FC<AuthOnboardingModalProps> = ({
         {/* Top Header bar with Mon Kanda Logo & Close */}
         <div className="px-5 pb-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/icon.svg" alt="" className="w-9 h-9 shrink-0" />
+            <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" className="w-9 h-9 shrink-0" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-base tracking-tight text-fg">Mon Kanda</span>

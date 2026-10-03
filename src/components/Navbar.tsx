@@ -82,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setCurrentTab('dashboard')} 
               className="flex items-center gap-2 shrink-0 cursor-pointer group"
             >
-              <img src="/icon.svg" alt="" className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 transition-transform group-hover:scale-105 drop-shadow-[0_4px_10px_rgba(37,99,235,0.35)]" />
+              <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 transition-transform group-hover:scale-105 drop-shadow-[0_4px_10px_rgba(37,99,235,0.35)]" />
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-base sm:text-lg tracking-tight text-fg">
                   Mon Kanda

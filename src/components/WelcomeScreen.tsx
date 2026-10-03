@@ -63,7 +63,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onRestore
             transition={{ type: 'spring', stiffness: 160, damping: 16 }}
           >
             <motion.img
-              src="/icon.svg"
+              src={`${import.meta.env.BASE_URL}icon.svg`}
               alt="Mon Kanda"
               className="w-40 h-40 sm:w-48 sm:h-48 drop-shadow-[0_30px_40px_rgba(0,0,0,0.45)]"
               animate={{ y: [0, -8, 0] }}

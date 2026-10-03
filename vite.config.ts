@@ -4,8 +4,12 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
+// Sous-dossier d'hébergement (ex. GitHub Pages : /Finance/) ; '/' par défaut
+const BASE = process.env.BASE_PATH || '/';
+
 export default defineConfig(() => {
   return {
+    base: BASE,
     plugins: [
       react(),
       tailwindcss(),
@@ -13,7 +17,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          id: '/',
+          id: BASE,
           name: 'Mon Kanda - Gestion financière',
           short_name: 'Mon Kanda',
           description: 'Gestion mensuelle de salaire, dépenses et calendrier d\'épargne',
@@ -21,23 +25,23 @@ export default defineConfig(() => {
           background_color: '#050506',
           display: 'standalone',
           orientation: 'portrait',
-          start_url: '/',
-          scope: '/',
+          start_url: BASE,
+          scope: BASE,
           icons: [
             {
-              src: '/pwa-192x192.png?v=2',
+              src: 'pwa-192x192.png?v=2',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-512x512.png?v=2',
+              src: 'pwa-512x512.png?v=2',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-maskable-512x512.png?v=2',
+              src: 'pwa-maskable-512x512.png?v=2',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',
