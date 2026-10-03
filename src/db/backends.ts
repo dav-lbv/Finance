@@ -31,7 +31,11 @@ export async function createNativeBackend(): Promise<StorageBackend> {
       await db.execute(statements);
     },
     executeSet: async (set) => {
-      await db.executeSet(set, true);
+      // iOS exige la clé `values` sur chaque instruction, même sans paramètre
+      await db.executeSet(
+        set.map((s) => ({ statement: s.statement, values: (s.values ?? []) as never[] })),
+        true,
+      );
     },
     query: async (statement, values) => (await db.query(statement, values as never[])).values ?? [],
   };
