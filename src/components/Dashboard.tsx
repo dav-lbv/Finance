@@ -31,6 +31,9 @@ import { DEFAULT_AVATAR } from '../utils/avatars';
 import { NotificationsModal } from './NotificationsModal';
 import { CATEGORY_CONFIG } from './CategorySelect';
 import { useCountUp } from '../hooks/useCountUp';
+import { CategoryDonutCard, SalaryDonutCard, TrendBarsCard, TrendPoint } from './DashboardCharts';
+
+const SHORT_MONTHS = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
 
 function formatCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace('.0', '')}M`;
@@ -138,6 +141,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
     height: weekdayTotals[i] > 0 ? Math.max(8, Math.round((weekdayTotals[i] / maxWeekday) * 100)) : 4,
   }));
   const peakWeekday = weekdayTotals.indexOf(Math.max(...weekdayTotals));
+
+  // 6 derniers mois (jusqu'au mois affiché) : dépenses et épargne réelles
+  const trendPoints: TrendPoint[] = (() => {
+    const keys: string[] = [];
+    let key = selectedMonth;
+    for (let i = 0; i < 6; i++) {
+      keys.unshift(key);
+      key = getPreviousMonthKey(key);
+    }
+    return keys.map((monthKey) => ({
+      monthKey,
+      label: `${SHORT_MONTHS[parseInt(monthKey.slice(5, 7), 10) - 1]} ${monthKey.slice(2, 4)}`,
+      expenses: (data.expenses[monthKey] || []).reduce((sum, e) => sum + e.amount, 0),
+      savings: data.savings.filter((d) => d.date.startsWith(monthKey)).reduce((sum, d) => sum + d.amount, 0),
+    }));
+  })();
 
   const heroValue = balanceView === 'balance' ? currentTotalExpenses : totalSavingsAccrued;
   const animatedHero = useCountUp(heroValue);
@@ -341,237 +360,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
       {/* ======================================================== */}
-      {/* 6. 3 CARTES DE MÉTRIQUES RÉELLES FINTECH DU MOIS         */}
+      {/* DIAGRAMMES : répartition du salaire, catégories, évolution */}
       {/* ======================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-surface rounded-2xl p-4 border border-line">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-fg-muted uppercase">Salaire perçu</span>
-            <span className="w-2 h-2 rounded-full bg-brand" />
-          </div>
-          <span className="text-lg sm:text-xl font-black text-fg tracking-tight mt-1.5 block">
-            +{formatCurrency(salaryReceived, currency)}
-          </span>
-        </div>
-
-        <div 
-          onClick={() => onNavigateToTab('expenses')}
-          className="bg-surface rounded-2xl p-4 border border-line hover:border-rose-500/40 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-fg-muted uppercase">Dépenses ce mois</span>
-            <span className="text-[10px] text-rose-400 font-bold">Détails</span>
-          </div>
-          <span className="text-lg sm:text-xl font-black text-rose-400 tracking-tight mt-1.5 block">
-            -{formatCurrency(currentTotalExpenses, currency)}
-          </span>
-        </div>
-
-        <div 
-          onClick={() => onNavigateToTab('savings')}
-          className="bg-surface rounded-2xl p-4 border border-line hover:border-brand/40 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-fg-muted uppercase">Épargne ce mois</span>
-            <span className="text-[10px] text-brand font-bold">Détails</span>
-          </div>
-          <span className="text-lg sm:text-xl font-black text-brand tracking-tight mt-1.5 block">
-            -{formatCurrency(currentMonthSavings, currency)}
-          </span>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <SalaryDonutCard
+          salary={salaryReceived}
+          expenses={currentTotalExpenses}
+          savings={currentMonthSavings}
+          currency={currency}
+          monthLabel={formatMonthKey(selectedMonth)}
+        />
+        <CategoryDonutCard
+          totals={categoriesSorted}
+          currency={currency}
+          monthLabel={formatMonthKey(selectedMonth)}
+        />
       </div>
 
-      {/* ======================================================== */}
-      {/* 7. SECTION DUO : DÉPENSES DU MOIS PRÉCÉDENT & CUMUL       */}
-      {/* ======================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        
-        {/* VUE 1 : DÉPENSES DU MOIS PRÉCÉDENT */}
-        <div className="bg-surface rounded-3xl p-5 sm:p-6 shadow-sm border border-line flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3.5 border-b border-line">
-              <div>
-                <span className="text-xs font-semibold text-fg-muted block uppercase tracking-wider">
-                  Mois précédent : {formatMonthKey(prevMonthKey)}
-                </span>
-                <h3 className="text-lg font-extrabold text-fg mt-0.5">
-                  Dépenses antérieures
-                </h3>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-surface-2 text-fg-2 border border-line">
-                {prevExpenses.length} transactions
-              </span>
-            </div>
+      <TrendBarsCard points={trendPoints} selectedMonth={selectedMonth} currency={currency} />
 
-            <div className="my-5 flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <span className="text-2xl sm:text-3xl font-black text-fg">
-                  {formatCurrency(prevTotalExpenses, currency)}
-                </span>
-                <span className="text-xs text-fg-muted block mt-0.5">
-                  Total consommé le mois dernier
-                </span>
-              </div>
-
-              {prevTotalExpenses > 0 && (
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
-                  expenseDiff > 0
-                    ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                    : 'bg-brand/10 text-brand border-brand/30'
-                }`}>
-                  <TrendingUp className={`w-3.5 h-3.5 ${expenseDiff > 0 ? '' : 'rotate-180'}`} />
-                  <span>
-                    {expenseDiff > 0 ? `+${expenseDiffPercent}%` : `${expenseDiffPercent}%`} vs ce mois
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Top 3 dépenses du mois précédent */}
-            <div className="space-y-2 mt-4">
-              <span className="text-xs font-bold text-fg-muted uppercase tracking-wider block">
-                Principales dépenses d'août
-              </span>
-              {prevExpenses.slice(0, 3).map((exp) => (
-                <div 
-                  key={exp.id}
-                  className="flex items-center justify-between p-2.5 rounded-2xl bg-surface border border-line"
-                >
-                  <div className="flex items-center gap-2.5 truncate pr-2">
-                    <div className="w-2 h-2 rounded-full bg-brand shrink-0" />
-                    <span className="text-xs font-semibold text-fg truncate">
-                      {exp.title}
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold text-fg-2 whitespace-nowrap">
-                    {formatCurrency(exp.amount, currency)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={() => setSelectedMonth(prevMonthKey)}
-            className="mt-5 w-full py-2.5 rounded-full bg-surface-2 hover:bg-surface-2 text-fg-2 hover:text-fg border border-line text-xs font-bold transition-all text-center cursor-pointer"
-          >
-            Consulter {formatMonthKey(prevMonthKey)}
-          </button>
-        </div>
-
-        {/* VUE 2 : TOTAL GLOBAL ÉPARGNE */}
-        <div className="bg-surface rounded-3xl p-5 sm:p-6 shadow-sm border border-line flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3.5 border-b border-line">
-              <div>
-                <span className="text-xs font-semibold text-fg-muted block uppercase tracking-wider">
-                  Trésorerie & Sécurité
-                </span>
-                <h3 className="text-lg font-extrabold text-fg mt-0.5">
-                  Épargne totale cumulée
-                </h3>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-brand/15 flex items-center justify-center text-brand">
-                <PiggyBank className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="my-5">
-              <span className="text-3xl sm:text-4xl font-black text-brand tracking-tight">
-                {formatCurrency(totalSavingsAccrued, currency)}
-              </span>
-              <span className="text-xs text-fg-muted block mt-1">
-                Fonds total disponible mis de côté
-              </span>
-            </div>
-
-            {/* Statistiques d'épargne du mois */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="p-3 rounded-2xl bg-surface border border-line">
-                <span className="text-[11px] font-semibold text-fg-muted block">
-                  Versé en {formatMonthKey(selectedMonth)}
-                </span>
-                <span className="text-base font-extrabold text-fg mt-1 block">
-                  {formatCurrency(currentMonthSavings, currency)}
-                </span>
-              </div>
-              <div className="p-3 rounded-2xl bg-surface border border-line">
-                <span className="text-[11px] font-semibold text-fg-muted block">
-                  Taux d'effort épargne
-                </span>
-                <span className="text-base font-extrabold text-brand mt-1 block">
-                  {savingsRate}% du salaire
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 flex gap-2">
-            <button
-              onClick={() => onNavigateToTab('savings')}
-              className="flex-1 py-2.5 rounded-full bg-surface-2 hover:bg-surface-2 text-fg-2 hover:text-fg border border-line text-xs font-bold transition-all text-center cursor-pointer"
-            >
-              Voir historique versements
-            </button>
-            <button
-              onClick={onOpenAddSavings}
-              className="px-4 py-2.5 rounded-full bg-brand text-brand-fg font-extrabold text-xs hover:bg-brand-hover transition-all cursor-pointer"
-            >
-              + Épargner
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-      {/* ======================================================== */}
-      {/* 8. RÉPARTITION PAR CATÉGORIE & ACTIVITÉ JOURNALIÈRE       */}
-      {/* ======================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        {/* Catégories de dépenses */}
-        <div className="lg:col-span-2 bg-surface rounded-3xl p-5 sm:p-6 border border-line">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
-            <h3 className="font-extrabold text-base text-fg">
-              Répartition des dépenses
-            </h3>
-            <span className="text-xs text-fg-muted font-semibold">
-              Ce mois
-            </span>
-          </div>
-
-          {categoriesSorted.length === 0 ? (
-            <div className="text-center py-10 text-fg-muted text-xs">
-              Aucune dépense enregistrée pour le mois de {formatMonthKey(selectedMonth)}.
-            </div>
-          ) : (
-            <div className="space-y-3.5">
-              {categoriesSorted.map(([category, amount]) => {
-                const percentage = currentTotalExpenses > 0 
-                  ? Math.round((amount / currentTotalExpenses) * 100) 
-                  : 0;
-
-                return (
-                  <div key={category} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-fg">{category}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-fg">{formatCurrency(amount, currency)}</span>
-                        <span className="text-fg-muted font-semibold w-8 text-right">{percentage}%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-surface-2 h-2 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-fg-muted to-brand h-full rounded-full transition-all duration-300"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+      {/* Activité journalière */}
+      <div className="grid grid-cols-1 gap-5">
 
         {/* Bar chart fintech style mobile card */}
         <div className="bg-surface rounded-3xl p-5 sm:p-6 border border-line flex flex-col justify-between">
