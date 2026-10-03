@@ -347,8 +347,8 @@ nav.bg-surface {
 .floaty { animation: floaty 4s ease-in-out infinite; }
 
 @keyframes pulseDot {
-  0%   { box-shadow: 0 0 0 0 rgba(var(--brand-rgb), 0.5); }
-  100% { box-shadow: 0 0 0 10px rgba(var(--brand-rgb), 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 55%, transparent); }
+  100% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--success) 0%, transparent); }
 }
 .pulse-dot { animation: pulseDot 1.8s ease-out infinite; }
 
