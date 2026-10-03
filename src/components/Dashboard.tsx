@@ -210,8 +210,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   ];
 
   return (
-    <div className="pb-28 max-w-4xl mx-auto stagger">
-
+    <>
       {/* Barre du haut collante (comme le calendrier) : avatar + bienvenue, cloche */}
       <div className="sticky top-0 z-30 -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8">
         <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
@@ -248,6 +247,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
       </div>
+
+    <div className="pb-28 max-w-4xl mx-auto stagger">
 
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
@@ -486,5 +487,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
       />
 
     </div>
+    </>
   );
 };
