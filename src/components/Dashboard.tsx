@@ -139,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }));
   const peakWeekday = weekdayTotals.indexOf(Math.max(...weekdayTotals));
 
-  const heroValue = balanceView === 'balance' ? netRemaining : totalSavingsAccrued;
+  const heroValue = balanceView === 'balance' ? currentTotalExpenses : totalSavingsAccrued;
   const animatedHero = useCountUp(heroValue);
 
   const activeProjects = (data.savingsProjects || []).filter((p) => !p.isClosed);
@@ -210,7 +210,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   balanceView === v ? 'bg-brand text-brand-fg' : 'text-fg-muted hover:text-fg'
                 }`}
               >
-                {v === 'balance' ? 'Solde du mois' : 'Épargne cumulée'}
+                {v === 'balance' ? 'Dépense du mois' : 'Épargne cumulée'}
               </button>
             ))}
           </div>
@@ -238,16 +238,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
-            </span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-              balanceView === 'balance' && !isPositiveNet
-                ? 'text-rose-400 border-rose-400/30 bg-rose-400/10'
-                : 'text-success border-success/30 bg-success/10'
-            }`}>
-              <TrendingUp className="w-3 h-3" />
-              {balanceView === 'balance'
-                ? (isPositiveNet ? `${100 - usedRatio}% disponible` : 'Déficit')
-                : `${data.savings.length} versement${data.savings.length > 1 ? 's' : ''}`}
             </span>
           </div>
         </div>
@@ -295,21 +285,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-        ) : (
-          <div className="rounded-3xl bg-surface border border-dashed border-line-strong p-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-extrabold text-fg">Un objectif en tête ?</p>
-              <p className="text-[11px] text-fg-muted">Créez un projet d'épargne et suivez sa progression.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onNavigateToTab('savings')}
-              className="shrink-0 px-4 py-1.5 rounded-full bg-brand text-brand-fg text-[11px] font-black cursor-pointer"
-            >
-              Créer
-            </button>
-          </div>
-        )}
+        ) : null}
 
         {/* Transactions */}
         <div className="rounded-3xl bg-surface border border-line overflow-hidden">
