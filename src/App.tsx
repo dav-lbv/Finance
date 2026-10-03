@@ -521,9 +521,9 @@ export default function App() {
       />
       </div>
 
-      {/* Halo vert derrière le calendrier (ambiance de la maquette) */}
+      {/* Halo neutre derrière le calendrier */}
       {currentTab !== 'dashboard' && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-success/20 via-success/[0.06] to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-fg/[0.08] via-fg/[0.03] to-transparent" />
       )}
 
       {/* Calendrier permanent : remplace l'en-tête sur tous les autres écrans */}

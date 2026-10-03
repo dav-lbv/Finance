@@ -212,10 +212,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
       {/* ======================================================== */}
-      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-14 border-b border-line-strong overflow-hidden bg-gradient-to-b from-success/25 via-surface-2 to-surface">
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8 px-5 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-14 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
         {/* Aurore : deux halos qui dérivent lentement */}
-        <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-success/25 blur-3xl pointer-events-none" />
-        <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/10 blur-3xl pointer-events-none" />
+        <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-fg/15 blur-3xl pointer-events-none" />
+        <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/[0.08] blur-3xl pointer-events-none" />
 
         {/* Ligne du haut : avatar + bienvenue, cloche */}
         <div className="relative flex items-center justify-between gap-3">
@@ -344,7 +344,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {featuredProject && (
-              <div className="relative rounded-[28px] border border-success/30 bg-gradient-to-br from-success/25 via-success/10 to-surface p-4 min-h-[148px] flex flex-col justify-between overflow-hidden">
+              <div className="relative rounded-[28px] border border-line bg-surface p-4 min-h-[148px] flex flex-col justify-between overflow-hidden">
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-[11px] font-semibold text-fg-2 leading-tight min-w-0 truncate">{featuredProject.title}</span>
                   <button
