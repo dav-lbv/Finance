@@ -82,7 +82,7 @@ export function useTheme() {
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#e8e8ec' : '#050506');
+      metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#ffffff' : '#3a3837');
     }
   }, [resolvedTheme, colorPalette]);
 

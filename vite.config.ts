@@ -21,7 +21,7 @@ export default defineConfig(() => {
           name: 'Mon Kanda - Gestion financière',
           short_name: 'Mon Kanda',
           description: 'Gestion mensuelle de salaire, dépenses et calendrier d\'épargne',
-          theme_color: '#050506',
+          theme_color: '#3a3837',
           background_color: '#050506',
           display: 'standalone',
           orientation: 'portrait',
