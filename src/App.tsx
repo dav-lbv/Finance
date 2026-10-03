@@ -32,6 +32,7 @@ import {
 } from './utils/storage';
 import { getCurrentMonthKey, getTodayDateString } from './utils/date';
 import { WeekCalendarBar } from './components/WeekCalendarBar';
+import { getMonthSalary } from './utils/finance';
 
 export default function App() {
   const [data, setData] = useState<AppData>(() => {
@@ -483,7 +484,7 @@ export default function App() {
   const currentExpenses = data.expenses[selectedMonth] || [];
   const currentTotalExpenses = currentExpenses.reduce((sum, item) => sum + item.amount, 0);
   const currentTotalSavings = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
-  const monthSalary = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
+  const monthSalary = getMonthSalary(data, selectedMonth);
   const monthSavings = data.savings.filter((d) => d.date.startsWith(selectedMonth)).reduce((a, d) => a + d.amount, 0);
   const availableRatio = monthSalary > 0
     ? Math.max(0, Math.round((1 - (currentTotalExpenses + monthSavings) / monthSalary) * 100))

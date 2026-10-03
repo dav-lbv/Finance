@@ -147,7 +147,7 @@ export function ensureMonthInitialized(data: AppData, targetMonthKey: string): A
     newData.monthlyBudgets[targetMonthKey] = {
       monthKey: targetMonthKey,
       baseBudget: suggestedBase,
-      salaryReceived: defaultSalary,
+      salaryReceived: defaultSalary > 0 ? defaultSalary : undefined,
     };
     modified = true;
   }

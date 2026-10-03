@@ -40,6 +40,7 @@ import { ANIMAL_AVATARS, DEFAULT_AVATAR } from '../utils/avatars';
 import { PWAInstallButton } from './PWAInstallButton';
 import { useTheme } from '../hooks/useTheme';
 import { CategorySelect } from './CategorySelect';
+import { getMonthSalary } from '../utils/finance';
 import { BiometricToggle } from './BiometricToggle';
 import { hashPassword } from '../utils/crypto';
 import { ProjectCategoriesSettings } from './ProjectCategoriesSettings';
@@ -127,7 +128,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   // Section 2: Month Salary state
   const currentMonthBudget = data.monthlyBudgets[selectedMonth];
   const [currentMonthSalary, setCurrentMonthSalary] = useState(
-    (currentMonthBudget?.salaryReceived ?? data.user.defaultSalary).toString()
+    getMonthSalary(data, selectedMonth).toString()
   );
   const [salarySavedToast, setSalarySavedToast] = useState(false);
 

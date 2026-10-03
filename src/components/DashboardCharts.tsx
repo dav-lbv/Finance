@@ -97,10 +97,12 @@ export const SalaryDonutCard: React.FC<{
   salary: number;
   expenses: number;
   savings: number;
+  /** Argent versé aux projets d'épargne, distinct de l'épargne générale */
+  projects: number;
   currency: string;
   monthLabel: string;
-}> = ({ salary, expenses, savings, currency, monthLabel }) => {
-  const used = expenses + savings;
+}> = ({ salary, expenses, savings, projects, currency, monthLabel }) => {
+  const used = expenses + savings + projects;
   const rest = Math.max(0, salary - used);
   const base = Math.max(salary, used);
   const pct = base > 0 ? Math.round((used / base) * 100) : 0;
@@ -109,6 +111,7 @@ export const SalaryDonutCard: React.FC<{
   const segments: DonutSegment[] = [
     { key: 'exp', label: 'Dépenses', value: expenses, color: 'var(--fg)' },
     { key: 'sav', label: 'Épargne', value: savings, color: 'var(--success)' },
+    { key: 'proj', label: 'Projets', value: projects, color: 'color-mix(in srgb, var(--fg) 60%, transparent)' },
     { key: 'rest', label: 'Reste', value: rest, color: 'color-mix(in srgb, var(--fg) 24%, transparent)' },
   ];
 
@@ -259,7 +262,7 @@ export const TrendBarsCard: React.FC<{
               <span className="w-2.5 h-2.5 rounded-sm bg-brand" /> Dépenses
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-success" /> Épargne
+              <span className="w-2.5 h-2.5 rounded-sm bg-success" /> Épargne & projets
             </span>
             <span className="ml-auto">Touchez une barre pour le détail</span>
           </div>

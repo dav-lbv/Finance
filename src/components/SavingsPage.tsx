@@ -5,6 +5,7 @@ import { AppData, SavingsDeposit, SavingsProject } from '../types';
 import { formatCurrency, formatDateFr, formatMonthKey } from '../utils/date';
 import { useCountUp } from '../hooks/useCountUp';
 import { Amount } from './Amount';
+import { getMonthSalary, splitSavings, sumAmounts } from '../utils/finance';
 import { SavingsModal } from './SavingsModal';
 import { SavingsDayTimeline } from './SavingsDayTimeline';
 import { SavingsProjectsSection } from './SavingsProjectsSection';
@@ -77,7 +78,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   onContributeToSavingsProject,
 }) => {
   const currency = data.user.currency || 'FCFA';
-  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
+  const salaryReceived = getMonthSalary(data, selectedMonth);
 
   const [view, setView] = useState<View>('home');
   const [cardIndex, setCardIndex] = useState(0);
@@ -91,15 +92,16 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   const closedCount = allProjects.length - activeProjects.length;
 
   // Calculs d'épargne
-  const totalSavings = data.savings.reduce((acc, d) => acc + d.amount, 0);
-  const monthTotalSavings = data.savings
-    .filter((d) => d.date.startsWith(selectedMonth))
-    .reduce((acc, d) => acc + d.amount, 0);
+  // L'épargne générale ne contient QUE les versements hors projets : l'argent des projets
+  // reste sur leurs propres cartes.
+  const { general: generalDeposits } = splitSavings(data.savings);
+  const totalSavings = sumAmounts(generalDeposits);
+  const monthTotalSavings = sumAmounts(generalDeposits.filter((d) => d.date.startsWith(selectedMonth)));
   const savingsRate = salaryReceived > 0 ? Math.round((monthTotalSavings / salaryReceived) * 100) : 0;
 
   // Cartes du carrousel : 1re = total ; ensuite un projet en cours = une carte
   const items: CarouselItem[] = [
-    { kind: 'total', id: 'total', total: totalSavings, monthTotal: monthTotalSavings, count: data.savings.length },
+    { kind: 'total', id: 'total', total: totalSavings, monthTotal: monthTotalSavings, count: generalDeposits.length },
     ...activeProjects.map((project) => ({ kind: 'project' as const, id: project.id, project })),
   ];
   const safeIndex = Math.min(cardIndex, items.length - 1);
@@ -145,7 +147,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   };
 
   // Liste affichée sous les actions : tous les versements ou ceux du projet
-  const listSource = (focusedProject ? data.savings.filter((d) => d.projectId === focusedProject.id) : data.savings)
+  const listSource = (focusedProject ? data.savings.filter((d) => d.projectId === focusedProject.id) : generalDeposits)
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date));
   const shownDeposits = listSource.slice(0, visibleDeposits);
@@ -276,7 +278,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
 
         {!focusedProject && (
           <SavingsDayTimeline
-            deposits={data.savings}
+            deposits={generalDeposits}
             selectedDate={selectedDate}
             currency={currency}
             savingsRate={savingsRate}

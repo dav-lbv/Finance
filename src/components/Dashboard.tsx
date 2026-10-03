@@ -32,6 +32,7 @@ import { NotificationsModal } from './NotificationsModal';
 import { CATEGORY_CONFIG } from './CategorySelect';
 import { useCountUp } from '../hooks/useCountUp';
 import { Amount } from './Amount';
+import { getMonthSalary, splitSavings, sumAmounts } from '../utils/finance';
 import { DotMeter } from './DotMeter';
 import { TransactionsPanel } from './TransactionsPanel';
 import { TransactionItem, TransactionSheet } from './TransactionSheet';
@@ -81,19 +82,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const prevTotalExpenses = prevExpenses.reduce((sum, item) => sum + item.amount, 0);
 
   // Budget et Salaire perçu du mois
-  const salaryReceived = data.monthlyBudgets[selectedMonth]?.salaryReceived ?? data.user.defaultSalary ?? 0;
+  const salaryReceived = getMonthSalary(data, selectedMonth);
 
   // Calculs Épargne
-  const totalSavingsAccrued = data.savings.reduce((acc, curr) => acc + curr.amount, 0);
-  const currentMonthSavings = data.savings
-    .filter(s => s.date.startsWith(selectedMonth))
-    .reduce((acc, curr) => acc + curr.amount, 0);
+  // Épargne générale (hors projets) et argent des projets : deux choses distinctes
+  const { general: generalDeposits, project: projectDeposits } = splitSavings(data.savings);
+  const totalSavingsAccrued = sumAmounts(generalDeposits);
+  const monthGeneralDeposits = generalDeposits.filter((d) => d.date.startsWith(selectedMonth));
+  const currentMonthSavings = sumAmounts(monthGeneralDeposits);
+  const currentMonthProjectSavings = sumAmounts(projectDeposits.filter((d) => d.date.startsWith(selectedMonth)));
   const savingsRate = salaryReceived > 0 ? Math.round((currentMonthSavings / salaryReceived) * 100) : 0;
 
   // Vrai calcul du solde restant net
-  const netRemaining = salaryReceived - currentTotalExpenses - currentMonthSavings;
+  const netRemaining = salaryReceived - currentTotalExpenses - currentMonthSavings - currentMonthProjectSavings;
   const isPositiveNet = netRemaining >= 0;
-  const usedRatio = salaryReceived > 0 ? Math.min(100, Math.round(((currentTotalExpenses + currentMonthSavings) / salaryReceived) * 100)) : 0;
+  const usedRatio = salaryReceived > 0 ? Math.min(100, Math.round(((currentTotalExpenses + currentMonthSavings + currentMonthProjectSavings) / salaryReceived) * 100)) : 0;
 
   // Comparaison Dépenses Mois Précédent vs Mois Actuel
   const expenseDiff = currentTotalExpenses - prevTotalExpenses;
@@ -337,8 +340,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Amount value={currentMonthSavings} currency={currency} />
                 </p>
                 <p className="mt-2 text-[11px] text-fg-muted">
-                  {savingsRate}% du salaire • {data.savings.filter((d) => d.date.startsWith(selectedMonth)).length} versement
-                  {data.savings.filter((d) => d.date.startsWith(selectedMonth)).length > 1 ? 's' : ''}
+                  {savingsRate}% du salaire • {monthGeneralDeposits.length} versement{monthGeneralDeposits.length > 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -387,6 +389,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           salary={salaryReceived}
           expenses={currentTotalExpenses}
           savings={currentMonthSavings}
+          projects={currentMonthProjectSavings}
           currency={currency}
           monthLabel={formatMonthKey(selectedMonth)}
         />
