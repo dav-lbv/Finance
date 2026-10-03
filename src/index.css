@@ -32,7 +32,7 @@
   --blob-a: rgba(255, 255, 255, 0.9);
   --blob-b: rgba(160, 160, 175, 0.35);
   --shadow-card: 0 8px 30px rgba(20, 20, 30, 0.07);
-  --cal-bar: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(242, 242, 246, 0.82));
+  --cal-bar: #ffffff;
 
   /* shadcn */
   --background: #e8e8ec;
@@ -93,7 +93,7 @@ html.dark {
   --blob-a: rgba(255, 255, 255, 0.07);
   --blob-b: rgba(120, 120, 140, 0.16);
   --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.45);
-  --cal-bar: linear-gradient(180deg, rgba(78, 78, 82, 0.62), rgba(44, 44, 48, 0.72));
+  --cal-bar: #3a3837;
 
   --background: #050506;
   --foreground: #f5f5f7;

@@ -539,7 +539,7 @@ export default function App() {
 
       {/* Calendrier permanent : remplace l'en-tête sur tous les autres écrans */}
       {currentTab !== 'dashboard' && currentTab !== 'settings' && (
-        <div className="sticky top-0 z-30 px-3 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+10px)] pb-1 max-w-7xl w-full mx-auto">
+        <div className="sticky top-0 z-30 w-full md:max-w-3xl md:mx-auto">
           <WeekCalendarBar
             selectedDate={selectedDate}
             onSelectDate={handleSelectDate}
