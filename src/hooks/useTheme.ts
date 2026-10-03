@@ -80,10 +80,11 @@ export function useTheme() {
       root.setAttribute('data-theme', 'dark');
     }
 
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', resolvedTheme === 'light' ? '#ffffff' : '#3a3837');
-    }
+    // Couleur de la barre d'état de Safari : celle de la barre du haut (le choix de l'app prime sur le système)
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.removeAttribute('media');
+      meta.setAttribute('content', resolvedTheme === 'light' ? '#ffffff' : '#3a3837');
+    });
   }, [resolvedTheme, colorPalette]);
 
   // Appliquer la palette de couleurs Manga Orange / Neon Lime sur <html>
