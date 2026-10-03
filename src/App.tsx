@@ -15,6 +15,7 @@ import { SavingsModal } from './components/SavingsModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { SettingsSection } from './components/SettingsPage';
 import { AuthOnboardingModal } from './components/AuthOnboardingModal';
+import { WelcomeScreen } from './components/WelcomeScreen';
 import { 
   AppData, 
   Expense, 
@@ -58,6 +59,8 @@ export default function App() {
 
   // Première utilisation : l'assistant de configuration est obligatoire
   const needsOnboarding = !data.user.isOnboarded;
+  // Première page : choix du compte / restauration, avant l'assistant de configuration
+  const [welcomeDone, setWelcomeDone] = useState(false);
 
   // Navigation fluide avec support des sous-sections de paramètres
   const handleNavigateToTab = (tab: 'expenses' | 'savings' | 'settings', section?: SettingsSection) => {
@@ -472,6 +475,13 @@ export default function App() {
     const initial = getDefaultData();
     setData(initial);
     saveAppData(initial);
+    setWelcomeDone(false);
+  };
+
+  const handleRestoreData = (restored: AppData) => {
+    setData(restored);
+    saveAppData(restored);
+    setWelcomeDone(true);
   };
 
   const appCurrency = data.user.currency || 'FCFA';
@@ -602,6 +612,7 @@ export default function App() {
             onUpdateSecurity={handleUpdateSecurity}
             onUpdateMonthSalary={handleUpdateMonthSalary}
             onResetData={handleResetData}
+            onRestoreData={handleRestoreData}
             onAddProjectCategory={handleAddProjectCategory}
             onRenameProjectCategory={handleRenameProjectCategory}
             onDeleteProjectCategory={handleDeleteProjectCategory}
@@ -627,8 +638,20 @@ export default function App() {
       />
 
       {/* Modal Assistant de Connexion & Onboarding Setup */}
+      {needsOnboarding && !welcomeDone && (
+        <WelcomeScreen
+          onStart={(prefill) => {
+            if (prefill) setData((d) => ({ ...d, user: { ...d.user, ...prefill } }));
+            setWelcomeDone(true);
+          }}
+          onRestore={handleRestoreData}
+        />
+      )}
+
+      {(isOnboardingOpen || (needsOnboarding && welcomeDone)) && (
       <AuthOnboardingModal
-        isOpen={isOnboardingOpen || needsOnboarding}
+        key={data.user.email || 'new'}
+        isOpen
         required={needsOnboarding}
         onClose={() => setIsOnboardingOpen(false)}
         currentUser={data.user}
@@ -640,6 +663,7 @@ export default function App() {
           setIsOnboardingOpen(false);
         }}
       />
+      )}
 
       {/* Modal Ajout Dépense avec sélection de modèles et popup d'enregistrement */}
       <ExpenseModal

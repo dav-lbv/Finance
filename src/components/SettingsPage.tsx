@@ -41,6 +41,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { useTheme } from '../hooks/useTheme';
 import { CategorySelect } from './CategorySelect';
 import { getMonthSalary } from '../utils/finance';
+import { CloudBackupCard } from './CloudBackupCard';
 import { SettingsMenu } from './SettingsMenu';
 import { SettingsSubHeader } from './SettingsSubHeader';
 import { BiometricToggle } from './BiometricToggle';
@@ -64,6 +65,7 @@ interface SettingsPageProps {
   onUpdateSecurity: (newSecurity: SecuritySettings) => void;
   onUpdateMonthSalary: (monthKey: string, salary: number) => void;
   onResetData: () => void;
+  onRestoreData: (data: AppData) => void;
   onAddProjectCategory: (name: string) => void;
   onRenameProjectCategory: (oldName: string, newName: string) => void;
   onDeleteProjectCategory: (name: string) => void;
@@ -95,6 +97,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onUpdateSecurity,
   onUpdateMonthSalary,
   onResetData,
+  onRestoreData,
   onAddProjectCategory,
   onRenameProjectCategory,
   onDeleteProjectCategory,
@@ -893,6 +896,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             <div className="space-y-4">
+              <CloudBackupCard data={data} onUpdateUser={onUpdateUser} onRestoreData={onRestoreData} />
+
               {/* Export JSON */}
               <div className="p-4 rounded-2xl bg-surface-2 border border-line-strong flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">

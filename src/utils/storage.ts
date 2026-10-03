@@ -60,6 +60,23 @@ function normalize(data: AppData): AppData {
   };
 }
 
+/**
+ * Valide et prépare une sauvegarde importée (fichier ou cloud) pour cet appareil.
+ * La clé biométrique est propre à l'appareil d'origine : elle est retirée.
+ */
+export function parseBackup(raw: unknown): AppData {
+  const obj = raw as Partial<AppData> | null;
+  if (!obj || typeof obj !== 'object' || typeof obj.user !== 'object' || typeof obj.expenses !== 'object') {
+    throw new Error("Ce fichier n'est pas une sauvegarde Mon Kanda valide.");
+  }
+  const data = normalize(obj as AppData);
+  return {
+    ...data,
+    user: { ...data.user, isOnboarded: true },
+    security: { ...data.security, useBiometrics: false, biometricCredentialId: undefined },
+  };
+}
+
 // ------------------------------------------------------------------
 // Cache mémoire + écriture asynchrone en base
 // ------------------------------------------------------------------
