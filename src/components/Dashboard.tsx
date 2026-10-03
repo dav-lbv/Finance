@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   PiggyBank, 
   Receipt, 
@@ -71,6 +72,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const [balanceView, setBalanceView] = useState<'balance' | 'wallet'>('balance');
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  // Emplacement de la barre du haut, posé par App au même endroit que le calendrier
+  const [barSlot, setBarSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setBarSlot(document.getElementById('top-bar-slot')), []);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
 
   // Dépenses du mois sélectionné
@@ -209,51 +213,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
     { label: 'Plus', icon: LayoutGrid, onClick: () => onNavigateToTab('expenses') },
   ];
 
+  const topBar = (
+    <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
+      <button
+        type="button"
+        onClick={() => onNavigateToTab('settings')}
+        className="flex items-center gap-3 min-w-0 text-left cursor-pointer"
+        aria-label="Ouvrir mon profil"
+      >
+        <span className="relative shrink-0">
+          <img
+            src={avatarImage}
+            alt={data.user.fullName || 'Profil'}
+            className="w-11 h-11 rounded-full object-cover"
+          />
+          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[color:var(--cal-bar)] pulse-dot" />
+        </span>
+        <span className="min-w-0 leading-tight">
+          <span className="block text-[11px] text-fg-muted">Bon retour</span>
+          <span className="block text-sm font-extrabold text-fg truncate">
+            {data.user.username || data.user.firstName || data.user.fullName || 'vous'}
+          </span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setIsNotificationsOpen(true)}
+        className="w-11 h-11 rounded-full bg-fg/10 flex items-center justify-center text-fg cursor-pointer"
+        title="Notifications"
+      >
+        <Bell className="w-[18px] h-[18px]" />
+      </button>
+    </div>
+  );
+
   return (
     <>
-      {/* Barre du haut collante (comme le calendrier) : avatar + bienvenue, cloche */}
-      <div className="sticky top-0 z-30 -mx-3 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-8">
-        <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('settings')}
-            className="flex items-center gap-3 min-w-0 text-left cursor-pointer"
-            aria-label="Ouvrir mon profil"
-          >
-            <span className="relative shrink-0">
-              <img
-                src={avatarImage}
-                alt={data.user.fullName || 'Profil'}
-                className="w-11 h-11 rounded-full object-cover"
-              />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[color:var(--cal-bar)] pulse-dot" />
-            </span>
-            <span className="min-w-0 leading-tight">
-              <span className="block text-[11px] text-fg-muted">Bon retour</span>
-              <span className="block text-sm font-extrabold text-fg truncate">
-                {data.user.username || data.user.firstName || data.user.fullName || 'vous'}
-              </span>
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsNotificationsOpen(true)}
-            className="w-11 h-11 rounded-full bg-fg/10 flex items-center justify-center text-fg cursor-pointer"
-            title="Notifications"
-          >
-            <Bell className="w-[18px] h-[18px]" />
-          </button>
-        </div>
-
-      </div>
-
+    {barSlot && createPortal(topBar, barSlot)}
     <div className="pb-28 max-w-4xl mx-auto stagger">
 
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}
       {/* ======================================================== */}
-      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-9 border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
+      <div className="relative -mx-3 sm:-mx-6 lg:-mx-8 -mt-[52px] sm:-mt-[68px] border-b border-line-strong overflow-hidden bg-gradient-to-b from-fg/[0.13] via-surface-2 to-surface">
         {/* Aurore : deux halos qui dérivent lentement */}
         <div className="aurora-a absolute -top-28 -left-16 w-[75%] h-72 rounded-full bg-fg/15 blur-3xl pointer-events-none" />
         <div className="aurora-b absolute -top-16 -right-20 w-[70%] h-64 rounded-full bg-fg/[0.08] blur-3xl pointer-events-none" />

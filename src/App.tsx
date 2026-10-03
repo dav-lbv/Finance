@@ -557,6 +557,9 @@ export default function App() {
         </div>
       )}
 
+      {/* Emplacement de la barre profil du tableau de bord : même place et même structure que le calendrier */}
+      {currentTab === 'dashboard' && <div id="top-bar-slot" className="sticky top-0 z-30 w-full md:max-w-3xl md:mx-auto" />}
+
       {/* Contenu principal (avec padding inférieur optimisé pour la barre mobile) */}
       <main className={`relative flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 md:pb-8 ${currentTab === 'settings' ? 'pt-[calc(env(safe-area-inset-top,0px)+16px)]' : ''}`}>
         {currentTab === 'dashboard' && (
