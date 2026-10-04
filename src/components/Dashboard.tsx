@@ -214,7 +214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   ];
 
   const topBar = (
-    <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
+    <div className="flex items-center justify-between gap-3 rounded-b-[34px] px-5 sm:px-8 pb-5 pt-[calc(env(safe-area-inset-top,0px)+28px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
       <button
         type="button"
         onClick={() => onNavigateToTab('settings')}

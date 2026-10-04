@@ -96,7 +96,7 @@ export const WeekCalendarBar: React.FC<WeekCalendarBarProps> = ({
   };
 
   return (
-    <div className="relative rounded-b-[34px] px-4 pb-[22px] pt-[calc(env(safe-area-inset-top,0px)+14px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
+    <div className="relative rounded-b-[34px] px-4 pb-[22px] pt-[calc(env(safe-area-inset-top,0px)+28px)] [background:var(--cal-bar)] shadow-[inset_0_-1px_0_var(--glass-edge),0_18px_40px_rgba(0,0,0,0.4)]">
       <div className="flex items-center gap-3">
         <button
           type="button"
