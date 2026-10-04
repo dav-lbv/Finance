@@ -227,7 +227,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             alt={data.user.fullName || 'Profil'}
             className="w-11 h-11 rounded-full object-cover"
           />
-          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[color:var(--cal-bar)] pulse-dot" />
+          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[color:var(--cal-bar)]" />
         </span>
         <span className="min-w-0 leading-tight">
           <span className="block text-[11px] text-fg-muted">Bon retour</span>
