@@ -1,6 +1,6 @@
 import React from 'react';
-import { Bell, CheckCheck, X, Sparkles, AlertCircle, ShieldCheck, PiggyBank, Calendar } from 'lucide-react';
-import { formatMonthKey } from '../utils/date';
+import { AnimatePresence, motion } from 'motion/react';
+import { Bell, BellRing, CheckCheck, X, Sparkles, ShieldCheck, Calendar } from 'lucide-react';
 
 interface NotificationItem {
   id: string;
@@ -20,127 +20,111 @@ interface NotificationsModalProps {
   currency: string;
 }
 
-export const NotificationsModal: React.FC<NotificationsModalProps> = ({
-  isOpen,
-  onClose,
-  selectedMonth,
-  totalExpenses,
-  totalSavings,
-  currency,
-}) => {
+export const NotificationsModal: React.FC<NotificationsModalProps> = ({ isOpen, onClose }) => {
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
 
-  if (!isOpen) return null;
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-  };
-
+  const markAllAsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div 
-        className="w-full max-w-md bg-surface border border-line rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-line bg-surface">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand/15 text-brand border border-brand/30 flex items-center justify-center">
-              <Bell className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-sm sm:text-base text-fg flex items-center gap-2">
-                Notifications
-                {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-brand text-brand-fg">
-                    {unreadCount} nouv.
-                  </span>
-                )}
-              </h3>
-              <p className="text-[11px] text-fg-muted">Alertes & rappels budgétaires Mon Kanda</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full text-fg-muted hover:text-fg hover:bg-surface-3 transition-colors"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+            className="w-full max-w-md max-h-[85vh] flex flex-col rounded-t-[32px] sm:rounded-[32px] bg-surface-solid border border-line shadow-2xl pb-[calc(env(safe-area-inset-bottom,0px)+16px)]"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            <div className="w-10 h-1.5 rounded-full bg-line-strong mx-auto mt-3" />
 
-        {/* Content list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2.5 divide-y divide-line/50">
-          {notifications.length === 0 && (
-            <div className="py-10 text-center text-xs text-fg-muted">
-              <Bell className="w-6 h-6 mx-auto mb-2 text-fg-muted" />
-              Aucune notification pour le moment.
-            </div>
-          )}
-          {notifications.map((notif) => {
-            return (
-              <div
-                key={notif.id}
-                className={`pt-2.5 first:pt-0 flex items-start gap-3 p-2.5 rounded-2xl transition-colors ${
-                  notif.isRead ? 'bg-surface/40 opacity-80' : 'bg-surface-2 border border-line-strong'
-                }`}
-              >
-                <div className="shrink-0 mt-0.5">
-                  {notif.type === 'finance' ? (
-                    <div className="w-7 h-7 rounded-lg bg-brand/20 text-brand flex items-center justify-center">
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </div>
-                  ) : notif.type === 'success' ? (
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                    </div>
-                  ) : (
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                      <Calendar className="w-3.5 h-3.5" />
-                    </div>
+            <div className="flex items-start justify-between gap-3 px-6 pt-4 pb-3">
+              <div className="min-w-0">
+                <h3 className="text-[28px] leading-tight font-light tracking-tight text-fg flex items-center gap-2">
+                  Notifications
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-brand text-brand-fg">{unreadCount} nouv.</span>
                   )}
-                </div>
+                </h3>
+                <p className="text-[12px] text-fg-muted mt-0.5">Alertes et rappels de budget</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fermer"
+                className="w-10 h-10 shrink-0 rounded-full bg-surface-2 border border-line flex items-center justify-center text-fg-muted cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1 mb-0.5">
-                    <span className="font-bold text-xs sm:text-sm text-fg truncate">
-                      {notif.title}
-                    </span>
-                    <span className="text-[10px] text-fg-muted shrink-0 font-medium">
-                      {notif.time}
-                    </span>
-                  </div>
-                  <p className="text-xs text-fg-2 leading-relaxed">
-                    {notif.message}
+            <div className="flex-1 overflow-y-auto px-6 pb-2">
+              {notifications.length === 0 ? (
+                <div className="py-10 flex flex-col items-center text-center">
+                  <span className="w-20 h-20 rounded-full bg-surface-2 border border-line flex items-center justify-center shadow-[inset_0_1px_0_var(--glass-edge)]">
+                    <BellRing className="w-8 h-8 text-fg-2" />
+                  </span>
+                  <p className="mt-5 text-lg font-bold text-fg">Tout est à jour</p>
+                  <p className="mt-1 max-w-[17rem] text-[13px] leading-relaxed text-fg-muted">
+                    Les rappels de budget et les alertes importantes apparaîtront ici.
                   </p>
                 </div>
+              ) : (
+                <ul className="space-y-2.5 pt-1">
+                  {notifications.map((notif) => (
+                    <li
+                      key={notif.id}
+                      className={`flex items-start gap-3 p-3 rounded-2xl border ${
+                        notif.isRead ? 'bg-surface/40 border-line opacity-80' : 'bg-surface-2 border-line-strong'
+                      }`}
+                    >
+                      <span className="w-9 h-9 shrink-0 rounded-full bg-surface-3 text-fg flex items-center justify-center">
+                        {notif.type === 'finance' ? <Sparkles className="w-4 h-4" /> : notif.type === 'success' ? <ShieldCheck className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-sm text-fg truncate">{notif.title}</span>
+                          <span className="text-[10px] text-fg-muted shrink-0 font-medium">{notif.time}</span>
+                        </div>
+                        <p className="text-xs text-fg-2 leading-relaxed mt-0.5">{notif.message}</p>
+                      </div>
+                      {!notif.isRead && <span className="w-2 h-2 rounded-full bg-fg shrink-0 mt-3" />}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-                {!notif.isRead && (
-                  <span className="w-2 h-2 rounded-full bg-brand shrink-0 mt-2 shadow-[0_0_8px_rgba(var(--brand-rgb),0.7)]"></span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-line bg-surface flex items-center justify-between">
-          <button
-            onClick={markAllAsRead}
-            className="flex items-center gap-1.5 text-xs text-fg-muted hover:text-brand font-semibold transition-colors px-2 py-1 rounded-lg"
-          >
-            <CheckCheck className="w-4 h-4" />
-            <span>Tout marquer comme lu</span>
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-full bg-brand text-brand-fg font-extrabold text-xs hover:bg-brand-hover transition-colors shadow-sm"
-          >
-            Fermer
-          </button>
-        </div>
-      </div>
-    </div>
+            <div className="px-6 pt-3 flex items-center gap-3">
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-1.5 text-xs text-fg-muted font-semibold cursor-pointer"
+                >
+                  <CheckCheck className="w-4 h-4" />
+                  Tout marquer comme lu
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className={`ml-auto flex-1 h-12 ${notifications.length > 0 ? 'max-w-[12rem]' : ''} rounded-full bg-fg text-app font-bold text-sm cursor-pointer active:scale-[0.98] transition`}
+              >
+                Fermer
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
