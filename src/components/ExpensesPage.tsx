@@ -47,6 +47,7 @@ const CATEGORIES: ExpenseCategory[] = [
   'Autre',
 ];
 
+import { PagedList, Pager } from './Pager';
 const ITEMS_PER_PAGE = 5;
 
 export const ExpensesPage: React.FC<ExpensesPageProps> = ({
@@ -553,49 +554,15 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                         </button>
                       )}
 
-                      <button
-                        onClick={() => onDeleteExpense(exp.id)}
-                        className="p-1.5 rounded-full text-fg-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                        title="Supprimer la dépense"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* BARRE DE NAVIGATION FLÈCHES GAUCHE / DROITE SI PLUS DE 5 DÉPENSES */}
-            {displayedActiveExpenses.length > ITEMS_PER_PAGE && (
-              <div className="px-4 sm:px-5 py-3 border-t border-line flex items-center justify-between text-xs bg-surface">
-                <span className="text-fg-muted font-medium text-[11px] sm:text-xs">
-                  {displayedActiveExpenses.length} dépenses • Page {activePage} sur {totalActivePages} (5 maxi par vue)
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    disabled={activePage === 1}
-                    onClick={() => setActivePage((p) => Math.max(1, p - 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                    title="Page précédente"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Précédent</span>
-                  </button>
-                  <button
-                    type="button"
-                    disabled={activePage === totalActivePages}
-                    onClick={() => setActivePage((p) => Math.min(totalActivePages, p + 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                    title="Page suivante"
-                  >
-                    <span className="hidden sm:inline">Suivant</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="px-4 sm:px-5 pb-4">
+              <Pager page={activePage} pageCount={totalActivePages} onChange={setActivePage} />
+            </div>
           </div>
         )}
       </div>
@@ -666,34 +633,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                 ))}
               </div>
 
-              {/* Navigation flèches si plus de 5 dépenses réglées */}
-              {settledExpenses.length > ITEMS_PER_PAGE && (
-                <div className="pt-3 mt-2 border-t border-line flex items-center justify-between text-xs">
-                  <span className="text-fg-muted text-[11px]">
-                    Page {settledPage} sur {totalSettledPages} (5 réglées par vue)
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={settledPage === 1}
-                      onClick={() => setSettledPage((p) => Math.max(1, p - 1))}
-                      className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                      title="Page précédente"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={settledPage === totalSettledPages}
-                      onClick={() => setSettledPage((p) => Math.min(totalSettledPages, p + 1))}
-                      className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                      title="Page suivante"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
+              <Pager page={settledPage} pageCount={totalSettledPages} onChange={setSettledPage} />
             </div>
           )}
         </div>
@@ -776,8 +716,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                         Validez les dépenses du mois pour les retrouver ici.
                       </p>
                     ) : (
-                      <ul className="space-y-1.5">
-                        {mPaid.map((e) => (
+                      <PagedList
+                        as="ul"
+                        className="space-y-1.5"
+                        items={mPaid}
+                        render={(e) => (
                           <li
                             key={e.id}
                             className="flex items-center justify-between gap-3 rounded-xl bg-surface border border-line px-3 py-2"
@@ -790,8 +733,8 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
                               -{formatCurrency(e.amount, currency)}
                             </span>
                           </li>
-                        ))}
-                      </ul>
+                        )}
+                      />
                     )}
                   </div>
                 )}
@@ -800,36 +743,9 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
           })}
         </div>
 
-        {/* Navigation flèches gauche / droite de l'historique des mois si > 5 mois */}
-        {allRecordedMonths.length > ITEMS_PER_PAGE && (
-          <div className="px-4 sm:px-5 py-3 border-t border-line flex items-center justify-between text-xs bg-surface">
-            <span className="text-fg-muted font-medium text-[11px] sm:text-xs">
-              Affichage de {paginatedRecordedMonths.length} sur {allRecordedMonths.length} mois (Page {monthsHistoryPage} sur {totalMonthsPages})
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                disabled={monthsHistoryPage === 1}
-                onClick={() => setMonthsHistoryPage((p) => Math.max(1, p - 1))}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                title="Mois précédents"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Précédent</span>
-              </button>
-              <button
-                type="button"
-                disabled={monthsHistoryPage === totalMonthsPages}
-                onClick={() => setMonthsHistoryPage((p) => Math.min(totalMonthsPages, p + 1))}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line-strong text-fg-2 hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
-                title="Mois suivants"
-              >
-                <span className="hidden sm:inline">Suivant</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="px-4 sm:px-5 pb-4">
+          <Pager page={monthsHistoryPage} pageCount={totalMonthsPages} onChange={setMonthsHistoryPage} />
+        </div>
       </div>
 
     </div>

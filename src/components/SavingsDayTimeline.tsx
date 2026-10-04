@@ -1,6 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { PiggyBank, Trash2 } from 'lucide-react';
+import { PiggyBank } from 'lucide-react';
+import { Pager, usePager } from './Pager';
 import { SavingsDeposit } from '../types';
 import { formatCurrency, formatDateFr } from '../utils/date';
 
@@ -10,7 +11,6 @@ interface SavingsDayTimelineProps {
   currency: string;
   /** Taux d'épargne du mois (0-100) */
   savingsRate: number;
-  onDelete: (id: string) => void;
 }
 
 /** Versements du jour sélectionné dans le calendrier permanent, en timeline. */
@@ -19,10 +19,10 @@ export const SavingsDayTimeline: React.FC<SavingsDayTimelineProps> = ({
   selectedDate,
   currency,
   savingsRate,
-  onDelete,
 }) => {
   const dayDeposits = deposits.filter((d) => d.date === selectedDate);
   const dayTotal = dayDeposits.reduce((acc, d) => acc + d.amount, 0);
+  const { page, setPage, pageCount, pageItems } = usePager(dayDeposits, selectedDate);
 
   return (
     <div className="lg:col-span-7">
@@ -60,7 +60,7 @@ export const SavingsDayTimeline: React.FC<SavingsDayTimelineProps> = ({
               </div>
             ) : (
               <div className="space-y-2.5">
-                {dayDeposits.map((dep, i) => (
+                {pageItems.map((dep, i) => (
                   <motion.div
                     key={dep.id}
                     initial={{ opacity: 0, x: -10 }}
@@ -79,17 +79,10 @@ export const SavingsDayTimeline: React.FC<SavingsDayTimelineProps> = ({
                           <p className="text-[11px] text-fg-muted truncate">{dep.note || dep.projectName || 'Versement épargne'}</p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(dep.id)}
-                        className="p-1.5 text-fg-muted hover:text-rose-400 cursor-pointer"
-                        title="Supprimer ce versement"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
                   </motion.div>
                 ))}
+                <Pager page={page} pageCount={pageCount} onChange={setPage} />
               </div>
             )}
           </motion.div>

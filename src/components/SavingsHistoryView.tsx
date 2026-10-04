@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ArrowLeft, Archive, CheckCircle2, ChevronRight, RotateCcw, X } from 'lucide-react';
 import { SavingsDeposit, SavingsProject } from '../types';
 import { formatCurrency, formatDateFr } from '../utils/date';
+import { PagedList, Pager, usePager } from './Pager';
 
 interface SavingsHistoryViewProps {
   projects: SavingsProject[];
@@ -34,6 +35,7 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
   const selectedDeposits = selected
     ? deposits.filter((d) => d.projectId === selected.id).sort((a, b) => b.date.localeCompare(a.date))
     : [];
+  const closedPager = usePager(closed, closed.length);
   const totalArchived = closed.reduce((s, p) => s + p.currentAmount, 0);
 
   return (
@@ -73,7 +75,7 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
         </div>
       ) : (
         <div className="space-y-2.5">
-          {closed.map((p) => (
+          {closedPager.pageItems.map((p) => (
             <button
               key={p.id}
               type="button"
@@ -95,6 +97,7 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
               </div>
             </button>
           ))}
+          <Pager page={closedPager.page} pageCount={closedPager.pageCount} onChange={closedPager.setPage} />
         </div>
       )}
 
@@ -160,8 +163,11 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
               {selectedDeposits.length === 0 ? (
                 <p className="text-xs text-fg-muted">Aucun versement rattaché à ce projet.</p>
               ) : (
-                <ul className="space-y-1.5">
-                  {selectedDeposits.map((d) => (
+                <PagedList
+                  as="ul"
+                  className="space-y-1.5"
+                  items={selectedDeposits}
+                  render={(d) => (
                     <li
                       key={d.id}
                       className="flex items-center justify-between rounded-xl bg-surface-2 border border-line px-3 py-2"
@@ -169,8 +175,8 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
                       <span className="text-[11px] text-fg-muted">{formatDateFr(d.date)}</span>
                       <span className="text-xs font-black text-fg tabular-nums">+{formatCurrency(d.amount, currency)}</span>
                     </li>
-                  ))}
-                </ul>
+                  )}
+                />
               )}
 
               <button

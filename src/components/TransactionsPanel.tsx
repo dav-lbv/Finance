@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ChevronDown, Receipt } from 'lucide-react';
 import { formatDateFr, getTodayDateString } from '../utils/date';
 import { Amount } from './Amount';
+import { Pager, usePager } from './Pager';
 import { TransactionItem } from './TransactionSheet';
 
 type Filter = 'all' | 'expense' | 'savings';
@@ -25,7 +26,6 @@ function dayLabel(date: string): string {
   return date === yesterday ? 'Hier' : formatDateFr(date);
 }
 
-const MAX_GROUPS = 4;
 
 /** Opérations du mois : filtres en pastilles, groupes par jour repliables, liseré de couleur. */
 export const TransactionsPanel: React.FC<TransactionsPanelProps> = ({
@@ -45,14 +45,18 @@ export const TransactionsPanel: React.FC<TransactionsPanelProps> = ({
     savings: items.filter((i) => i.type === 'savings').length,
   };
 
+  const visibleItems = useMemo(
+    () => items.filter((i) => filter === 'all' || i.type === filter).sort((a, b) => b.date.localeCompare(a.date)),
+    [items, filter],
+  );
+  const { page, setPage, pageCount, pageItems } = usePager(visibleItems, filter);
+
+  // Les 5 opérations de la page, regroupées par jour
   const groups = useMemo(() => {
-    const visible = items
-      .filter((i) => filter === 'all' || i.type === filter)
-      .sort((a, b) => b.date.localeCompare(a.date));
     const map = new Map<string, TransactionItem[]>();
-    visible.forEach((i) => map.set(i.date, [...(map.get(i.date) || []), i]));
-    return [...map.entries()].slice(0, MAX_GROUPS);
-  }, [items, filter]);
+    pageItems.forEach((i) => map.set(i.date, [...(map.get(i.date) || []), i]));
+    return [...map.entries()];
+  }, [pageItems]);
 
   const filters: { id: Filter; label: string }[] = [
     { id: 'all', label: 'Tout' },
@@ -174,6 +178,7 @@ export const TransactionsPanel: React.FC<TransactionsPanelProps> = ({
               </div>
             );
           })}
+          <Pager page={page} pageCount={pageCount} onChange={setPage} />
         </div>
       )}
     </div>

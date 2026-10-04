@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowLeft, History, PiggyBank, Plus, Target, Trash2 } from 'lucide-react';
+import { ArrowLeft, History, PiggyBank, Plus, Target } from 'lucide-react';
+import { Pager, usePager } from './Pager';
 import { AppData, SavingsDeposit, SavingsProject } from '../types';
 import { formatCurrency, formatDateFr, formatMonthKey } from '../utils/date';
 import { useCountUp } from '../hooks/useCountUp';
@@ -40,7 +41,6 @@ interface SavingsPageProps {
 
 type View = 'home' | 'projects' | 'history';
 
-const DEPOSITS_STEP = 5;
 
 /** Bouton d'action rond sous le carrousel */
 const RoundAction: React.FC<{
@@ -82,7 +82,6 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
 
   const [view, setView] = useState<View>('home');
   const [cardIndex, setCardIndex] = useState(0);
-  const [visibleDeposits, setVisibleDeposits] = useState(DEPOSITS_STEP);
   const [toast, setToast] = useState<string | null>(null);
   const [isLocalModalOpen, setIsLocalModalOpen] = useState(false);
   const [localModalProject, setLocalModalProject] = useState<string | undefined>(undefined);
@@ -150,11 +149,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   const listSource = (focusedProject ? data.savings.filter((d) => d.projectId === focusedProject.id) : generalDeposits)
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date));
-  const shownDeposits = listSource.slice(0, visibleDeposits);
-
-  useEffect(() => {
-    setVisibleDeposits(DEPOSITS_STEP);
-  }, [focused.id]);
+  const { page: depositPage, setPage: setDepositPage, pageCount: depositPages, pageItems: shownDeposits } = usePager(listSource, focused.id);
 
   // ============================ SOUS-VUES ============================
   if (view === 'projects') {
@@ -282,7 +277,6 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
             selectedDate={selectedDate}
             currency={currency}
             savingsRate={savingsRate}
-            onDelete={onDeleteSavings}
           />
         )}
 
@@ -321,25 +315,9 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onDeleteSavings(dep.id)}
-                    className="p-2.5 -mr-1 text-fg-muted hover:text-rose-400 cursor-pointer shrink-0"
-                    title="Supprimer ce versement"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               ))}
-              {listSource.length > visibleDeposits && (
-                <button
-                  type="button"
-                  onClick={() => setVisibleDeposits((n) => n + DEPOSITS_STEP)}
-                  className="w-full py-2.5 rounded-full bg-surface border border-line text-xs font-bold text-fg-2 cursor-pointer"
-                >
-                  Afficher plus
-                </button>
-              )}
+              <Pager page={depositPage} pageCount={depositPages} onChange={setDepositPage} />
             </div>
           )}
         </div>
