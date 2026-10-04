@@ -289,16 +289,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       
       {/* Toast notifications */}
       {userSavedToast && (
-        <div className="fixed left-4 right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+112px)] z-50 mx-auto w-fit max-w-md bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
+        <div className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top,0px)+84px)] z-50 mx-auto w-fit max-w-md bg-surface-solid border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-brand" />
-          <span className="text-xs font-bold">Informations utilisateur enregistrées avec succès !</span>
+          <span className="text-xs font-bold">Profil enregistré</span>
         </div>
       )}
 
       {salarySavedToast && (
-        <div className="fixed left-4 right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+112px)] z-50 mx-auto w-fit max-w-md bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
+        <div className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top,0px)+84px)] z-50 mx-auto w-fit max-w-md bg-surface-solid border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-brand" />
-          <span className="text-xs font-bold">Salaire mensuel mis à jour !</span>
+          <span className="text-xs font-bold">Salaire mis à jour</span>
         </div>
       )}
 

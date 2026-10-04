@@ -225,6 +225,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ data, themeMode, set
       </Section>
 
       <p className="text-center text-[11px] text-fg-muted pb-2">Mon Kanda • vos données restent sur cet appareil</p>
+      <p className="text-center text-[10px] text-fg-muted/70 -mt-4 pb-2">Version {__APP_VERSION__}</p>
     </div>
   );
 };

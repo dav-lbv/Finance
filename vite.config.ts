@@ -1,8 +1,20 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import {execSync} from 'child_process';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
+
+// Version affichée dans Réglages (commit Vercel, sinon commit git local)
+function appVersion(): string {
+  const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (fromVercel) return fromVercel.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'dev';
+  }
+}
 
 // Sous-dossier d'hébergement (ex. GitHub Pages : /Finance/) ; '/' par défaut
 const BASE = process.env.BASE_PATH || '/';
@@ -10,6 +22,7 @@ const BASE = process.env.BASE_PATH || '/';
 export default defineConfig(() => {
   return {
     base: BASE,
+    define: {__APP_VERSION__: JSON.stringify(appVersion())},
     plugins: [
       react(),
       tailwindcss(),
