@@ -251,7 +251,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <>
     {barSlot && createPortal(topBar, barSlot)}
-    <div className="pb-28 max-w-4xl mx-auto stagger">
+    <div className="max-w-4xl mx-auto stagger">
 
       {/* ======================================================== */}
       {/* HÉROS : en-tête, solde, actions rapides (pleine largeur)  */}

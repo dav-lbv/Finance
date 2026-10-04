@@ -285,18 +285,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-28 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto">
       
       {/* Toast notifications */}
       {userSavedToast && (
-        <div className="fixed bottom-24 right-4 z-50 bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="fixed left-4 right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+112px)] z-50 mx-auto w-fit max-w-md bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-brand" />
           <span className="text-xs font-bold">Informations utilisateur enregistrées avec succès !</span>
         </div>
       )}
 
       {salarySavedToast && (
-        <div className="fixed bottom-24 right-4 z-50 bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="fixed left-4 right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+112px)] z-50 mx-auto w-fit max-w-md bg-surface-2 border-2 border-brand text-fg px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-brand" />
           <span className="text-xs font-bold">Salaire mensuel mis à jour !</span>
         </div>

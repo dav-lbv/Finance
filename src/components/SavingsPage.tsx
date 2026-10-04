@@ -159,7 +159,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
   // ============================ SOUS-VUES ============================
   if (view === 'projects') {
     return (
-      <div className="space-y-4 pb-28">
+      <div className="space-y-4">
         <button
           type="button"
           onClick={() => setView('home')}
@@ -186,7 +186,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
 
   if (view === 'history') {
     return (
-      <div className="pb-28">
+      <div>
         <SavingsHistoryView
           projects={allProjects}
           deposits={data.savings}
@@ -203,7 +203,7 @@ export const SavingsPage: React.FC<SavingsPageProps> = ({
 
   // ============================== ACCUEIL ==============================
   return (
-    <div className="pb-28 max-w-md mx-auto stagger">
+    <div className="max-w-md mx-auto stagger">
       {/* Solde de la carte au premier plan */}
       <div className="text-center pt-1">
         <AnimatePresence mode="wait">

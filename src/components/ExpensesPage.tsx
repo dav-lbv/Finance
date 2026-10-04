@@ -177,7 +177,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({
   );
 
   return (
-    <div className="space-y-5 pb-28 stagger">
+    <div className="space-y-5 stagger">
       {/* EN-TÊTE PAGE DÉPENSES - Totalement adaptatif smartphone */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
