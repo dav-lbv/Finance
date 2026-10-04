@@ -42,7 +42,7 @@ export const SavingsHistoryView: React.FC<SavingsHistoryViewProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="w-10 h-10 rounded-full bg-surface border border-line flex items-center justify-center text-fg cursor-pointer"
+          className="w-10 h-10 shrink-0 rounded-full bg-surface border border-line flex items-center justify-center text-fg cursor-pointer"
           aria-label="Retour"
         >
           <ArrowLeft className="w-4.5 h-4.5" />

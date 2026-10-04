@@ -79,7 +79,7 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({ item, curren
               <button
                 type="button"
                 onClick={onClose}
-                className="w-9 h-9 rounded-full bg-surface-2 border border-line text-fg-muted flex items-center justify-center cursor-pointer"
+                className="w-9 h-9 shrink-0 rounded-full bg-surface-2 border border-line text-fg-muted flex items-center justify-center cursor-pointer"
                 aria-label="Fermer"
               >
                 <X className="w-4 h-4" />

@@ -240,7 +240,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <button
         type="button"
         onClick={() => setIsNotificationsOpen(true)}
-        className="w-11 h-11 rounded-full bg-fg/10 flex items-center justify-center text-fg cursor-pointer"
+        className="w-11 h-11 shrink-0 rounded-full bg-fg/10 flex items-center justify-center text-fg cursor-pointer"
         title="Notifications"
       >
         <Bell className="w-[18px] h-[18px]" />
@@ -338,7 +338,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => onNavigateToTab('savings')}
-                  className="w-9 h-9 -mt-1 -mr-1 rounded-full bg-brand text-brand-fg flex items-center justify-center cursor-pointer"
+                  className="w-9 h-9 -mt-1 -mr-1 shrink-0 rounded-full bg-brand text-brand-fg flex items-center justify-center cursor-pointer"
                   aria-label="Ouvrir l'épargne"
                 >
                   <ArrowUpRight className="w-4 h-4" />
