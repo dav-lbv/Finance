@@ -44,6 +44,10 @@ export default function App() {
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthKey());
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'expenses' | 'savings' | 'settings'>('dashboard');
+  // Chaque onglet s'ouvre en haut de page (la position de défilement ne doit pas se transmettre)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [currentTab]);
   const [initialSettingsSection, setInitialSettingsSection] = useState<SettingsSection>('menu');
   // L'application démarre verrouillée si l'utilisateur a activé le verrouillage
   const [isLocked, setIsLocked] = useState<boolean>(() => {

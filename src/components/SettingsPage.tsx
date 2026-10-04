@@ -112,6 +112,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const { themeMode, resolvedTheme, setThemeMode } = useTheme();
 
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
+  // Chaque sous-page de Réglages s'ouvre en haut
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeSection]);
 
   useEffect(() => {
     if (initialSection) {
