@@ -499,10 +499,10 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 items-end gap-3">
                 <div>
                   <label className="block text-xs font-bold text-fg-2 mb-1">
-                    Objectif visé ({currency})
+                    Objectif ({currency})
                   </label>
                   <input
                     type="number" inputMode="decimal"
@@ -516,7 +516,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-fg-2 mb-1">
-                    Apport déjà versé ({currency})
+                    Déjà versé ({currency})
                   </label>
                   <input
                     type="number" inputMode="decimal"
@@ -546,7 +546,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                   <label className="block text-xs font-bold text-fg-2 mt-2.5 mb-1">
                     {categories.length > 0 ? 'Ou créer une nouvelle catégorie' : 'Catégorie (optionnel)'}
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-stretch gap-2">
                     <input
                       type="text"
                       value={newCategory}
@@ -575,7 +575,7 @@ export const SavingsProjectsSection: React.FC<SavingsProjectsSectionProps> = ({
                         setCategory(name);
                         setNewCategory('');
                       }}
-                      className="shrink-0 px-4 py-2.5 rounded-2xl bg-brand text-brand-fg text-xs font-black disabled:opacity-40 cursor-pointer"
+                      className="shrink-0 px-5 rounded-2xl bg-brand text-brand-fg text-sm font-black disabled:opacity-40 cursor-pointer flex items-center"
                     >
                       Ajouter
                     </button>
